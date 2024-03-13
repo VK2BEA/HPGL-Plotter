@@ -13,11 +13,10 @@ Once captured, the plot may be printed or saved as PDF, SVG or PNG files.
 To build & install using Linux autotools, install the following required packages & tools:
 ----------------------------------------------------------------------
 * `automake`, `autoconf` and `libtool`  
-* To build on Raspberri Pi / Debian: 	`libgs-dev libglib2.0-dev libgtk-4-dev 
+* To build on Raspberri Pi / Debian: 	`libgs-dev libglib2.0-dev libgtk-4-dev`
 * To run on Raspberry Pi / Debian :	`libglib-2, libgtk-4, libgpib, fonts-noto-color-emoji`
 
-Install the GPIB driver: 
-See the `GPIB-Linux.driver/installGPIBdriver.on.RPI` file for a script that may work for you to download and install the Linux GPIB driver, otherwise, visit https://linux-gpib.sourceforge.io/ for installation instructions.
+To compile and to run this program the [Linux GPIB](https://linux-gpib.sourceforge.io/) driver must be installed. RPMs are available from the [Copr repositories](https://copr.fedorainfracloud.org/coprs/vk2bea/GPIB/) for Fedora Linux.
 
 The National Instruments GPIB driver *may* also be used, but this has not been tested. The Linux GPIB API is compatable with the NI library.... quote: *"The API of the C library is intended to be compatible with National Instrument's GPIB library."*
 
