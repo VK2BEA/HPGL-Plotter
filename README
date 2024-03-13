@@ -1,15 +1,11 @@
-HP8753 Companion
-================
+GPIB/HPGL Plotter
+=================
 
 Author: Michael G. Katzmann (NV3Z/VK2BEA/G4NYV) 
 ------------------------------------------------------------------
 
-Program to augment functionality of the HP 8753 Vector Nework Analyzer.
-    1. Retrieve and save calibration and setup
-    2. Retrieve trace(s) and display on connected computer
-       Use mouse to examine the trace (see source and response settings at mouse position)
-    3. Save traces as an image file (PNG) or PDF
-    4. Print traces to connected printer
+Program to emulate a GPIB / HPGL plotter for HP Spectrum and Network Analyzers
+
 
 Requirements
 ------------
@@ -25,11 +21,11 @@ sudo dnf copr enable vk2bea/GPIB
 sudo dnf install dkms-linux-gpib linux-gpib linux-gpib-devel
 sudo dnf install linux-gpib-firmware
 
-* To run on Debian (RPi) : libglib-2, libgtk-3, libgs, libsqlite3, libgpib, fonts-noto-color-emoji
-* To run on Fedora: glib2, gtk3, libgs, sqlite-libs, libgpib, google-noto-emoji-color-fonts
+* To run on Debian (RPi) : libglib-2, libgtk-4, libgpib, fonts-noto-color-emoji
+* To run on Fedora: glib2, gtk4, libgpib, google-noto-emoji-color-fonts
 
-* To build on Debian (RPi) : libgs-dev, libglib2.0-dev, libgtk-3-dev, libsqlite3-dev, https://linux-gpib.sourceforge.io/, yelp-tools
-* To build on Fedora/Redhat: gtk3-devel, glib2-devel, sqlite-devel, libgs-devel, https://linux-gpib.sourceforge.io/, yelp-tools
+* To build on Debian (RPi) : libgs-dev, libglib2.0-dev, libgtk-4-dev, v, https://linux-gpib.sourceforge.io/
+* To build on Fedora/Redhat: gtk4-devel, glib2-devel, libgs-devel, https://linux-gpib.sourceforge.io/
 
 To install
         $ ./autogen.sh
@@ -37,9 +33,8 @@ To install
         $ make
         $ sudo make check
         $ sudo make install
-        $ /usr/local/bin/hp8753
+
 To uninstall
         $ sudo make uninstall
 
-Note:
-Fedora RPMs are available for simpler installation on Fedora 35 and Fedora 36. See https://copr.fedorainfracloud.org/coprs/vk2bea/GPIB/
+
