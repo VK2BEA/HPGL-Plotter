@@ -139,6 +139,7 @@
 	(1,27,"GtkWidget","width-request","0",None,None,None,None,None,None,None,None,None),
 	(1,33,"GtkWindow","deletable","False",None,None,None,None,None,None,None,None,None),
 	(1,33,"GtkWindow","hide-on-close","True",None,None,None,None,None,None,None,None,None),
+	(1,33,"GtkWindow","modal","True",None,None,None,None,None,None,None,None,None),
 	(1,33,"GtkWindow","resizable","False",None,None,None,None,None,None,None,None,None),
 	(1,33,"GtkWindow","title","Settings",None,None,None,None,None,None,None,None,None),
 	(1,34,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),

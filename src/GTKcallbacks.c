@@ -31,6 +31,7 @@ void
 CB_btn_Options ( GtkButton* wBtnOptions, gpointer user_data ) {
 	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnOptions), "data");
 
+	gtk_window_unminimize( GTK_WINDOW( WLOOKUP ( pGlobal, "dlg_Options") ));
 	gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Options" ), TRUE );
 }
 
