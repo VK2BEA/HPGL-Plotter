@@ -1,0 +1,101 @@
+m4_include([VERSION]) #Force reconf on VERSION change
+AC_INIT([HPGLplotter],[m4_esyscmd_s(cat VERSION)],[nv3z@gmail.com],[HPGLplotter],[http://github.com/vk2bea/HPGLplotter])
+
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
+
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+
+AC_USE_SYSTEM_EXTENSIONS
+
+AC_PROG_INSTALL
+AC_PROG_CC
+AC_PROG_CXX
+LT_PATH_LD
+AM_PROG_CC_C_O
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+PKG_PROG_PKG_CONFIG
+
+AUTOCONF_ENV="SHELL=/bin/sh"
+
+LT_INIT
+AC_ENABLE_STATIC
+
+AC_ARG_ENABLE(debug,
+AS_HELP_STRING([--enable-debug],
+               [enable debugging, default: no]),
+[case "${enableval}" in
+             yes) debug=true ;;
+             no)  debug=false ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+esac],
+[debug=false])
+
+AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
+
+# Some useful default flags
+CFLAGS="-Werror -Wall $CFLAGS"
+CXXFLAGS="-Werror -Wall $CXXFLAGS"
+
+PKG_PROG_PKG_CONFIG
+if test -z "$PKG_CONFIG"; then
+  AC_MSG_WARN([Cannot find pkg-config, make sure it is installed in your PATH])
+fi
+
+AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
+
+# Debug
+m4_include([config_m4/debug.m4])
+
+# Check for profiling mode
+m4_include([config_m4/profiling.m4])
+
+# Checking libs
+m4_include([config_m4/versioning.m4])
+
+# yelp-tools
+#AC_CHECK_PROG(YELP_CHECK,yelp-build,yes)
+#if test x"$YELP_CHECK" != x"yes" ; then
+#   AC_MSG_ERROR([Please install yelp-tools before installing.])
+#fi
+
+# ghostscript
+#AC_CHECK_PROG(GS_CHECK,gs,yes)
+#if test x"$GS_CHECK" != x"yes" ; then
+#   AC_MSG_ERROR([Please install gs before installing.])
+#fi
+# libgpib
+AC_CHECK_LIB(gpib,ibask,,AC_MSG_ERROR([Please install Linux GPIB driver before continuing.]))
+
+# libsystemd
+# AC_CHECK_LIB(systemd,sd_journal_print,,AC_MSG_ERROR([Please install systemd library (libsystemd-dev on Debian type systems).]))
+
+# check for Noto font
+fc-list -q "Noto Emoji" || fc-list -q "Noto Color Emoji"
+if [[ $? -ne 0 ]]; then
+   AC_MSG_ERROR([Please install fonts-noto-color-emoji before proceeding.])
+else
+   echo "checking for Emoji font... yes"   
+fi
+
+YELP_HELP_INIT
+
+PKG_CHECK_MODULES([GLIB], [glib-2.0])
+PKG_CHECK_MODULES([GTK4], [gtk4])
+
+# files required for building
+
+AC_CHECK_HEADER(gpib/gpib_user.h, , [AC_MSG_ERROR([Couldn't find linux gpib headers. Please install libgpib development package] )])
+
+
+# Output files
+AC_CONFIG_FILES([
+	Makefile
+	src/Makefile
+    data/Makefile
+])
+
+
+AC_OUTPUT

@@ -1,0 +1,129 @@
+Idisplay { color: green; }
+Vdisplay { color: red; }
+
+.LCDdisplay { 
+    font-size: 300%; 
+    background-image: none; 
+    background-color: #808080; 
+    color:  #F0F0FF;
+    font-weight: bold; 
+    border-radius: 6px; 
+    padding: 0px .5em 0px .0em; 
+    margin-left: 0.5em; 
+}
+
+.plot { 
+    background-image: none; 
+    background-color: #FFFFFF; 
+    border: 1px solid grey;
+}
+
+.status { color: darkblue;  font-style: oblique; }
+
+.GPIBframeLeft {
+    border-style:solid;
+    border-top-width: 1px;
+    border-bottom-width: 1px;  
+    border-left-width: 1px;
+    border-right-width: 0px;
+    border-top-left-radius: 6px; 
+    border-bottom-left-radius: 6px; 
+    border-top-right-radius: 0; 
+    border-bottom-right-radius: 0; 
+}
+.GPIBframeRight {
+    border-style:solid;
+    border-top-width: 1px;
+    border-bottom-width: 1px;  
+    border-left-width: 0px;
+    border-right-width: 1px;
+    border-top-left-radius: 0px; 
+    border-bottom-left-radius: 0px; 
+    border-top-right-radius: 6px; 
+    border-bottom-right-radius: 6px; 
+}
+
+.VIframe {
+    border-radius: 5px;
+    padding: 2px 2px 2px 2px;
+    background-color: #FFFFFF; 
+    border:  1px solid #B0B0B0;
+    outline: 1px solid #FFFFFF;
+    font-weight: normal; 
+}
+
+Channelframe {
+    border-radius: 0px;
+    padding: 2px 2px 2px 2px;
+    border:  2px solid #8080E0;
+    outline: 1px solid #FFFFFF;
+}
+
+.on  { 
+    color: darkgreen;  
+    font-weight: bold; 
+}
+
+.addr  { 
+    color: darkgreen; 
+   font-style: italic;  
+}
+
+.off  { 
+  color: darkred; 
+  font-weight: bold; 
+}
+
+.error {
+    border-radius: 5px;
+    padding: 2px 2px 2px 2px;
+    background-color: #EFE0E0; 
+    font-weight: bold; 
+}
+
+entry.LCD, label.LCD { 
+    font-size: 300%; 
+    background-image: none; 
+    background-color: #808080; 
+    color:  #F0F0FF;
+    font-weight: bold; 
+    border-top-left-radius: 6px; 
+    border-bottom-left-radius: 6px; 
+    border-top-right-radius: 0; 
+    border-bottom-right-radius: 0; 
+    padding: 0px 0.5em 0px 0em; 
+    margin-left: 0.5em; 
+ }
+
+entry.LCD1, label.LCD1{ 
+    font-size: 300%; 
+    background-image: none; 
+    background-color: #808080; 
+    color:  #F0F0FF;
+    font-weight: bold; 
+    border: none;
+    outline: 0px solid #FFFFFF;
+    padding: 0px 0em 0px 0em; 
+    margin-left: 0; 
+ }
+label.LCD2 { 
+    font-size: 200%; 
+    background-image: none; 
+    background-color: #808080; 
+    color:  #F0F0FF;
+    font-weight: bold; 
+    border: none;
+    padding: 0px 0.25em 0px .25em; 
+    margin-left: 0; 
+ }
+
+box.LCD1 { 
+    background-image: none; 
+    background-color: #808080; 
+    border-top-left-radius: 6px; 
+    border-bottom-left-radius: 6px; 
+    border-top-right-radius: 6px; 
+    border-bottom-right-radius: 6px; 
+    border: none;
+    padding: 0px 0em 0px 0em; 
+ }

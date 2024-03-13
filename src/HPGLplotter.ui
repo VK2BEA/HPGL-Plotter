@@ -1,0 +1,571 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.17.3 -->
+<interface>
+  <!-- interface-name HPGLplotter.ui -->
+  <!-- interface-description GPIB HPGL plotter emulator -->
+  <!-- interface-copyright Michael G. Katzmann 2024 -->
+  <!-- interface-authors Michael G. Katzmann -->
+  <requires lib="gtk" version="4.12"/>
+  <object class="GtkApplicationWindow" id="WID_HPGLplotter_main">
+    <property name="hexpand">True</property>
+    <property name="hexpand-set">True</property>
+    <property name="title">HPGL Plotter</property>
+    <property name="vexpand">True</property>
+    <property name="vexpand-set">True</property>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox">
+            <property name="hexpand">True</property>
+            <property name="margin-bottom">6</property>
+            <property name="margin-end">4</property>
+            <property name="margin-start">4</property>
+            <property name="margin-top">6</property>
+            <property name="valign">start</property>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">start</property>
+                <property name="homogeneous">True</property>
+                <property name="valign">start</property>
+                <child>
+                  <object class="GtkButton" id="WID_btn_Print">
+                    <property name="icon-name">document-print</property>
+                    <property name="margin-end">2</property>
+                    <signal name="clicked" handler="CB_btn_Print"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_btn_PDF">
+                    <property name="label">PDF</property>
+                    <property name="margin-end">2</property>
+                    <property name="margin-start">2</property>
+                    <signal name="clicked" handler="CB_btn_PDF"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_btn_PNG">
+                    <property name="label">PNG</property>
+                    <property name="margin-end">2</property>
+                    <property name="margin-start">2</property>
+                    <signal name="clicked" handler="CB_btn_PNG"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_btn_SVG">
+                    <property name="label">SVG</property>
+                    <property name="margin-end">2</property>
+                    <property name="margin-start">2</property>
+                    <signal name="clicked" handler="CB_btn_SVG"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">end</property>
+                <property name="homogeneous">True</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="hexpand">True</property>
+                    <property name="label">   </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_btn_Options">
+                    <property name="icon-name">playlist-automatic-symbolic</property>
+                    <property name="margin-end">2</property>
+                    <property name="margin-start">2</property>
+                    <signal name="clicked" handler="CB_btn_Options"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="WID_label_PID">
+                    <property name="css-classes">addr</property>
+                    <property name="label">GPIB 23</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_btn_Print_2">
+                    <property name="label">Clear</property>
+                    <property name="margin-end">2</property>
+                    <signal name="clicked" handler="CB_btn_Erase"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="WID_chk_AutoErase">
+                <property name="active">True</property>
+                <property name="halign">end</property>
+                <property name="label">Auto Clear</property>
+                <property name="margin-start">9</property>
+                <property name="valign">center</property>
+                <signal name="toggled" handler="CB_chk_AutoErase"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <child>
+              <object class="GtkAspectFrame">
+                <property name="margin-bottom">4</property>
+                <property name="margin-end">4</property>
+                <property name="margin-start">4</property>
+                <property name="margin-top">4</property>
+                <property name="ratio">1.414</property>
+                <child>
+                  <object class="GtkDrawingArea" id="WID_drawing_Plot">
+                    <property name="content-height">500</property>
+                    <property name="content-width">707</property>
+                    <property name="css-classes">plot</property>
+                    <property name="height-request">0</property>
+                    <property name="hexpand">True</property>
+                    <property name="hexpand-set">True</property>
+                    <property name="vexpand">True</property>
+                    <property name="vexpand-set">True</property>
+                    <property name="width-request">0</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkLabel" id="WID_label_Status">
+            <property name="css-classes">status</property>
+            <property name="label">GPIB controller 🡄 no connection</property>
+            <property name="margin-bottom">4</property>
+            <property name="margin-start">4</property>
+            <property name="margin-top">4</property>
+            <property name="xalign">0.0</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkDialog" id="WID_dlg_Options">
+    <property name="deletable">False</property>
+    <property name="hide-on-close">True</property>
+    <property name="resizable">False</property>
+    <property name="title">Settings</property>
+    <child>
+      <object class="GtkBox">
+        <property name="margin-bottom">4</property>
+        <property name="margin-end">4</property>
+        <property name="margin-start">4</property>
+        <property name="margin-top">4</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkBox">
+                <property name="homogeneous">True</property>
+                <property name="margin-bottom">4</property>
+                <property name="margin-end">4</property>
+                <property name="margin-start">4</property>
+                <property name="margin-top">3</property>
+                <child>
+                  <object class="GtkFrame" id="WID_frm_ControllerID">
+                    <property name="css-classes">GPIBframeLeft</property>
+                    <property name="label">GPIB Controller Index</property>
+                    <property name="margin-bottom">2</property>
+                    <child>
+                      <object class="GtkSpinButton" id="WID_spin_ControllerIndex">
+                        <property name="adjustment">
+                          <object class="GtkAdjustment" id="WID_adj_Controller">
+                            <property name="page-increment">1.0</property>
+                            <property name="page-size">1.0</property>
+                            <property name="step-increment">1.0</property>
+                            <property name="upper">16.0</property>
+                          </object>
+                        </property>
+                        <property name="climb-rate">1.0</property>
+                        <property name="focusable">True</property>
+                        <property name="margin-bottom">4</property>
+                        <property name="margin-end">4</property>
+                        <property name="margin-start">4</property>
+                        <property name="numeric">True</property>
+                        <property name="tooltip-text">Use either the controller name (as defined in gpib.conf) or the controller index.</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkFrame">
+                    <property name="css-classes">GPIBframeRight</property>
+                    <property name="label">GPIB Plotter PID</property>
+                    <property name="margin-bottom">2</property>
+                    <child>
+                      <object class="GtkSpinButton" id="WID_spin_DevicePID">
+                        <property name="adjustment">
+                          <object class="GtkAdjustment">
+                            <property name="page-increment">1.0</property>
+                            <property name="page-size">1.0</property>
+                            <property name="step-increment">1.0</property>
+                            <property name="upper">32.0</property>
+                            <property name="value">5.0</property>
+                          </object>
+                        </property>
+                        <property name="climb-rate">1.0</property>
+                        <property name="focusable">True</property>
+                        <property name="margin-bottom">4</property>
+                        <property name="margin-end">4</property>
+                        <property name="margin-start">4</property>
+                        <property name="numeric">True</property>
+                        <property name="tooltip-text">GPIB PID of the simulated plotter</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="margin-bottom">4</property>
+                <property name="margin-end">4</property>
+                <property name="margin-start">4</property>
+                <property name="margin-top">4</property>
+                <child>
+                  <object class="GtkFrame">
+                    <property name="hexpand">True</property>
+                    <property name="label">GPIB Controller Name</property>
+                    <property name="margin-top">2</property>
+                    <child>
+                      <object class="GtkBox">
+                        <child>
+                          <object class="GtkCheckButton" id="WID_cbutton_ControlerNameNotIdx">
+                            <property name="margin-end">4</property>
+                            <property name="margin-start">4</property>
+                            <signal name="toggled" handler="CB_chk_UseControllerName"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="WID_entry_ControllerName">
+                            <property name="hexpand">True</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">4</property>
+                            <property name="sensitive">False</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame">
+                <property name="label">Pen colors</property>
+                <property name="margin-bottom">4</property>
+                <property name="margin-end">4</property>
+                <property name="margin-start">4</property>
+                <property name="margin-top">4</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">1</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_1_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">4</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_4_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">7</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_7_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">2</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_2_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">5</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_5_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">8</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_8_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="margin-end">14</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">3</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_3_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">start</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <property name="valign">start</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">6</property>
+                                <property name="margin-end">8</property>
+                                <property name="margin-start">8</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkColorButton" id="WID_6_Color">
+                                <property name="halign">end</property>
+                                <signal name="color-set" handler="CB_color_Pen"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="WID_btn_ColorReset">
+                            <property name="halign">center</property>
+                            <property name="label">Reset</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">14</property>
+                            <property name="margin-start">4</property>
+                            <property name="margin-top">4</property>
+                            <signal name="clicked" handler="CB_btn_ColorReset"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame">
+                <property name="label">PDF/SVG Page Size</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="column-homogeneous">True</property>
+                    <property name="row-homogeneous">True</property>
+                    <property name="valign">start</property>
+                    <child>
+                      <object class="GtkCheckButton" id="WID_3_chk_PaperSize">
+                        <property name="group">WID_1_chk_PaperSize</property>
+                        <property name="label">A3 (297 × 420 mm)</property>
+                        <signal name="toggled" handler="CB_chk_PaperSize"/>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="column-span">1</property>
+                          <property name="row">0</property>
+                          <property name="row-span">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="WID_2_chk_PaperSize">
+                        <property name="group">WID_1_chk_PaperSize</property>
+                        <property name="label">Letter (8½″ × 11″)</property>
+                        <signal name="toggled" handler="CB_chk_PaperSize"/>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="column-span">1</property>
+                          <property name="row">1</property>
+                          <property name="row-span">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="WID_1_chk_PaperSize">
+                        <property name="group">
+                          <object class="GtkCheckButton"/>
+                        </property>
+                        <property name="label">A4 (210 × 297 mm)</property>
+                        <signal name="toggled" handler="CB_chk_PaperSize"/>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="WID_4_chk_PaperSize">
+                        <property name="group">WID_1_chk_PaperSize</property>
+                        <property name="label">Tabloid (11″ × 17″)</property>
+                        <signal name="toggled" handler="CB_chk_PaperSize"/>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="column-span">1</property>
+                          <property name="row">1</property>
+                          <property name="row-span">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="halign">end</property>
+                <property name="margin-bottom">6</property>
+                <property name="margin-top">7</property>
+                <property name="valign">start</property>
+                <child>
+                  <object class="GtkButton" id="WID_btn_OK">
+                    <property name="label">OK</property>
+                    <property name="margin-bottom">4</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="valign">end</property>
+                    <signal name="clicked" handler="CB_btn_OK"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

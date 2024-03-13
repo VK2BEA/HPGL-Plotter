@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=HPGL Plotter
+Comment=GPIB HPIB Plotter Emulator for  HP Spectrum & Network Analyzers
+Exec=HPGLplotter
+Icon=HPGLplotter
+Categories=Application;Electronics;
+Terminal=false
+Type=Application
+Encoding=UTF-8
+X-Desktop-File-Install-Version=0.21
