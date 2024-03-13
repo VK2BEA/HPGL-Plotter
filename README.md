@@ -8,6 +8,8 @@ This is a program to emulate an HPGL plotter for older HP Spectrum and Network A
 
 Once captured, the plot may be printed or saved as PDF, SVG or PNG files.
 
+![HPGL plotter plot](https://github.com/VK2BEA/HPGL-Plotter/assets/3782222/93aae20e-9779-4722-8888-43a0eaf3304f)
+
 To build & install using Linux autotools, install the following required packages & tools:
 ----------------------------------------------------------------------
 * `automake`, `autoconf` and `libtool`  
