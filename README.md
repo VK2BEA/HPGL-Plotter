@@ -30,7 +30,7 @@ Once the prerequisites (as listed above) are installed, install the 'HPGL Plotte
         $ sudo make install
 To run:
         
-        $ /usr/local/bin/hp8753
+        $ /usr/local/bin/HPGLplotter
 
 To uninstall:
         
