@@ -19,7 +19,7 @@ To install on the Linux Fedora distribution:
 To build & install using Linux autotools, install the following required packages & tools:
 ----------------------------------------------------------------------
 * `automake`, `autoconf` and `libtool`  
-* To build on Raspberri Pi / Debian: 	`libgs-dev libglib2.0-dev libgtk-4-dev`
+* To build on Raspberri Pi / Debian: 	`libglib2.0-dev libgtk-4-dev`
 * To run on Raspberry Pi / Debian :	`libglib-2, libgtk-4, libgpib, fonts-noto-color-emoji`
 
 To compile and to run this program the [Linux GPIB](https://linux-gpib.sourceforge.io/) driver must be installed. RPMs are available from the [Copr repositories](https://copr.fedorainfracloud.org/coprs/vk2bea/GPIB/) for Fedora Linux.
