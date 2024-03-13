@@ -74,22 +74,28 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="WID_btn_Options">
+                    <property name="has-tooltip">True</property>
                     <property name="icon-name">playlist-automatic-symbolic</property>
                     <property name="margin-end">2</property>
                     <property name="margin-start">2</property>
+                    <property name="tooltip-text">Set GPIB PIDs, pen colors and the PDF page size.</property>
                     <signal name="clicked" handler="CB_btn_Options"/>
                   </object>
                 </child>
                 <child>
                   <object class="GtkLabel" id="WID_label_PID">
                     <property name="css-classes">addr</property>
+                    <property name="has-tooltip">True</property>
                     <property name="label">GPIB 23</property>
+                    <property name="tooltip-text">GPIB PID of this plotter.</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkButton" id="WID_btn_Print_2">
+                    <property name="has-tooltip">True</property>
                     <property name="label">Clear</property>
                     <property name="margin-end">2</property>
+                    <property name="tooltip-text">Clear the plot (akin to replacing the paper with a new sheet)</property>
                     <signal name="clicked" handler="CB_btn_Erase"/>
                   </object>
                 </child>
@@ -99,8 +105,11 @@
               <object class="GtkCheckButton" id="WID_chk_AutoErase">
                 <property name="active">True</property>
                 <property name="halign">end</property>
+                <property name="has-tooltip">True</property>
                 <property name="label">Auto Clear</property>
                 <property name="margin-start">9</property>
+                <property name="tooltip-text">Clear the plot when the 'OP' command is received (after 'SP' - park pen).
+If you are plotting 2 or 4 plots per page, uncheck this box. </property>
                 <property name="valign">center</property>
                 <signal name="toggled" handler="CB_chk_AutoErase"/>
               </object>
@@ -239,6 +248,7 @@
                           <object class="GtkCheckButton" id="WID_cbutton_ControlerNameNotIdx">
                             <property name="margin-end">4</property>
                             <property name="margin-start">4</property>
+                            <property name="tooltip-text">Use the controller name rather than the index (minor) number</property>
                             <signal name="toggled" handler="CB_chk_UseControllerName"/>
                           </object>
                         </child>
@@ -248,6 +258,7 @@
                             <property name="margin-bottom">4</property>
                             <property name="margin-end">4</property>
                             <property name="sensitive">False</property>
+                            <property name="tooltip-text">Name of controller as shown in /etc/gpib.conf</property>
                           </object>
                         </child>
                       </object>
