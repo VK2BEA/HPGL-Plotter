@@ -140,6 +140,10 @@ on_activate (GApplication *app, gpointer udata)
  	}
  	g_slist_free(widgetList);
 
+#ifndef DEBUG
+	g_timeout_add( 20, (GSourceFunc)splashCreate, pGlobal );
+	g_timeout_add( 5000, (GSourceFunc)splashDestroy, pGlobal );
+#endif
 
  	GtkCssProvider * cssProvider = gtk_css_provider_new();
  	gtk_css_provider_load_from_resource(cssProvider, "/src/HPGLplotter.css");

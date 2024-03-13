@@ -1,7 +1,8 @@
 
 #ifndef VERSION
-   #define VERSION "0.00-0"
+   #define VERSION "1.00-0"
 #endif
+
 #define INVALID	(-1)
 
 #include <glib-2.0/glib.h>
@@ -235,6 +236,8 @@ void CB_chk_UseControllerName ( GtkCheckButton* wBtnUseControllerName, gpointer 
 void initializeOptionsDialog( tGlobal *pGlobal );
 gint saveSettings( tGlobal *pGlobal );
 gint recoverSettings( tGlobal *pGlobal );
+gint splashCreate (tGlobal *pGlobal);
+gint splashDestroy (tGlobal *pGlobal);
 
 void drawHPlogo (cairo_t *cr, gdouble centreX, gdouble lowerLeftY, gdouble scale);
 

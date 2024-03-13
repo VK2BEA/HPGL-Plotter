@@ -82,7 +82,13 @@
 	(1,133,"GtkCheckButton","WID_3_chk_PaperSize",130,None,None,None,None,None,None),
 	(1,134,"GtkCheckButton","WID_2_chk_PaperSize",130,None,None,None,None,None,None),
 	(1,136,"GtkCheckButton",None,132,None,None,None,-1,None,None),
-	(1,137,"GtkCheckButton","WID_4_chk_PaperSize",130,None,None,None,1,None,None)
+	(1,137,"GtkCheckButton","WID_4_chk_PaperSize",130,None,None,None,1,None,None),
+	(1,138,"GtkWindow","WID_Splash",None,None,None,None,-1,None,None),
+	(1,139,"GtkBox",None,138,None,None,None,-1,None,None),
+	(1,140,"GtkLabel","WID_lbl_version",139,None,None,None,2,None,None),
+	(1,141,"GtkSeparator",None,139,None,None,None,1,None,None),
+	(1,142,"GtkLabel",None,139,None,None,None,None,None,None),
+	(1,143,"GtkLabel",None,139,None,None,None,3,None,None)
   </object>
   <object_property>
 	(1,1,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
@@ -332,7 +338,24 @@
 	(1,134,"GtkCheckButton","group","132",None,None,None,None,None,None,None,None,None),
 	(1,134,"GtkCheckButton","label","Letter (8½″ × 11″)",None,None,None,None,None,None,None,None,None),
 	(1,137,"GtkCheckButton","group","132",None,None,None,None,None,None,None,None,None),
-	(1,137,"GtkCheckButton","label","Tabloid (11″ × 17″)",None,None,None,None,None,None,None,None,None)
+	(1,137,"GtkCheckButton","label","Tabloid (11″ × 17″)",None,None,None,None,None,None,None,None,None),
+	(1,138,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(1,138,"GtkWindow","decorated","False",None,None,None,None,None,None,None,None,None),
+	(1,139,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
+	(1,140,"GtkLabel","label","1.0",None,None,None,None,None,None,None,None,None),
+	(1,140,"GtkWidget","margin-end","15",None,None,None,None,None,None,None,None,None),
+	(1,140,"GtkWidget","margin-start","15",None,None,None,None,None,None,None,None,None),
+	(1,140,"GtkWidget","margin-top","15",None,None,None,None,None,None,None,None,None),
+	(1,142,"GtkLabel","label","GPIB / HPGL Plotter",None,None,None,None,None,None,None,None,None),
+	(1,142,"GtkWidget","css-classes","splash_name",None,None,None,None,None,None,None,None,None),
+	(1,142,"GtkWidget","margin-bottom","15",None,None,None,None,None,None,None,None,None),
+	(1,142,"GtkWidget","margin-top","15",None,None,None,None,None,None,None,None,None),
+	(1,143,"GtkLabel","label","Copyright © 2024  Michael G. Katzmann\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either\nexpress or implied.\n\nSee the License for the specific language governing permissions and\nlimitations under the License",None,None,None,None,None,None,None,None,None),
+	(1,143,"GtkWidget","css-classes","license",None,None,None,None,None,None,None,None,None),
+	(1,143,"GtkWidget","margin-bottom","15",None,None,None,None,None,None,None,None,None),
+	(1,143,"GtkWidget","margin-end","15",None,None,None,None,None,None,None,None,None),
+	(1,143,"GtkWidget","margin-start","15",None,None,None,None,None,None,None,None,None),
+	(1,143,"GtkWidget","margin-top","15",None,None,None,None,None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(1,130,133,"GtkGridLayoutChild","column","1",None,None,None,None),

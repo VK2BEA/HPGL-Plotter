@@ -127,3 +127,15 @@ box.LCD1 {
     border: none;
     padding: 0px 0em 0px 0em; 
  }
+
+.license {
+    color:  #606060;
+   text-align: center;
+   border: 1px solid green;
+padding: 10px;
+}
+.splash_name {
+    font-size: 200%; 
+    font-style: italic;
+    color:  #000080;
+}
