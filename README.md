@@ -12,9 +12,9 @@ Once captured, the plot may be printed or saved as PDF, SVG or PNG files.
 
 To install on the Linux Fedora distribution:
 -------------------------------------------
-`sudo dnf -y copr enable vk2bea/GPIB`  
-`sudo dnf -y copr enable vk2bea/HPGLplotter`  
-`sudo dnf -y install HPGLplotter linux-gpib-firmware`  
+        $ sudo dnf -y copr enable vk2bea/GPIB 
+        $ sudo dnf -y copr enable vk2bea/HPGLplotter 
+        $ sudo dnf -y install HPGLplotter linux-gpib-firmware 
 
 To build & install using Linux autotools, install the following required packages & tools:
 ----------------------------------------------------------------------
