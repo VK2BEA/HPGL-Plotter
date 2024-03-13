@@ -3,17 +3,41 @@
 
 <svg
    width="229.85117mm"
-   height="141.02455mm"
-   viewBox="0 0 229.85117 141.02455"
+   height="229.851mm"
+   viewBox="0 0 229.85117 229.851"
    version="1.1"
    id="svg1"
+   sodipodi:docname="HPGLplotter.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.9754794"
+     inkscape:cx="265.51048"
+     inkscape:cy="307.54109"
+     inkscape:window-width="2560"
+     inkscape:window-height="1403"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
   <defs
      id="defs1" />
   <g
      id="layer1"
-     transform="translate(14.1938,-81.347939)">
+     transform="translate(14.1938,-36.368744)">
     <g
        id="g1480"
        transform="matrix(1.2693097,0,0,1.2693097,-1956.6343,-1432.5896)"
