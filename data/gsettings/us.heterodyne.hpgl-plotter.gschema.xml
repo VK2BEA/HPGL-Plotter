@@ -24,7 +24,7 @@
       </description>
     </key>
     <key name="last-directory" type="s">
-      <default>''</default>
+      <default>'~'</default>
       <summary>Last directory used to save PDF, PNG or SVG</summary>
       <description>
         Last directory used to save PDF, PNG or SVG
