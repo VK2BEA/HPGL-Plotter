@@ -40,6 +40,10 @@ Troubleshooting:
 ----------------------------------------------------------------------
 If problems are encountered, first confirm that correct GPIB communication is occuring. 
 
+**Note** that the GPIB interface on the Linux computer must be able to act as a simple listener / talker. Some devices (notable the **Agilent 82357A/B**) can only act as system controllers and will not work with this application.
+
+The program has been tested with the HP8753C Network Analyzer and the HP8595E Spectrum Analyzer. <em>(If you use it with other instruments, please report your experience)</em>
+
 Use the `ibtest` and `ibterm` tools distributed with the `linux-gpib` distribution.
 
 The HPGL Plotter logs some information to the journal, the verbosity of which can be set with the `--debug` command line switch.
