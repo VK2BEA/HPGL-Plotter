@@ -17,7 +17,7 @@ HPGLplotter6dir = $(prefix)/share/applications
 HPGLplotter6_DATA = applications/HPGLplotter.desktop
 
 HPGLplotter7dir = $(prefix)/usr/local/share/fonts/HPGLplotter/
-HPGLplotter_DATA = fonts/NotoSansMono-Light.ttf
+HPGLplotter7_DATA = fonts/NotoSansMono-Light.ttf
 
 install-data-hook:
 	gtk-update-icon-cache --ignore-theme-index $(prefix)/share/icons/hicolor/
