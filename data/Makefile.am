@@ -22,5 +22,5 @@ HPGLplotter_DATA = fonts/NotoSansMono-Light.ttf
 install-data-hook:
 	gtk-update-icon-cache --ignore-theme-index $(prefix)/share/icons/hicolor/
 	glib-compile-schemas $(prefix)/share/glib-2.0/schemas
-	fc-cache i$(prefix)/share/fonts/HPGLplotter
+	fc-cache $(prefix)/share/fonts/HPGLplotter
 
