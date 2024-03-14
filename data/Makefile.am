@@ -16,7 +16,11 @@ HPGLplotter5_DATA = gsettings/us.heterodyne.hpgl-plotter.gschema.xml
 HPGLplotter6dir = $(prefix)/share/applications
 HPGLplotter6_DATA = applications/HPGLplotter.desktop
 
+HPGLplotter7dir = $(prefix)/usr/local/share/fonts/HPGLplotter/
+HPGLplotter_DATA = fonts/NotoSansMono-Light.ttf
+
 install-data-hook:
 	gtk-update-icon-cache --ignore-theme-index $(prefix)/share/icons/hicolor/
 	glib-compile-schemas $(prefix)/share/glib-2.0/schemas
+	fc-cache i$(prefix)/share/fonts/HPGLplotter
 
