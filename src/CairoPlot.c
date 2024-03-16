@@ -135,14 +135,12 @@ translateHPGLpointToCairo( tCoord *HPGLpoint,
 				(gdouble)(plotterState->HPGLscaledP1P2[ P2 ].y - plotterState->HPGLscaledP1P2[ P1 ].y);
 
 		// We want to maintain the margin we setup with the plotter units...
-		//   ... so do not adjust for pGlobal->HPGLplotterP1P2[ P1 ] position
+		//   ... so do not adjust for plotterState->HPGLplotterP1P2[ P1 ] position
 		*pCairoX = ((fractionX * (plotterState->HPGLinputP1P2[ P2 ].x - plotterState->HPGLinputP1P2[ P1 ].x))
 				+ plotterState->HPGLinputP1P2[ P1 ].x) * cairoScaleFactorX;
 		*pCairoY = ((fractionY * (plotterState->HPGLinputP1P2[ P2 ].y - plotterState->HPGLinputP1P2[ P1 ].y))
 				+ plotterState->HPGLinputP1P2[ P1 ].y) * cairoScaleFactorY;
 	} else {
-		// We want to maintain the margin we setup with the plotter units...
-		//   ... so do not adjust for pGlobal->HPGLplotterP1P2[ P1 ] position
 		*pCairoX = HPGLpoint->x * cairoScaleFactorX;
 		*pCairoY = HPGLpoint->y * cairoScaleFactorY;
 	}

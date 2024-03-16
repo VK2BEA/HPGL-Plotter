@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.00-2"
+   #define VERSION "1.01-1"
 #endif
 
 #define INVALID	(-1)
@@ -97,7 +97,6 @@ typedef struct {
 #define P1	0
 #define P2	1
 	tCoord			HPGLplotterP1P2[2];			// The plotter sheet
-	tCoord			HPGLinputP1P2[2];			// The part of the plotter sheet we are using
 
 	GdkRGBA HPGLpens[ NUM_HPGL_PENS ];
 

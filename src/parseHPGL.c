@@ -33,10 +33,6 @@ initializeHPGL( tGlobal *pGlobal ) {
 	pGlobal->HPGLplotterP1P2[ P1 ].y = HPGL_A3_LL_Y;
 	pGlobal->HPGLplotterP1P2[ P2 ].x = HPGL_A3_UR_X;
 	pGlobal->HPGLplotterP1P2[ P2 ].y = HPGL_A3_UR_Y;
-
-	pGlobal->HPGLinputP1P2[ P1 ] = pGlobal->HPGLplotterP1P2[ P1 ];
-	pGlobal->HPGLinputP1P2[ P2 ] = pGlobal->HPGLplotterP1P2[ P2 ];
-
 }
 
 static gchar labelTerminator = '\003';
@@ -241,24 +237,16 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	    	gint ydiff = pGlobal->HPGLplotterP1P2[ P2 ].y - pGlobal->HPGLplotterP1P2[ P1 ].y;
 	    	pointP1.x = arg1;
 	    	pointP1.y = arg2;
-			pGlobal->HPGLinputP1P2[ P1 ].x = arg1;
-			pGlobal->HPGLinputP1P2[ P1 ].y = arg2;
 			if( nargs == 2 ) {
 		    	pointP2.x = arg1 + xdiff;
 		    	pointP2.y = arg2 + ydiff;
-				pGlobal->HPGLinputP1P2[ P2 ].x = arg1 + xdiff;
-				pGlobal->HPGLinputP1P2[ P2 ].y = arg2 + ydiff;
 			} else {
 				pointP2.x = arg3;
 				pointP2.y = arg4;
-				pGlobal->HPGLinputP1P2[ P2 ].x = arg3;
-				pGlobal->HPGLinputP1P2[ P2 ].y = arg4;
 			}
 	    } else {
 	    	pointP1 = pGlobal->HPGLplotterP1P2[ P1 ];
 	    	pointP2 = pGlobal->HPGLplotterP1P2[ P2 ];
-			pGlobal->HPGLinputP1P2[ P1 ] = pGlobal->HPGLplotterP1P2[ P1 ];
-			pGlobal->HPGLinputP1P2[ P2 ] = pGlobal->HPGLplotterP1P2[ P2 ];
 	    }
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_IP,  &pointP1, sizeof( tCoord)  );
 		append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY, &pointP2, sizeof( tCoord)  );
