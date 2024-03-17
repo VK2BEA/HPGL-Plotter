@@ -56,7 +56,8 @@ append( void **pCompiledHPGL, guint *countOfBytes, eHPGL HPGLfn, void *pObject, 
 /*!     \brief  Parse an HPGL command
  *
  * Parse an HPGL command and prepare data for plotting.
- * We create a compiled serial data set for plotting....
+ * We create a compiled serial data set for (a little more) efficient plotting....
+ * (we replot every time the window is enlarged or reduced, so making a little faster is helpful)
  * NNNNNNNN - byte count (total count of bytes for the data)
  * Line         - CHPGL_LINE2PT - identifier byte
  *                NN          - 16 bit count of bytes in line (n)
@@ -118,13 +119,10 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	else
 		HPGLserialCount = sizeof( guint );	// byte count at the beginning of malloced string
 
-	switch( HPGLcmd ) {	// concatenate the two bytes
+	switch( HPGLcmd ) {
 	case HPGL_POSN_ABS:	// PA
-		// some PA lines also contain other commands recursively call
-		// in such a case to process the second command
-		// e.g.: PA3084 ,2414 SR 1.472 , 2.279 ;
-		//       PA3444 ,736 SP1;
-
+		// We accumulate points in the currentLine malloced array while the pen is down.
+		// When the pen is lifted (PU), we add this sequence of points to the compiled plot
 		bMorePoints = TRUE; pNextChar = sHPGLargs;
 		while ( bMorePoints ) {
 			posn.x = (guint16)g_ascii_strtoll( pNextChar, &pNextChar, 10 );
@@ -350,6 +348,9 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
  * PDPU10,20
  * PDlPU10,20;
  * PD PU 10 20;
+ *
+ * Parse the input data and break into individual commands.
+ * The HPGL commands may be terminated with a semicolon or the next command (2 upper case characters)
  */
 gboolean
 deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {

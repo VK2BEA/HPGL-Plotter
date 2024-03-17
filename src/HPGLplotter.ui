@@ -161,6 +161,7 @@ If you are plotting 2 or 4 plots per page, uncheck this box. </property>
     <property name="modal">True</property>
     <property name="resizable">False</property>
     <property name="title">Settings</property>
+    <property name="transient-for">WID_HPGLplotter_main</property>
     <child>
       <object class="GtkBox">
         <property name="margin-bottom">4</property>
