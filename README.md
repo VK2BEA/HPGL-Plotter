@@ -45,7 +45,7 @@ Troubleshooting:
 ----------------------------------------------------------------------
 If problems are encountered, first confirm that correct GPIB communication is occuring. 
 
-**Note** that the GPIB interface on the Linux computer must be able to act as a simple listener / talker. Some devices (notably the **Agilent 82357A/B**) can only act as system controllers and will not work with this application.
+**Note** that the GPIB interface on the Linux computer must be able to act as a simple listener / talker. Some devices (notably the **Agilent 82357A/B**) can only act as system controllers and will not work with this application. (the National Instruments GPIB-USB-HS does work as it does not have this restriction)
 
 The program has been tested with the HP8753C Network Analyzer and the HP8595E Spectrum Analyzer. <em>(If you use it with other instruments, please report your experience)</em>
 
