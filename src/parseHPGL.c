@@ -121,16 +121,25 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 
 	switch( HPGLcmd ) {
 	case HPGL_POSN_ABS:	// PA
+	case HPGL_POSN_REL:	// PR
 		// We accumulate points in the currentLine malloced array while the pen is down.
 		// When the pen is lifted (PU), we add this sequence of points to the compiled plot
 		bMorePoints = TRUE; pNextChar = sHPGLargs;
 		while ( bMorePoints ) {
-			posn.x = (guint16)g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+			gint64 x=0, y=0;
+			if( HPGLcmd == HPGL_POSN_REL ) {
+				x = posn.x;
+				y = posn.y;
+			}
+			x += g_ascii_strtoll( pNextChar, &pNextChar, 10 );
 			while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
 				pNextChar++;
-			posn.y = (guint16)g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+			y += g_ascii_strtoll( pNextChar, &pNextChar, 10 );
 			while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
 				pNextChar++;
+
+			posn.x = (guint16)x;
+			posn.y = (guint16)y;
 
 			if( bPenDown ) {
 				// make sure we have enough space .. quantized by 100 points
@@ -139,7 +148,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 				nPointsInLine++;
 			}
 
-			if( !g_ascii_isdigit( *pNextChar ) )
+			if( !(g_ascii_isdigit( *pNextChar ) || *pNextChar == '-' || *pNextChar == '.' ))
 				bMorePoints = FALSE;
 		}
 		bNewPosition = TRUE;
@@ -165,7 +174,9 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			// End of a line ...
 			// this concludes the line..  Add the accumulated line points to the compiled HPGL serial store
 			// Insert the compiled HPGL command (either CHPGL_LINE2PT or CHPGL_LINE)
-			if( nPointsInLine == 2 ) {
+			if( nPointsInLine == 1) {
+				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_DOT,  NULL, 0  );
+			} else if( nPointsInLine == 2 ) {
 				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINE2PT,  NULL, 0  );
 			} else {
 				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINE,  &nPointsInLine, sizeof(guint16)  );
@@ -278,13 +289,13 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			scalingType = SCALING_ANISOTROPIC;
 			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_SCALING,  &scalingType, sizeof( eHPGLscalingType )  );
 			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP1, sizeof( tCoord) );
-			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP1, sizeof( tCoord) );
+			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP2, sizeof( tCoord) );
 			break;
 		case 5:
 			scalingType = arg5;
 			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_SCALING,  &scalingType, sizeof( eHPGLscalingType )  );
 			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP1, sizeof( tCoord) );
-			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP1, sizeof( tCoord) );
+			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP2, sizeof( tCoord) );
 			break;
 		case 7:
 			scalingType = SCALING_ISOTROLIC_LB;	// LB is specified only for isotropic
@@ -292,7 +303,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			pointLeftBottom.y   = arg7;
 			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_SCALING,  &scalingType, sizeof( eHPGLscalingType )  );
 			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP1, sizeof( tCoord) );
-			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP1, sizeof( tCoord) );
+			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointP2, sizeof( tCoord) );
 			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pointLeftBottom, sizeof( tCoord) );
 			break;
 		}

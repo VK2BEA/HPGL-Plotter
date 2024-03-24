@@ -194,8 +194,8 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 {
 	if( pGlobal->plotHPGL ) {
 		guint HPGLserialCount = 0;
-		static gfloat charSizeX = 1.0, charSizeY = 1.0;
-		static tPlotterState plotterState = {0};
+		gfloat charSizeX = 1.0, charSizeY = 1.0;
+		tPlotterState plotterState = {0};
 		guint length = *((guint *)pGlobal->plotHPGL);
 		gint HPGLpen = 0;
 		gint ptsInLine;
@@ -211,6 +211,10 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 		eHPGLscalingType scaleType;
 		gint i;
 
+		plotterState.HPGLplotterP1P2[ P2 ].x = HPGL_A3_UR_X;
+		plotterState.HPGLplotterP1P2[ P2 ].y = HPGL_A3_UR_Y;
+		plotterState.HPGLinputP1P2[ P1 ] = plotterState.HPGLplotterP1P2[ P1 ];
+		plotterState.HPGLinputP1P2[ P2 ] = plotterState.HPGLplotterP1P2[ P2 ];
 		// The surface may have been adjusted (i.e. for printing, PDF & SVG
 		// to position correctly on a page that is not 1.414:1 aspect ratio
 		// We need to save the transformation matrix, so that is can be recovered
@@ -226,6 +230,11 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 	    {
 	    	setSurfaceRotation( cr, &plotterState.intitalMatrix, imageWidth, imageHeight,
 	    			&areaWidth, &areaHeight, plotterState.HPGLrotation );
+
+			// Noto Sans Mono Light
+			cairo_select_font_face(cr, HPGL_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+			cairo_set_font_size (cr, imageWidth / 70 );
+
 	    	// flip Y axis
 	    	cairo_matrix_t font_matrix;
 	    	// we need to flip the font back (otherwise it will be upside down)
@@ -236,9 +245,6 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 	    	// Better center the plot in the screen
 			gdouble dot = (gdouble)areaWidth / 300.0;
 			gdouble dashes[] = { dot * 5, dot * 2 };
-
-			// Noto Sans Mono Light
-			cairo_select_font_face(cr, HPGL_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 
 			// If we don't set the color its black ... but the HP8753 does
 			gdk_cairo_set_source_rgba (cr, &pGlobal->HPGLpens[1] );      // black pen by default
@@ -268,6 +274,14 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					}
 					cairo_stroke( cr );
 
+					break;
+				case CHPGL_DOT:
+					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 1, tCoord );
+					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
+										 &cairoX, &cairoY, &plotterState );
+					cairo_new_path( cr );
+					cairo_arc( cr, cairoX, cairoY, areaWidth/1000, 0.0, 2.0 * M_PI );
+					cairo_fill( cr );
 					break;
 				case CHPGL_LINE2PT:
 					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 2, tCoord );

@@ -201,8 +201,8 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		return eRDWT_ERROR;
 
 	//todo - remove when linux GPIB driver fixed
-	// a bug in the drive means that the timout used for the ibrda command is not accessed immediatly
-	// we delay, so that the timeout used is TNONE bedore changing to T30ms
+	// a bug in the drive means that the timout used for the ibrda command is not accessed immediately
+	// we delay, so that the timeout used is TNONE before changing to T30ms
 	usleep( 20 * 1000 );
 
 	// set the timout for the ibwait to 30ms

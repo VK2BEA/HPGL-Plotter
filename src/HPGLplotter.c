@@ -21,6 +21,7 @@
 #include <glib-2.0/glib.h>
 #include <gpib/ib.h>
 #include <gtk/gtk.h>
+#include <gdk/gdk.h>
 #include <locale.h>
 #include <time.h>
 #include <errno.h>
@@ -47,12 +48,73 @@ static const GOptionEntry optionEntries[] =
           &optDeviceID, "GPIB device ID for HPGL plotter", NULL },
   { "GPIBcontrollerIndex",  'c', 0, G_OPTION_ARG_INT,
           &optControllerIndex, "GPIB controller board index", NULL },
-  { "GPIBcontrollerName",  'C', 0, G_OPTION_ARG_INT,
+  { "GPIBcontrollerName",  'C', 0, G_OPTION_ARG_STRING,
 		          &sOptControllerName, "GPIB controller name (in /etc/gpib.conf)", NULL },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &argsRemainder, "", NULL },
   { NULL }
 };
 
+
+static gboolean
+CB_KeyPressed (GObject             *dataObject,
+				  guint                  keyval,
+				  guint                  keycode,
+				  GdkModifierType        state,
+				  GtkEventControllerKey *event_controller)
+{
+
+	tGlobal *pGlobal = (tGlobal *)g_object_get_data( dataObject, "globalData");
+
+  if (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK))
+      return FALSE;
+
+  switch ( keyval ) {
+  case GDK_KEY_F2:
+	  switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
+	  case GDK_SHIFT_MASK:
+		  break;
+	  case GDK_CONTROL_MASK:
+		  break;
+	  case GDK_ALT_MASK:
+		  break;
+	  case GDK_SUPER_MASK:
+		  break;
+	  case 0:
+#if 0
+		  gtk_window_get_default_size( GTK_WINDOW( WLOOKUP( pGlobal, "HPGLplotter_main" )), &width, &height );
+		  g_print( "Main w: %d, h: %d\n", width, height ); width=0; height=0;
+#endif
+		  break;
+	  }
+	  break;
+	  case GDK_KEY_F12:
+	  	  switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
+	  	  case GDK_SHIFT_MASK:
+	  		  break;
+	  	  case GDK_CONTROL_MASK:
+	  		  break;
+	  	  case GDK_ALT_MASK:
+	  		  break;
+	  	  case GDK_SUPER_MASK:
+	  		  break;
+	  	  case 0:
+		  	  gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
+	  		  break;
+	  	  }
+	  	  break;
+  break;
+  default:
+	break;
+  }
+
+  return TRUE;
+}
+
+static gboolean
+CB_KeyReleased (GtkWidget *drawing_area)
+{
+  return FALSE;
+}
 /*!     \brief  on_activate (activate signal callback)
  *
  * Activate the main window and add it to the application(show or raise the main window)
@@ -75,6 +137,7 @@ on_activate (GApplication *app, gpointer udata)
 	const gchar __attribute__((unused)) *wname;
 	GtkWidget *widget;
 	GSList *widgetList;
+	GtkEventController *event_controller;
 
 	tGlobal *pGlobal= (tGlobal *)udata;
 
@@ -186,6 +249,16 @@ on_activate (GApplication *app, gpointer udata)
 
 	gtk_window_set_default_icon_name("HPGLplotter");
 
+
+
+	// Get callbacks for keypresss and release
+	event_controller = gtk_event_controller_key_new ();
+	g_signal_connect_object (event_controller, "key-pressed",
+	                           G_CALLBACK (CB_KeyPressed), dataObject, G_CONNECT_SWAPPED);
+	g_signal_connect_object (event_controller, "key-released",
+	                           G_CALLBACK (CB_KeyReleased), dataObject, G_CONNECT_SWAPPED);
+	gtk_widget_add_controller (GTK_WIDGET (wApplicationWindow), event_controller);
+
 	gtk_widget_set_visible(wApplicationWindow, TRUE);
 	gtk_application_add_window( GTK_APPLICATION(app), GTK_WINDOW(wApplicationWindow) );
 	gtk_window_set_icon_name(GTK_WINDOW (wApplicationWindow),"HPGLplotter");
@@ -225,6 +298,7 @@ on_startup (GApplication *app, gpointer udata)
 
 	if( sOptControllerName )  {
 		pGlobal->sGPIBcontrollerName = sOptControllerName;
+		pGlobal->flags.bGPIB_UseControllerIndex = FALSE;
 	}
 
 	if( optControllerIndex != INVALID ) {

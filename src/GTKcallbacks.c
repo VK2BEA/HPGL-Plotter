@@ -62,3 +62,40 @@ CB_btn_Erase ( GtkButton* wBtnErase, gpointer user_data ) {
 	gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }
 
+
+void
+CB_btn_DbgPlot ( GtkButton* wBtnDbgPlot, gpointer user_data ) {
+	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnDbgPlot), "data");
+	GtkTextIter iterStart, iterEnd;
+	GtkTextView *wTextView = GTK_TEXT_VIEW( WLOOKUP( pGlobal, "txtview_Debug") );
+	GtkTextBuffer *wTextBuffer = gtk_text_view_get_buffer(wTextView);
+	gtk_text_buffer_get_start_iter( wTextBuffer, &iterStart );
+	gtk_text_buffer_get_end_iter( wTextBuffer, &iterEnd );
+	gchar *sHPGL = gtk_text_buffer_get_text ( wTextBuffer, &iterStart, &iterEnd, FALSE );
+
+	g_free( pGlobal->plotHPGL );
+	pGlobal->plotHPGL = NULL;
+	deserializeHPGL( sHPGL, pGlobal );
+	gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
+
+	g_free( sHPGL );
+}
+
+void
+CB_btn_DbgClose ( GtkButton* wBtnDbgClose, gpointer user_data ) {
+	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnDbgClose), "data");
+
+	gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), FALSE );
+}
+
+void
+CB_btn_DbgClear ( GtkButton* wBtnDbgClose, gpointer user_data ) {
+	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnDbgClose), "data");
+	GtkTextIter iterStart, iterEnd;
+	GtkTextView *wTextView = GTK_TEXT_VIEW( WLOOKUP( pGlobal, "txtview_Debug") );
+	GtkTextBuffer *wTextBuffer = gtk_text_view_get_buffer(wTextView);
+	gtk_text_buffer_get_start_iter( wTextBuffer, &iterStart );
+	gtk_text_buffer_get_end_iter( wTextBuffer, &iterEnd );
+	gtk_text_buffer_delete ( wTextBuffer, &iterStart, &iterEnd );
+}
+

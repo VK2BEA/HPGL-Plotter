@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.01-2"
+   #define VERSION "1.10-1"
 #endif
 
 #define INVALID	(-1)
@@ -129,9 +129,10 @@ extern GdkRGBA HPGLpensFactory[ NUM_HPGL_PENS ];
 
 // Lines of HPGL commands are compiled into a serial sream that can be quickly drawn and stored
 // Each variable length command is prceeded by a CHPGL (compiled HPGL) byte
-typedef enum { PAYLOAD_ONLY=0, CHPGL_LINE2PT=1, CHPGL_LINE=2, CHPGL_PEN=3, CHPGL_LINETYPE=4,
-               CHPGL_TEXT_SIZE=5, CHPGL_LABEL=6, CHPGL_LABEL_REL=7, CHPGL_OP=8, CHPGL_IP=9, CHPGL_SCALING=10, CHPGL_ROTATION=11 } eHPGL;
-typedef enum { SCALING_NONE, SCALING_ANISOTROPIC=0, SCALING_ISOTROPIC=1, SCALING_POINT=2, SCALING_ISOTROLIC_LB=3 } eHPGLscalingType;
+typedef enum { PAYLOAD_ONLY=0,   CHPGL_DOT=1,     CHPGL_LINE2PT=2, CHPGL_LINE=3,      CHPGL_PEN=4,
+	           CHPGL_LINETYPE=5, CHPGL_TEXT_SIZE=6, CHPGL_LABEL=7,   CHPGL_LABEL_REL=8, CHPGL_OP=9,
+			   CHPGL_IP=10,      CHPGL_SCALING=11,  CHPGL_ROTATION=12 } eHPGL;
+typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALING_POINT=3, SCALING_ISOTROLIC_LB=4 } eHPGLscalingType;
 
 // The subset of HPGL commands that the 8753 provides are the following
 #define HPGL_INPUT_MASK     ('I'<<8|'M')    // IM (Input Mask)
@@ -146,6 +147,7 @@ typedef enum { SCALING_NONE, SCALING_ANISOTROPIC=0, SCALING_ISOTROPIC=1, SCALING
 
 #define HPGL_POSN_ABS		('P'<<8|'A')	// PA (position absolute)
 #define HPGL_PEN_DOWN		('P'<<8|'D')	// PD (pen down)
+#define HPGL_POSN_REL		('P'<<8|'R')	// PA (position relative)
 #define HPGL_PEN_UP			('P'<<8|'U')	// PU (pen up)
 #define HPGL_ROTATION		('R'<<8|'O')	// RO (rotation)
 #define HPGL_CHAR_SIZE_REL	('S'<<8|'R')	// SR (character size relative)
@@ -214,10 +216,6 @@ enum _Widgets {
 
 #define WLOOKUP(p,n) g_hash_table_lookup ( (p)->widgetHashTable, (gconstpointer)(n))
 #define COMMA2SPACE(x) { for( gchar *p=(x); *p != 0; p++ ) if( *p == ',' ) *p = ' '; }
-
-#define DBG( level, message, ... ) \
-        if( globalData.flags.bbDebug >= level ) \
-                LOG( G_LOG_LEVEL_DEBUG, message, ## __VA_ARGS__)
 
 void logVersion(void);
 

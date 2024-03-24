@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.17.3 -->
+<!-- Created with Cambalache 0.90.0 -->
 <interface>
   <!-- interface-name HPGLplotter.ui -->
   <!-- interface-description GPIB HPGL plotter emulator -->
@@ -7,11 +7,7 @@
   <!-- interface-authors Michael G. Katzmann -->
   <requires lib="gtk" version="4.12"/>
   <object class="GtkApplicationWindow" id="WID_HPGLplotter_main">
-    <property name="hexpand">True</property>
-    <property name="hexpand-set">True</property>
     <property name="title">HPGL Plotter</property>
-    <property name="vexpand">True</property>
-    <property name="vexpand-set">True</property>
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
@@ -628,6 +624,77 @@ limitations under the License</property>
             <property name="margin-end">15</property>
             <property name="margin-start">15</property>
             <property name="margin-top">15</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkDialog" id="WID_dlg_Debug">
+    <property name="height-request">500</property>
+    <property name="hide-on-close">True</property>
+    <property name="transient-for">WID_HPGLplotter_main</property>
+    <property name="width-request">700</property>
+    <child>
+      <object class="GtkBox">
+        <property name="margin-bottom">4</property>
+        <property name="margin-end">4</property>
+        <property name="margin-start">4</property>
+        <property name="margin-top">4</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="vexpand">True</property>
+            <child>
+              <object class="GtkTextView" id="WID_txtview_Debug">
+                <property name="css-classes">debug</property>
+                <property name="input-purpose">terminal</property>
+                <property name="margin-bottom">4</property>
+                <property name="margin-end">4</property>
+                <property name="margin-start">4</property>
+                <property name="margin-top">4</property>
+                <property name="monospace">True</property>
+                <property name="vexpand">True</property>
+                <property name="wrap-mode">char</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="valign">end</property>
+            <child>
+              <object class="GtkBox">
+                <property name="homogeneous">True</property>
+                <property name="valign">end</property>
+                <child>
+                  <object class="GtkButton" id="WID_btn_DbgClear">
+                    <property name="label">Clear</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="valign">end</property>
+                    <signal name="clicked" handler="CB_btn_DbgClear"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_Dbg_Close">
+                    <property name="label">Close</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="valign">end</property>
+                    <signal name="clicked" handler="CB_btn_DbgClose"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="WID_btn_DbgPlot">
+                    <property name="label">Plot</property>
+                    <property name="margin-end">4</property>
+                    <property name="margin-start">4</property>
+                    <property name="valign">end</property>
+                    <signal name="clicked" handler="CB_btn_DbgPlot"/>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
       </object>
