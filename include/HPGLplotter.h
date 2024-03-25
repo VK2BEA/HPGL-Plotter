@@ -97,6 +97,7 @@ typedef struct {
 #define P1	0
 #define P2	1
 	tCoord			HPGLplotterP1P2[2];			// The plotter sheet
+	gdouble			aspectRatio;
 
 	GdkRGBA HPGLpens[ NUM_HPGL_PENS ];
 
@@ -104,7 +105,6 @@ typedef struct {
 	gint			GPIBdevicePID;
 	gchar 			*sGPIBcontrollerName;
 	gint			GPIBcontrollerDevice;		// from ibfind (or copied from controllerIndex) when opened
-
 
     GtkPrintSettings *printSettings;
     GtkPageSetup     *pageSetup;
@@ -164,7 +164,7 @@ typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALI
 
 gboolean parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal );
 gboolean deserializeHPGL( gchar *sHPGL, tGlobal *pGlobal );
-void initializeHPGL( tGlobal *pGlobal );
+void initializeHPGL( tGlobal *pGlobal, gboolean bLandscape );
 void CB_DrawingArea_Draw (GtkDrawingArea *widget, cairo_t *cr, gint areaWidth, gint areaHeight, gpointer pGlobal);
 
 gboolean sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal );
@@ -179,8 +179,8 @@ gboolean sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal );
 
 #define HPGL_A3_LL_X	0
 #define HPGL_A3_LL_Y	0
-#define HPGL_A3_UR_X	16800
-#define HPGL_A3_UR_Y	11880
+#define HPGL_A3_LONG	16800
+#define HPGL_A3_SHORT	11880
 
 #define SQU_ROOT_2			(1.41421356237)
 

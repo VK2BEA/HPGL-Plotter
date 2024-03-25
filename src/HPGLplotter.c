@@ -64,47 +64,71 @@ CB_KeyPressed (GObject             *dataObject,
 {
 
 	tGlobal *pGlobal = (tGlobal *)g_object_get_data( dataObject, "globalData");
+	GtkWidget *wAspectFrame, *wDrawingArea;
 
-  if (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK))
-      return FALSE;
+//	if (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK))
+//      return FALSE;
 
-  switch ( keyval ) {
-  case GDK_KEY_F2:
-	  switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
-	  case GDK_SHIFT_MASK:
+	switch ( keyval ) {
+	case GDK_KEY_F2:
+		switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
+		case GDK_SHIFT_MASK:
+			break;
+		case GDK_CONTROL_MASK:
+			break;
+		case GDK_ALT_MASK:
+			break;
+		case GDK_SUPER_MASK:
 		  break;
-	  case GDK_CONTROL_MASK:
-		  break;
-	  case GDK_ALT_MASK:
-		  break;
-	  case GDK_SUPER_MASK:
-		  break;
-	  case 0:
+		case 0:
 #if 0
-		  gtk_window_get_default_size( GTK_WINDOW( WLOOKUP( pGlobal, "HPGLplotter_main" )), &width, &height );
-		  g_print( "Main w: %d, h: %d\n", width, height ); width=0; height=0;
+			gtk_window_get_default_size( GTK_WINDOW( WLOOKUP( pGlobal, "HPGLplotter_main" )), &width, &height );
+			g_print( "Main w: %d, h: %d\n", width, height ); width=0; height=0;
 #endif
-		  break;
-	  }
-	  break;
-	  case GDK_KEY_F12:
-	  	  switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
-	  	  case GDK_SHIFT_MASK:
-	  		  break;
-	  	  case GDK_CONTROL_MASK:
-	  		  break;
-	  	  case GDK_ALT_MASK:
-	  		  break;
-	  	  case GDK_SUPER_MASK:
-	  		  break;
-	  	  case 0:
-		  	  gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
-	  		  break;
-	  	  }
-	  	  break;
-  break;
-  default:
-	break;
+			break;
+		}
+		break;
+	case GDK_KEY_F11:
+		switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
+			case GDK_SHIFT_MASK:
+				initializeHPGL( pGlobal, TRUE );
+				wAspectFrame = WLOOKUP( pGlobal, "AspectFrame");
+				gtk_aspect_frame_set_ratio( GTK_ASPECT_FRAME( wAspectFrame ), sqrt( 2.0 ) );
+				wDrawingArea = WLOOKUP( pGlobal, "drawing_Plot");
+				gtk_drawing_area_set_content_height ( GTK_DRAWING_AREA( wDrawingArea ), 500 );
+				break;
+			case GDK_CONTROL_MASK:
+				initializeHPGL( pGlobal, FALSE );
+				wAspectFrame = WLOOKUP( pGlobal, "AspectFrame");
+				gtk_aspect_frame_set_ratio( GTK_ASPECT_FRAME( wAspectFrame ), 1.0/sqrt( 2.0 ) );
+				wDrawingArea = WLOOKUP( pGlobal, "drawing_Plot");
+				gtk_drawing_area_set_content_height ( GTK_DRAWING_AREA( wDrawingArea ), 1000 );
+				break;
+			case GDK_ALT_MASK:
+				break;
+			case GDK_SUPER_MASK:
+				break;
+			case 0:
+				break;
+		}
+		break;
+	case GDK_KEY_F12:
+		switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
+			case GDK_SHIFT_MASK:
+				break;
+			case GDK_CONTROL_MASK:
+				gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
+				break;
+			case GDK_ALT_MASK:
+				break;
+			case GDK_SUPER_MASK:
+				break;
+			case 0:
+				break;
+		}
+		break;
+	default:
+		break;
   }
 
   return TRUE;
@@ -327,7 +351,7 @@ on_startup (GApplication *app, gpointer udata)
     	pGlobal->HPGLpens[ i ] = HPGLpensFactory[ i ];
     }
 
-    initializeHPGL( pGlobal );
+    initializeHPGL( pGlobal, TRUE );
 
     recoverSettings( pGlobal );
 

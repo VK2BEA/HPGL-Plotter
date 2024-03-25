@@ -115,11 +115,12 @@ If you are plotting 2 or 4 plots per page, uncheck this box. </property>
         <child>
           <object class="GtkBox">
             <child>
-              <object class="GtkAspectFrame">
+              <object class="GtkAspectFrame" id="WID_AspectFrame">
                 <property name="margin-bottom">4</property>
                 <property name="margin-end">4</property>
                 <property name="margin-start">4</property>
                 <property name="margin-top">4</property>
+                <property name="obey-child">False</property>
                 <property name="ratio">1.414</property>
                 <child>
                   <object class="GtkDrawingArea" id="WID_drawing_Plot">

@@ -83,6 +83,7 @@ static void
 setSurfaceRotation( cairo_t *cr, cairo_matrix_t* pIntitalMatrix, gdouble areaWidth, gdouble areaHeight,
 		gdouble *areaWidthModified, gdouble *areaHeightModified, gint rotation) {
 
+	gdouble t;
 	// cairo_identity_matrix ( cr );
 	cairo_set_matrix (cr, pIntitalMatrix );
 
@@ -97,6 +98,9 @@ setSurfaceRotation( cairo_t *cr, cairo_matrix_t* pIntitalMatrix, gdouble areaWid
 	case 90:
 		cairo_rotate( cr, M_PI / 2.0 );	// 90 degrees
     	cairo_translate( cr, 0.0, -areaWidth);
+    	t = areaWidth;
+    	areaWidth  = areaHeight;
+    	areaHeight = t;
 		break;
 	case 180:
 		cairo_rotate( cr, M_PI  );	// 180 degrees
@@ -105,6 +109,9 @@ setSurfaceRotation( cairo_t *cr, cairo_matrix_t* pIntitalMatrix, gdouble areaWid
 	case 270:
 		cairo_rotate( cr, -M_PI / 2.0 );	// 90 degrees
     	cairo_translate( cr, -areaHeight, 0.0 );
+    	t = areaWidth;
+    	areaWidth  = areaHeight;
+    	areaHeight = t;
 		break;
 	}
 	// Add a border
@@ -211,8 +218,8 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 		eHPGLscalingType scaleType;
 		gint i;
 
-		plotterState.HPGLplotterP1P2[ P2 ].x = HPGL_A3_UR_X;
-		plotterState.HPGLplotterP1P2[ P2 ].y = HPGL_A3_UR_Y;
+		plotterState.HPGLplotterP1P2[ P1 ] = pGlobal->HPGLplotterP1P2[P1];
+		plotterState.HPGLplotterP1P2[ P2 ] = pGlobal->HPGLplotterP1P2[P2];
 		plotterState.HPGLinputP1P2[ P1 ] = plotterState.HPGLplotterP1P2[ P1 ];
 		plotterState.HPGLinputP1P2[ P2 ] = plotterState.HPGLplotterP1P2[ P2 ];
 		// The surface may have been adjusted (i.e. for printing, PDF & SVG
@@ -236,7 +243,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 			// The default character size is 0.19 cm wide by 0.27 cm high..
 			// Our A4 page is 297 wide x 210 high i.e 156.3 characters along the wide side
 			//
-			cairo_set_font_size (cr, imageWidth / 80 );
+			cairo_set_font_size (cr, imageWidth / 70 );
 
 	    	// flip Y axis
 	    	cairo_matrix_t font_matrix;
@@ -251,7 +258,6 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 
 			// If we don't set the color its black ... but the HP8753 does
 			gdk_cairo_set_source_rgba (cr, &pGlobal->HPGLpens[1] );      // black pen by default
-
 
 			do {
 				// get compiled HPGL command byte

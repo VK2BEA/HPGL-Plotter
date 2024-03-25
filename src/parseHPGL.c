@@ -28,11 +28,19 @@
 #include "messageEvent.h"
 
 void
-initializeHPGL( tGlobal *pGlobal ) {
+initializeHPGL( tGlobal *pGlobal, gboolean bLandscape ) {
+
 	pGlobal->HPGLplotterP1P2[ P1 ].x = HPGL_A3_LL_X;
 	pGlobal->HPGLplotterP1P2[ P1 ].y = HPGL_A3_LL_Y;
-	pGlobal->HPGLplotterP1P2[ P2 ].x = HPGL_A3_UR_X;
-	pGlobal->HPGLplotterP1P2[ P2 ].y = HPGL_A3_UR_Y;
+	if( bLandscape ) {
+		pGlobal->HPGLplotterP1P2[ P2 ].x = HPGL_A3_LONG;
+		pGlobal->HPGLplotterP1P2[ P2 ].y = HPGL_A3_SHORT;
+		pGlobal->aspectRatio = sqrt( 2.0 );
+	} else {
+		pGlobal->HPGLplotterP1P2[ P2 ].x = HPGL_A3_SHORT;
+		pGlobal->HPGLplotterP1P2[ P2 ].y = HPGL_A3_LONG;
+		pGlobal->aspectRatio = 1.0 / sqrt( 2.0 );
+	}
 }
 
 static gchar labelTerminator = '\003';
