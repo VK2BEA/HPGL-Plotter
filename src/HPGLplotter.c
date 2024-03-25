@@ -263,6 +263,7 @@ on_activate (GApplication *app, gpointer udata)
 	gtk_application_add_window( GTK_APPLICATION(app), GTK_WINDOW(wApplicationWindow) );
 	gtk_window_set_icon_name(GTK_WINDOW (wApplicationWindow),"HPGLplotter");
 
+	pGlobal->timeSinceLastHPGLcommand = g_timer_new();
     // Start the GPIB communication thread
     pGlobal->pGThread = g_thread_new( "GPIBthread", threadGPIB, (gpointer)pGlobal );
 
@@ -368,6 +369,8 @@ on_shutdown (GApplication *app, gpointer userData)
     g_source_unref ( pGlobal->messageEventSource );
 
 	g_hash_table_destroy( globalData.widgetHashTable );
+
+	g_timer_destroy ( pGlobal->timeSinceLastHPGLcommand );
 
     LOG( G_LOG_LEVEL_INFO, "Ending");
 }

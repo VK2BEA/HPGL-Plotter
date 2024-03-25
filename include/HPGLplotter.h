@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.10-1"
+   #define VERSION "1.11-1"
 #endif
 
 #define INVALID	(-1)
@@ -117,7 +117,7 @@ typedef struct {
 	GAsyncQueue 	*messageQueueToGPIB;
 
 	void *plotHPGL;
-
+	GTimer   		*timeSinceLastHPGLcommand;
 	GThread 		*pGThread;
 
 } tGlobal;

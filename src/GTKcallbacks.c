@@ -57,8 +57,6 @@ CB_chk_AutoErase ( GtkCheckButton* wBtnAutoErase, gpointer user_data ) {
 void
 CB_btn_Erase ( GtkButton* wBtnErase, gpointer user_data ) {
 	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT( wBtnErase ), "data");
-	g_free( pGlobal->plotHPGL );
-	pGlobal->plotHPGL = NULL;
 	gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }
 

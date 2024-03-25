@@ -233,7 +233,10 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 
 			// Noto Sans Mono Light
 			cairo_select_font_face(cr, HPGL_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-			cairo_set_font_size (cr, imageWidth / 70 );
+			// The default character size is 0.19 cm wide by 0.27 cm high..
+			// Our A4 page is 297 wide x 210 high i.e 156.3 characters along the wide side
+			//
+			cairo_set_font_size (cr, imageWidth / 80 );
 
 	    	// flip Y axis
 	    	cairo_matrix_t font_matrix;
@@ -280,7 +283,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
 										 &cairoX, &cairoY, &plotterState );
 					cairo_new_path( cr );
-					cairo_arc( cr, cairoX, cairoY, areaWidth/1000, 0.0, 2.0 * M_PI );
+					cairo_arc( cr, cairoX, cairoY, areaWidth/750, 0.0, 2.0 * M_PI );
 					cairo_fill( cr );
 					break;
 				case CHPGL_LINE2PT:

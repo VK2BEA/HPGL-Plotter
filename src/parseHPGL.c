@@ -113,6 +113,13 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	guint HPGLserialCount;
 	guint16 strLength;
 
+	// It may not be able to tell when the start of a new plot begins
+	// If no HPGL is received in 250ms, we reset the plot
+	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > ms( 250 ) && pGlobal->flags.bAutoClear ) {
+		g_free( pGlobal->plotHPGL );
+		pGlobal->plotHPGL = 0;
+	}
+	g_timer_start( pGlobal->timeSinceLastHPGLcommand );
 
 	if( pGlobal->plotHPGL )
 		HPGLserialCount = *(guint *)(pGlobal->plotHPGL);
