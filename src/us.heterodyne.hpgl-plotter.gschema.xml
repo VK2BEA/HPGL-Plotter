@@ -58,6 +58,13 @@
         Selection of whether to use the index or name of the GPIB controller
       </description>
     </key>
+    <key name="gpib-do-not-enable-system" type="b">
+      <default>false</default>
+      <summary>Do not enable GPIB as system controller</summary>
+      <description>
+        Do not switch the GPIB interface to system controller if there is another controller on the bus
+      </description>
+    </key>
     <key name="auto-clear" type="b">
       <default>true</default>
       <summary>Clear the page when we determine a new plot is received</summary>

@@ -75,8 +75,6 @@
 	(1,124,"GtkColorButton","WID_1_Color",99,None,None,None,1,None,None),
 	(1,125,"GtkButton","WID_btn_ColorReset",98,None,None,None,2,None,None),
 	(1,126,"GtkFrame",None,35,None,None,None,3,None,None),
-	(1,128,"GtkBox",None,35,None,None,None,4,None,None),
-	(1,129,"GtkButton","WID_btn_OK",128,None,None,None,None,None,None),
 	(1,130,"GtkGrid",None,126,None,None,None,-1,None,None),
 	(1,132,"GtkCheckButton","WID_1_chk_PaperSize",130,None,None,None,1,None,None),
 	(1,133,"GtkCheckButton","WID_3_chk_PaperSize",130,None,None,None,None,None,None),
@@ -97,7 +95,12 @@
 	(1,150,"GtkButton","WID_Dbg_Close",148,None,None,None,1,None,None),
 	(1,151,"GtkScrolledWindow",None,145,None,None,None,None,None,None),
 	(1,152,"GtkTextView","WID_txtview_Debug",151,None,None,None,-1,None,None),
-	(1,153,"GtkButton","WID_btn_DbgClear",148,None,None,None,None,None,None)
+	(1,153,"GtkButton","WID_btn_DbgClear",148,None,None,None,None,None,None),
+	(1,154,"GtkBox",None,35,None,None,None,5,None,None),
+	(1,155,"GtkButton","WID_btn_OK",154,None,None,None,None,None,None),
+	(1,156,"GtkFrame",None,35,None,None,None,4,None,None),
+	(1,157,"GtkBox",None,156,None,None,None,-1,None,None),
+	(1,158,"GtkCheckButton","WID_cbutton_NoGPIBSystemCtrlr",157,None,None,None,None,None,None)
   </object>
   <object_property>
 	(1,1,"GtkWindow","title","HPGL Plotter",None,None,None,None,None,None,None,None,None),
@@ -327,15 +330,6 @@
 	(1,125,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
 	(1,125,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
 	(1,126,"GtkFrame","label","PDF/SVG Page Size",None,None,None,None,None,None,None,None,None),
-	(1,128,"GtkWidget","halign","end",None,None,None,None,None,None,None,None,None),
-	(1,128,"GtkWidget","margin-bottom","6",None,None,None,None,None,None,None,None,None),
-	(1,128,"GtkWidget","margin-top","7",None,None,None,None,None,None,None,None,None),
-	(1,128,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
-	(1,129,"GtkButton","label","OK",None,None,None,None,None,None,None,None,None),
-	(1,129,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
-	(1,129,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
-	(1,129,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
-	(1,129,"GtkWidget","valign","end",None,None,None,None,None,None,None,None,None),
 	(1,130,"GtkGrid","column-homogeneous","True",None,None,None,None,None,None,None,None,None),
 	(1,130,"GtkGrid","row-homogeneous","True",None,None,None,None,None,None,None,None,None),
 	(1,130,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
@@ -397,7 +391,24 @@
 	(1,153,"GtkButton","label","Clear",None,None,None,None,None,None,None,None,None),
 	(1,153,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
 	(1,153,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
-	(1,153,"GtkWidget","valign","end",None,None,None,None,None,None,None,None,None)
+	(1,153,"GtkWidget","valign","end",None,None,None,None,None,None,None,None,None),
+	(1,154,"GtkWidget","halign","end",None,None,None,None,None,None,None,None,None),
+	(1,154,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
+	(1,154,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
+	(1,154,"GtkWidget","valign","end",None,None,None,None,None,None,None,None,None),
+	(1,155,"GtkButton","label","OK",None,None,None,None,None,None,None,None,None),
+	(1,155,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
+	(1,155,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
+	(1,155,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
+	(1,155,"GtkWidget","valign","end",None,None,None,None,None,None,None,None,None),
+	(1,156,"GtkFrame","label","Options",None,None,None,None,None,None,None,None,None),
+	(1,156,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
+	(1,156,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
+	(1,156,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
+	(1,157,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
+	(1,157,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
+	(1,158,"GtkCheckButton","label","GPIB - never set to system controller",None,None,None,None,None,None,None,None,None),
+	(1,158,"GtkWidget","tooltip-text","To clear the GPIB interface and better probe \nthe GPIB, the interface is temporarily configured\nas a sytem controller.\nIf there is another GPIB system controller on the\nGPIB, check this box to avoid contention.",None,None,None,None,None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(1,130,133,"GtkGridLayoutChild","column","1",None,None,None,None),
@@ -431,13 +442,13 @@
 	(26,1,110,"GtkColorButton","color-set","CB_color_Pen",None,None,None,None,None),
 	(28,1,124,"GtkColorButton","color-set","CB_color_Pen",None,None,None,None,None),
 	(29,1,125,"GtkButton","clicked","CB_btn_ColorReset",None,None,None,None,None),
-	(30,1,129,"GtkButton","clicked","CB_btn_OK",None,None,None,None,None),
 	(31,1,132,"GtkCheckButton","toggled","CB_chk_PaperSize",None,None,None,None,None),
 	(32,1,134,"GtkCheckButton","toggled","CB_chk_PaperSize",None,None,None,None,None),
 	(33,1,133,"GtkCheckButton","toggled","CB_chk_PaperSize",None,None,None,None,None),
 	(35,1,137,"GtkCheckButton","toggled","CB_chk_PaperSize",None,None,None,None,None),
 	(36,1,149,"GtkButton","clicked","CB_btn_DbgPlot",None,None,None,None,None),
 	(37,1,150,"GtkButton","clicked","CB_btn_DbgClose",None,None,None,None,None),
-	(38,1,153,"GtkButton","clicked","CB_btn_DbgClear",None,None,None,None,None)
+	(38,1,153,"GtkButton","clicked","CB_btn_DbgClear",None,None,None,None,None),
+	(39,1,155,"GtkButton","clicked","CB_btn_OK",None,None,None,None,None)
   </object_signal>
 </cambalache-project>

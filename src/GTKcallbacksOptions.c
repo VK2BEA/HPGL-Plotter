@@ -44,6 +44,7 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
 				pGlobal->sGPIBcontrollerName, -1 );
 	// gboolean bUseGPIBcontrollerName = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ) );
 	gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ), !pGlobal->flags.bGPIB_UseControllerIndex );
+	gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_NoGPIBSystemCtrlr" ), pGlobal->flags.bDoNotEnableSystemController );
 
 	for( gint pen = 1; pen < NUM_HPGL_PENS; pen++ ) {	// Pen 0 is always white
 		gchar sWID[] = "1_Color";
@@ -77,6 +78,8 @@ CB_btn_OK ( GtkButton* wBtnOK, gpointer user_data ) {
 	const gchar *sGPIBcontrollerName = gtk_entry_buffer_get_text(
 				gtk_entry_get_buffer( WLOOKUP( pGlobal, "entry_ControllerName") ) );
 	gboolean bUseGPIBcontrollerName = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ) );
+
+	pGlobal->flags.bDoNotEnableSystemController = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_NoGPIBSystemCtrlr" ) );
 
 	gboolean bGPIBchanged = FALSE;
 
@@ -148,3 +151,4 @@ CB_chk_PaperSize ( GtkCheckButton* wBtnPaperSize, gpointer user_data ) {
 		pGlobal->PDFpaperSize = sequence;
 	}
 }
+

@@ -33,6 +33,7 @@ tGlobal globalData = {0};
 
 static gint     optDebug = 0;
 static gboolean bOptQuiet = 0;
+static gint     bOptDoNotEnableSystemController = 0;
 static gint     optDeviceID = INVALID;
 static gint     optControllerIndex = INVALID;
 static gchar    *sOptControllerName = NULL;
@@ -44,6 +45,8 @@ static const GOptionEntry optionEntries[] =
           &optDebug, "Print diagnostic messages in journal (0-7)", NULL },
   { "quiet",           'q', 0, G_OPTION_ARG_NONE,
           &bOptQuiet, "No GUI sounds", NULL },
+  { "GPIBnoSystemController",  'n', 0, G_OPTION_ARG_NONE,
+          &bOptDoNotEnableSystemController, "Do not enable GPIB interface as a system controller", NULL },
   { "GPIBdeviceID",      'd', 0, G_OPTION_ARG_INT,
           &optDeviceID, "GPIB device ID for HPGL plotter", NULL },
   { "GPIBcontrollerIndex",  'c', 0, G_OPTION_ARG_INT,
@@ -96,13 +99,17 @@ CB_KeyPressed (GObject             *dataObject,
 				gtk_aspect_frame_set_ratio( GTK_ASPECT_FRAME( wAspectFrame ), sqrt( 2.0 ) );
 				wDrawingArea = WLOOKUP( pGlobal, "drawing_Plot");
 				gtk_drawing_area_set_content_height ( GTK_DRAWING_AREA( wDrawingArea ), 500 );
+				gtk_drawing_area_set_content_width  ( GTK_DRAWING_AREA( wDrawingArea ), 707 );
+				pGlobal->flags.bPortrait = FALSE;
 				break;
 			case GDK_CONTROL_MASK:
 				initializeHPGL( pGlobal, FALSE );
 				wAspectFrame = WLOOKUP( pGlobal, "AspectFrame");
 				gtk_aspect_frame_set_ratio( GTK_ASPECT_FRAME( wAspectFrame ), 1.0/sqrt( 2.0 ) );
 				wDrawingArea = WLOOKUP( pGlobal, "drawing_Plot");
-				gtk_drawing_area_set_content_height ( GTK_DRAWING_AREA( wDrawingArea ), 1000 );
+				gtk_drawing_area_set_content_height ( GTK_DRAWING_AREA( wDrawingArea ), 707 );
+				gtk_drawing_area_set_content_width  ( GTK_DRAWING_AREA( wDrawingArea ), 500 );
+				pGlobal->flags.bPortrait = TRUE;
 				break;
 			case GDK_ALT_MASK:
 				break;
@@ -112,16 +119,16 @@ CB_KeyPressed (GObject             *dataObject,
 				break;
 		}
 		break;
-	case GDK_KEY_F10:
+	case GDK_KEY_F12:
 		switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
 			case GDK_SHIFT_MASK:
 				break;
 			case GDK_CONTROL_MASK:
-				gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
 				break;
 			case GDK_ALT_MASK:
 				break;
 			case GDK_SUPER_MASK:
+				gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
 				break;
 			case 0:
 				break;
@@ -321,22 +328,6 @@ on_startup (GApplication *app, gpointer udata)
 	pGlobal->flags.bGPIB_UseControllerIndex = TRUE;
 	pGlobal->flags.bAutoClear = TRUE;
 
-	if( sOptControllerName )  {
-		pGlobal->sGPIBcontrollerName = sOptControllerName;
-		pGlobal->flags.bGPIB_UseControllerIndex = FALSE;
-	}
-
-	if( optControllerIndex != INVALID ) {
-		pGlobal->GPIBcontrollerIndex = optControllerIndex;
-		pGlobal->sGPIBcontrollerName = NULL;
-	}
-
-	if( optDeviceID != INVALID ) {
-		pGlobal->GPIBdevicePID = optDeviceID;
-	}
-
-
-
     /*! We use a loop source to send data back from the
      *  GPIB threads to indicate status
      */
@@ -354,6 +345,25 @@ on_startup (GApplication *app, gpointer udata)
     initializeHPGL( pGlobal, TRUE );
 
     recoverSettings( pGlobal );
+
+    // The command line switches should override the recovered settings
+    if( bOptDoNotEnableSystemController ) {
+    	pGlobal->flags.bDoNotEnableSystemController = TRUE;
+    }
+
+	if( sOptControllerName )  {
+		pGlobal->sGPIBcontrollerName = sOptControllerName;
+		pGlobal->flags.bGPIB_UseControllerIndex = FALSE;
+	}
+
+	if( optControllerIndex != INVALID ) {
+		pGlobal->GPIBcontrollerIndex = optControllerIndex;
+		pGlobal->sGPIBcontrollerName = NULL;
+	}
+
+	if( optDeviceID != INVALID ) {
+		pGlobal->GPIBdevicePID = optDeviceID;
+	}
 
 	if( bAbort )
 		g_application_quit (G_APPLICATION ( app ));

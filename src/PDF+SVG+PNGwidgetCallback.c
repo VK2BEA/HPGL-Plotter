@@ -73,19 +73,34 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 		switch( fileType ) {
 		case ePDF:
 		default:
-			width  = paperDimensions[pGlobal->PDFpaperSize].width;
-			height = paperDimensions[pGlobal->PDFpaperSize].height;
+			if( pGlobal->flags.bPortrait ) {
+				width  = paperDimensions[pGlobal->PDFpaperSize].height;
+				height = paperDimensions[pGlobal->PDFpaperSize].width;
+			} else {
+				width  = paperDimensions[pGlobal->PDFpaperSize].width;
+				height = paperDimensions[pGlobal->PDFpaperSize].height;
+			}
 			cs = cairo_pdf_surface_create ( sChosenFilename, width, height );
 			cairo_pdf_surface_set_metadata (cs, CAIRO_PDF_METADATA_CREATOR, "Linux GPIB/HPGL plotter");
 			break;
 		case eSVG:
-			width  = paperDimensions[pGlobal->PDFpaperSize].width;
-			height = paperDimensions[pGlobal->PDFpaperSize].height;
+			if( pGlobal->flags.bPortrait ) {
+				width  = paperDimensions[pGlobal->PDFpaperSize].height;
+				height = paperDimensions[pGlobal->PDFpaperSize].width;
+			} else {
+				width  = paperDimensions[pGlobal->PDFpaperSize].width;
+				height = paperDimensions[pGlobal->PDFpaperSize].height;
+			}
 			cs = cairo_svg_surface_create ( sChosenFilename, width, height );
 			break;
 		case ePNG:
-			width  = PNG_WIDTH;
-			height = PNG_WIDTH / SQU_ROOT_2;
+			if( pGlobal->flags.bPortrait ) {
+				width  = PNG_WIDTH * pGlobal->aspectRatio;
+				height = PNG_WIDTH;
+			} else {
+				width  = PNG_WIDTH;
+				height = PNG_WIDTH / pGlobal->aspectRatio;
+			}
 			cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
 			break;
 		}
@@ -94,12 +109,22 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 		// Letter and Tabloid size are not in the ratio of our data ( height = width / sqrt( 2 ) )
 		// we need to adjust
 		if( fileType != ePNG )	{	// we know PNG is the right aspect ratio
-			if( height / (width / SQU_ROOT_2) > 1.01 ) {// this should leave A4 and A3 untouched
-			  cairo_translate( cr, 0.0, (height - width / SQU_ROOT_2) / 2.0  );
-			  height = width / SQU_ROOT_2;
-			} else if( height / (width / SQU_ROOT_2) < 0.99 ) {
-			  cairo_translate( cr, (height - width / SQU_ROOT_2) / 2.0, 0.0  );
-			  width = height * SQU_ROOT_2;
+			if( pGlobal->flags.bPortrait ) {
+				if( (height / width) * pGlobal->aspectRatio > 1.01 ) {// this should leave A4 and A3 untouched
+				  cairo_translate( cr, 0.0, (height - width / pGlobal->aspectRatio) / 2.0  );
+				  height = width / pGlobal->aspectRatio;
+				} else if( (height / width) * pGlobal->aspectRatio < 0.99 ) {
+				  cairo_translate( cr, (width - height * pGlobal->aspectRatio) / 2.0, 0.0  );
+				  width = height * pGlobal->aspectRatio;
+				}
+			} else {
+				if( (height / width) / pGlobal->aspectRatio > 1.01 ) {// this should leave A4 and A3 untouched
+				  cairo_translate( cr, 0.0, (height - width / pGlobal->aspectRatio) / 2.0  );
+				  height = width / pGlobal->aspectRatio;
+				} else if( (height / width) / pGlobal->aspectRatio < 0.99 ) {
+				  cairo_translate( cr, (width - height * pGlobal->aspectRatio) / 2.0, 0.0  );
+				  width = height * pGlobal->aspectRatio;
+				}
 			}
 		}
 

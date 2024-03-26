@@ -169,6 +169,11 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 		bNewPosition = TRUE;
 		break;
 
+	case HPGL_DEF_TERMINATOR:
+		if( *sHPGLargs == 0 )
+			break;
+		labelTerminator = *sHPGLargs;
+		break;
 	case HPGL_LABEL:	// LB
 		strLength = strlen( sHPGLargs );
 		if( strLength == 0 )

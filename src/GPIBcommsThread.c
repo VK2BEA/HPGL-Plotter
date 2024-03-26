@@ -92,7 +92,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	//todo - remove when linux GPIB driver fixed
 	// a bug in the drive means that the timout used for the ibrda command is not accessed immediatly
 	// we delay, so that the timeout used is TNONE bedore changing to T30ms
-	usleep( 20 * 1000 );
+	// usleep( 20 * 1000 );
 
 	// set the timout for the ibwait to 30ms
 	ibtmo( GPIBdescriptor, T30ms );
@@ -130,7 +130,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 		*pBytesWritten = AsyncIbcnt();
 	*pGPIBstatus = AsyncIbsta();
 
-	DBG( eDEBUG_EXTENSIVE, "🖊: %d / %d bytes", AsyncIbcnt(), length );
+	DBG( eDEBUG_EXTENSIVE, "🖊: %d / %ld bytes", AsyncIbcnt(), length );
 
 	if( (*pGPIBstatus & CMPL) != CMPL ) {
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
@@ -161,7 +161,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 tGPIBReadWriteStatus
 GPIBasyncWriteString( gint GPIBdescriptor, const void *sData, gint *pGPIBstatus, gdouble timeoutSecs ) {
 	glong nBytesWritten;
-	DBG( eDEBUG_EXTENSIVE, "🖊: %s", sData );
+	DBG( eDEBUG_EXTENSIVE, "🖊: %s", (char *)sData );
 	return GPIBasyncWriteBinary( GPIBdescriptor, sData, strlen( (gchar *)sData ),
 			&nBytesWritten, pGPIBstatus, timeoutSecs );
 }
@@ -203,7 +203,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	//todo - remove when linux GPIB driver fixed
 	// a bug in the drive means that the timout used for the ibrda command is not accessed immediately
 	// we delay, so that the timeout used is TNONE before changing to T30ms
-	usleep( 20 * 1000 );
+	// usleep( 20 * 1000 );
 
 	// set the timout for the ibwait to 30ms
 	ibtmo( GPIBdescriptor, T30ms );
@@ -243,7 +243,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		*pNbytesRead = AsyncIbcnt();
 	*pGPIBstatus = AsyncIbsta();
 
-	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%d max)", AsyncIbcnt(), maxBytes );
+	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", AsyncIbcnt(), maxBytes );
 
 	if( (*pGPIBstatus & CMPL) != CMPL ) {
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
@@ -293,25 +293,27 @@ GPIBreadConfiguration( gint GPIBdescriptor, gint option, gint *result, gint *pGP
 gint
 closeGPIBcontroller( tGlobal *pGlobal ) {
 #define FIRST_ALLOCATED_CONTROLLER_DESCRIPTOR 16
+	// If we have another system controller on the bus, the commands here will cause a problem
+	// Do not change to controller mode unless the setting is checked.
+	if( !pGlobal->flags.bDoNotEnableSystemController) {
+		// Request system control (board
+		// i.e. make board system controller
+		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
+			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 
-	// Request system control (board
-	// i.e. make board system controller
-	if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
-		LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+		// perform interface clear (board)
+		// this is to get the instrument (e.g. HP8595E) to release the GPIB
+		// without this we get "not controller in charge" errors
+		if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
+			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+		}
 
-	// perform interface clear (board)
-	// this is to get the instrument (e.g. HP8595E) to release the GPIB
-	// without this we get "not controller in charge" errors
-    if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
-    	LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-    }
-
-	// assert ATN (board)
-	// i.e. become active controller (if it was set when we started )
-	if( pGlobal->flags.bInitialGPIB_ATN &&
-			(ibcac( pGlobal->GPIBcontrollerDevice, 0 ) & ERR ) == ERR )
-		LOG( G_LOG_LEVEL_WARNING, "ibcac (true) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-
+		// assert ATN (board)
+		// i.e. become active controller (if it was set when we started )
+		if( pGlobal->flags.bInitialGPIB_ATN &&
+				(ibcac( pGlobal->GPIBcontrollerDevice, 0 ) & ERR ) == ERR )
+			LOG( G_LOG_LEVEL_WARNING, "ibcac (true) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+	}
     // reinitialize controller (parameters in /etc/gpib.conf)
     // if we opened the device with ibfind(), release the resources
 	if(  !pGlobal->flags.bGPIB_ControllerOpenedWithIndex
@@ -367,31 +369,36 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 		goto err;
 	}
 
-	// Request system control (board
-	// i.e. make board system controller
-	if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
-		LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+	// If we have another system controller on the bus, the commands here will cause a problem
+	// Do not change to controller mode unless the setting is checked.
+	if( !pGlobal->flags.bDoNotEnableSystemController) {
+		// Request system control (board
+		// i.e. make board system controller
+		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
+			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 
-	// perform interface clear (board)
-	// this is to get the instrument (e.g. HP8595E) to release the GPIB
-	// without this we get "not controller in charge" errors
-    if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
-    	LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-    }
+		// perform interface clear (board)
+		// this is to get the instrument (e.g. HP8595E) to release the GPIB
+		// without this we get "not controller in charge" errors
+		if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
+			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+		}
 
-	// Check that there is a controller there (USB device may have been removed)
-	if( iblines( pGlobal->GPIBcontrollerDevice, &lineStatus )  & ERR ) {
-		LOG( G_LOG_LEVEL_WARNING, "iblines error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-		goto err;
-	}
+		// Check that there is a controller there (USB device may have been removed)
+		if( iblines( pGlobal->GPIBcontrollerDevice, &lineStatus )  & ERR ) {
+			LOG( G_LOG_LEVEL_WARNING, "iblines error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+			goto err;
+		}
 
-	pGlobal->flags.bInitialGPIB_ATN = ( ( lineStatus  & ( ValidATN | BusATN ) ) == ( ValidATN | BusATN ) ? 1 : 0 );
-	// Release the ATN line (if it's set)
+		pGlobal->flags.bInitialGPIB_ATN = ( ( lineStatus  & ( ValidATN | BusATN ) ) == ( ValidATN | BusATN ) ? 1 : 0 );
+		// Release the ATN line (if it's set)
 
-	if( pGlobal->flags.bInitialGPIB_ATN &&
-			(ibgts( pGlobal->GPIBcontrollerDevice, 0 ) & ERR) == ERR ) {
-		LOG( G_LOG_LEVEL_WARNING, "ibgts error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-		goto err;
+		if( pGlobal->flags.bInitialGPIB_ATN &&
+				(ibgts( pGlobal->GPIBcontrollerDevice, 0 ) & ERR) == ERR ) {
+			LOG( G_LOG_LEVEL_WARNING, "ibgts error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+			goto err;
+		}
+
 	}
 
 	// Relinquish system control (argument is FALSE)

@@ -89,6 +89,7 @@ saveSettings( tGlobal *pGlobal ) {
     g_settings_set_int( gs, "gpib-device-pid", pGlobal->GPIBdevicePID );
     g_settings_set_string( gs, "gpib-controller-name", pGlobal->sGPIBcontrollerName );
     g_settings_set_boolean( gs, "gpib-use-controller-index", pGlobal->flags.bGPIB_UseControllerIndex);
+    g_settings_set_boolean( gs, "gpib-do-not-enable-system", pGlobal->flags.bDoNotEnableSystemController);
     g_settings_set_boolean( gs, "auto-clear", pGlobal->flags.bAutoClear );
     g_settings_set_int( gs, "pdf-paper-size", pGlobal->PDFpaperSize );
 
@@ -137,6 +138,7 @@ recoverSettings( tGlobal *pGlobal ) {
     pGlobal->sGPIBcontrollerName = g_settings_get_string( gs, "gpib-controller-name" );
     pGlobal->sLastDirectory = g_settings_get_string( gs, "last-directory" );
     pGlobal->flags.bGPIB_UseControllerIndex = g_settings_get_boolean( gs, "gpib-use-controller-index" );
+    pGlobal->flags.bDoNotEnableSystemController = g_settings_get_boolean( gs, "gpib-do-not-enable-system" );
     pGlobal->flags.bAutoClear = g_settings_get_boolean( gs, "auto-clear" );
     pGlobal->PDFpaperSize = g_settings_get_int( gs, "pdf-paper-size" );
 

@@ -30,7 +30,7 @@ tGPIBReadWriteStatus GPIBasyncWrite( gint GPIBdescriptor, const void *sData, gin
 tGPIBReadWriteStatus GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 		glong *pNbytesWritten, gint *GPIBstatus, gdouble timeoutSecs );
 
-#define ERR_TIMEOUT (0x1000)
+#define ERR_TIMEOUT (0x10000)
 #define GPIBfailed(x) (((x) & (ERR | ERR_TIMEOUT)) != 0)
 #define GPIBsucceeded(x) (((x) & (ERR | ERR_TIMEOUT)) == 0)
 

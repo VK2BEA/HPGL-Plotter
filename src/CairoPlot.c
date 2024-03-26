@@ -243,7 +243,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 			// The default character size is 0.19 cm wide by 0.27 cm high..
 			// Our A4 page is 297 wide x 210 high i.e 156.3 characters along the wide side
 			//
-			cairo_set_font_size (cr, imageWidth / 70 );
+			cairo_set_font_size (cr, imageWidth / 85 );
 
 	    	// flip Y axis
 	    	cairo_matrix_t font_matrix;
@@ -258,6 +258,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 
 			// If we don't set the color its black ... but the HP8753 does
 			gdk_cairo_set_source_rgba (cr, &pGlobal->HPGLpens[1] );      // black pen by default
+			cairo_set_line_width( cr, areaWidth/1000.0 );
 
 			do {
 				// get compiled HPGL command byte

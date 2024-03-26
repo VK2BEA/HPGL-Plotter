@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.11-1"
+   #define VERSION "1.13-1"
 #endif
 
 #define INVALID	(-1)
@@ -92,6 +92,8 @@ typedef struct {
 		gushort bInitialGPIB_ATN         : 1;
 		gushort bErasePrimed			 : 1;
 		gushort bAutoClear				 : 1;
+		gushort bPortrait				 : 1;
+		gushort bDoNotEnableSystemController : 1;
 	} flags;
 	gint		PDFpaperSize;
 #define P1	0
@@ -135,6 +137,7 @@ typedef enum { PAYLOAD_ONLY=0,   CHPGL_DOT=1,     CHPGL_LINE2PT=2, CHPGL_LINE=3,
 typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALING_POINT=3, SCALING_ISOTROLIC_LB=4 } eHPGLscalingType;
 
 // The subset of HPGL commands that the 8753 provides are the following
+#define HPGL_DEF_TERMINATOR ('D'<<8|'T')    // DT (Define Terminator (label))
 #define HPGL_INPUT_MASK     ('I'<<8|'M')    // IM (Input Mask)
 #define HPGL_INPUT_POINTS   ('I'<<8|'P')    // IP (Input P1 & P2)
 #define HPGL_INPUT_WINDOW	('I'<<8|'W')    // IW (Input Window)

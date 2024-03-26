@@ -139,3 +139,11 @@ padding: 10px;
     font-style: italic;
     color:  #000080;
 }
+.settings_title {
+    font-weight: bold;
+}
+.debug {
+   font-size: 70%; 
+   color: #000000; 
+   background-color: #F6F6FF;
+}
