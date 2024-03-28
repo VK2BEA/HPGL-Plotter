@@ -92,7 +92,9 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	//todo - remove when linux GPIB driver fixed
 	// a bug in the drive means that the timout used for the ibrda command is not accessed immediatly
 	// we delay, so that the timeout used is TNONE bedore changing to T30ms
-	// usleep( 20 * 1000 );
+#if !GPIB_CHECK_VERSION(4,3,6)
+	usleep( 20 * 1000 );
+#endif
 
 	// set the timout for the ibwait to 30ms
 	ibtmo( GPIBdescriptor, T30ms );
@@ -201,9 +203,11 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		return eRDWT_ERROR;
 
 	//todo - remove when linux GPIB driver fixed
-	// a bug in the drive means that the timout used for the ibrda command is not accessed immediately
+	// a bug in the drive means that the timeout used for the ibrda command is not accessed immediately
 	// we delay, so that the timeout used is TNONE before changing to T30ms
-	// usleep( 20 * 1000 );
+#if !GPIB_CHECK_VERSION(4,3,6)
+	usleep( 20 * 1000 );
+#endif
 
 	// set the timout for the ibwait to 30ms
 	ibtmo( GPIBdescriptor, T30ms );
@@ -369,6 +373,13 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 		goto err;
 	}
 
+	// Disable read termination on character
+	if( ibeos( pGlobal->GPIBcontrollerDevice, 0x0a ) & ERR ) {	// no | REOS  (Enable termination of reads when eos character is received.)
+		LOG( G_LOG_LEVEL_WARNING, "ibeos error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+		goto err;
+	}
+
+
 	// If we have another system controller on the bus, the commands here will cause a problem
 	// Do not change to controller mode unless the setting is checked.
 	if( !pGlobal->flags.bDoNotEnableSystemController) {
@@ -398,7 +409,6 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 			LOG( G_LOG_LEVEL_WARNING, "ibgts error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 			goto err;
 		}
-
 	}
 
 	// Relinquish system control (argument is FALSE)
@@ -507,6 +517,7 @@ threadGPIB(gpointer _pGlobal) {
 	// The HP662X formats numbers like 3.141 not, the continental European way 3,14159
     setlocale(LC_NUMERIC, "C");
 	ibvers(&sGPIBversion);
+	LOG( G_LOG_LEVEL_WARNING, "Linux GPIB version: %s", sGPIBversion);
 
 	// g_print( "Linux GPIB version: %s\n", sGPIBversion );
 

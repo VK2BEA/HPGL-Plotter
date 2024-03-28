@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.13-1"
+   #define VERSION "1.14-1"
 #endif
 
 #define INVALID	(-1)
@@ -211,7 +211,10 @@ g_memdup2(gconstpointer mem, gsize byte_size) {
                 return new_mem;
 }
 #endif /* !GLIB_CHECK_VERSION(2, 67, 3) */
-
+#ifndef GPIB_CHECK_VERSION
+ #define GPIB_CHECK_VERSION(ma,mi,mic) 0
+ #pragma message "You should update to a newer version of linux-gpib"
+#endif
 
 enum _Widgets {
 	eW_drawingArea

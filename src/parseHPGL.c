@@ -336,7 +336,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 
 	case HPGL_OUTPUT_POINTS:
 		postInfo("New plot");
-		sReply = g_strdup_printf( "%d,%d,%d,%d;",
+		sReply = g_strdup_printf( "%d,%d,%d,%d;\n",
 			    				pGlobal->HPGLplotterP1P2[ P1 ].x, pGlobal->HPGLplotterP1P2[ P1 ].y,
 								pGlobal->HPGLplotterP1P2[ P2 ].x, pGlobal->HPGLplotterP1P2[ P2 ].y );
 		sendGPIBreply( sReply, pGlobal );
@@ -356,7 +356,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 		break;
 
 	case HPGL_OUTPUT_STATUS:
-		sendGPIBreply( "26", pGlobal );	// all OK
+		sendGPIBreply( "26;\n", pGlobal );	// all OK
 		break;
 
     case HPGL_VELOCITY:		// VS
