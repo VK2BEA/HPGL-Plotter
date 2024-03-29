@@ -331,7 +331,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	    break;
 
 	case HPGL_OUTPUT_ERROR:
-		sendGPIBreply( "0", pGlobal );	// nothing to see here
+		sendGPIBreply( "0\n", pGlobal );	// nothing to see here
 		break;
 
 	case HPGL_OUTPUT_POINTS:

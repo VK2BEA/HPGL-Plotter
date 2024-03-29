@@ -291,8 +291,8 @@ GPIBreadConfiguration( gint GPIBdescriptor, gint option, gint *result, gint *pGP
  *
  * Close the controller if it was opened and close the device
  *
- * \param pDescGPIBcontroller pointer to GPIB controller descriptor
- * \param pDescGPIB_HP662X    pointer to GPIB device descriptor
+ * \param  pGlobal pointer global data structure
+ * \return 0
  */
 gint
 closeGPIBcontroller( tGlobal *pGlobal ) {
