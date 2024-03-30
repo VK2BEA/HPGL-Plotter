@@ -71,7 +71,7 @@
                 <child>
                   <object class="GtkButton" id="WID_btn_Options">
                     <property name="has-tooltip">True</property>
-                    <property name="icon-name">playlist-automatic-symbolic</property>
+                    <property name="icon-name">emblem-system</property>
                     <property name="margin-end">2</property>
                     <property name="margin-start">2</property>
                     <property name="tooltip-text">Set GPIB PIDs, pen colors and the PDF page size.</property>

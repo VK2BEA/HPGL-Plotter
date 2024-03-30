@@ -223,7 +223,7 @@
 	(1,88,"GtkWidget","margin-start","9",None,None,None,None,None,None,None,None,None),
 	(1,88,"GtkWidget","tooltip-text","Clear the plot when the 'OP' command is received (after 'SP' - park pen).\nIf you are plotting 2 or 4 plots per page, uncheck this box. ",None,None,None,None,None,None,None,None,None),
 	(1,88,"GtkWidget","valign","center",None,None,None,None,None,None,None,None,None),
-	(1,89,"GtkButton","icon-name","playlist-automatic-symbolic",None,None,None,None,None,None,None,None,None),
+	(1,89,"GtkButton","icon-name","emblem-system",None,None,None,None,None,None,None,None,None),
 	(1,89,"GtkWidget","has-tooltip","True",None,None,None,None,None,None,None,None,None),
 	(1,89,"GtkWidget","margin-end","2",None,None,None,None,None,None,None,None,None),
 	(1,89,"GtkWidget","margin-start","2",None,None,None,None,None,None,None,None,None),
