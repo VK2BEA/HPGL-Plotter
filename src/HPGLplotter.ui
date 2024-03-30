@@ -561,6 +561,7 @@ If you are plotting 2 or 4 plots per page, uncheck this box. </property>
                 <property name="margin-bottom">4</property>
                 <property name="margin-top">4</property>
                 <property name="valign">start</property>
+                <property name="visible">False</property>
                 <child>
                   <object class="GtkBox">
                     <property name="halign">start</property>

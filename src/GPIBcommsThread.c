@@ -340,12 +340,10 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
  * based on the parameters set (whether to use descriptors or GPIB addresses)
  *
  * \param pGlobal             pointer to global data structure
- * \param pDescGPIBcontroller pointer to GPIB controller descriptor
- * \param pDescGPIB_HP662X    pointer to GPIB device descriptor
  * \return                    0 on success or ERROR on failure
  */
 gint
-openGPIBcontroller( tGlobal *pGlobal ) {
+openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
 	short	lineStatus;
 	int		ibaskResult = 0;
 
@@ -370,7 +368,7 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 	if( pGlobal->GPIBcontrollerDevice == INVALID )
 		goto err;
 
-	// As if we are the system controller
+	// ask if we are the system controller
 	if( ibask( pGlobal->GPIBcontrollerDevice, IbaSC, &ibaskResult ) & ERR ) {
 		LOG( G_LOG_LEVEL_WARNING, "ibask (IbaSC) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 		goto err;
@@ -393,19 +391,22 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 
 	// If we have another system controller on the bus, the commands here will cause a problem
 	// Do not change to controller mode unless the setting is checked.
-	if( !pGlobal->flags.bDoNotEnableSystemController && pGlobal->flags.bInitialActiveController ) {
-		// Request system control (board
-		// i.e. make board system controller
-#if 0
-		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
-			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-#endif
-		// perform interface clear (board)
-		// this is to get the instrument (e.g. HP8595E) to release the GPIB
-		// without this we get "not controller in charge" errors
-		if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
-			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-		}
+	if( !pGlobal->flags.bDoNotEnableSystemController && ( pGlobal->flags.bInitialActiveController || bResetInterface ) ) {
+
+		if( bResetInterface ) {
+			// Request system control (board
+			// i.e. make board system controller
+			if( !pGlobal->flags.bInitialActiveController )	// We only have to make system controller if it not already
+				if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
+					LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+
+			// perform interface clear (board)
+			// this is to get the instrument (e.g. HP8595E) to release the GPIB
+			// without this we get "not controller in charge" errors
+			if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
+				LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+			}
+	   }
 
 		// Check that there is a controller there (USB device may have been removed)
 		if( iblines( pGlobal->GPIBcontrollerDevice, &lineStatus )  & ERR ) {
@@ -562,7 +563,11 @@ threadGPIB(gpointer _pGlobal) {
 					bRunning = FALSE;
 					continue;
 				case TG_REINITIALIZE_GPIB:
-					closeGPIBcontroller( pGlobal );
+					openGPIBcontroller( pGlobal, TRUE );
+					if( pGlobal->flags.bDoNotEnableSystemController )
+						postInfo("GPIB controller configured");
+					else
+						postInfo("GPIB interfaced cleared and controller configured");
 					continue;
 				default:
 					break;
@@ -578,7 +583,7 @@ threadGPIB(gpointer _pGlobal) {
 			static gint loops = 0;
 			if( (loops++ % 50) == 0 ) {
 				loops = 1;	// don't do this every time
-				if( openGPIBcontroller( pGlobal ) == ERROR ) {
+				if( openGPIBcontroller( pGlobal, FALSE ) == ERROR ) {
 					postInfo("GPIB controller no connection");
 					usleep( ms(100) );
 					continue; // can't do anything without GPIB

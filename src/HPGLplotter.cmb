@@ -405,6 +405,7 @@
 	(1,156,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
 	(1,156,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
 	(1,156,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
+	(1,156,"GtkWidget","visible","False",None,None,None,None,None,None,None,None,None),
 	(1,157,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
 	(1,157,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
 	(1,158,"GtkCheckButton","label","GPIB - never set to system controller",None,None,None,None,None,None,None,None,None),
