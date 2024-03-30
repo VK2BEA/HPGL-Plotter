@@ -73,6 +73,12 @@ CB_KeyPressed (GObject             *dataObject,
 //      return FALSE;
 
 	switch ( keyval ) {
+	case GDK_KEY_Escape:
+		pGlobal->flags.bInitialActiveController = TRUE;
+	    messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
+	    messageData->command = TG_REINITIALIZE_GPIB;
+	    g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+		break;
 	case GDK_KEY_F2:
 		switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
 		case GDK_SHIFT_MASK:

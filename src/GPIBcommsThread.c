@@ -291,32 +291,34 @@ GPIBreadConfiguration( gint GPIBdescriptor, gint option, gint *result, gint *pGP
  *
  * Close the controller if it was opened and close the device
  *
- * \param  pGlobal pointer global data structure
- * \return 0
+ * \param pDescGPIBcontroller pointer to GPIB controller descriptor
+ * \param pDescGPIB_HP662X    pointer to GPIB device descriptor
  */
 gint
 closeGPIBcontroller( tGlobal *pGlobal ) {
 #define FIRST_ALLOCATED_CONTROLLER_DESCRIPTOR 16
 	// If we have another system controller on the bus, the commands here will cause a problem
 	// Do not change to controller mode unless the setting is checked.
-	if( !pGlobal->flags.bDoNotEnableSystemController) {
-		// Request system control (board
+	if( !pGlobal->flags.bDoNotEnableSystemController && pGlobal->flags.bInitialActiveController) {
+		// Request system control
 		// i.e. make board system controller
+#if 0
 		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
 			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-
+#endif
 		// perform interface clear (board)
 		// this is to get the instrument (e.g. HP8595E) to release the GPIB
 		// without this we get "not controller in charge" errors
 		if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
 			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 		}
-
+#if 0
 		// assert ATN (board)
 		// i.e. become active controller (if it was set when we started )
 		if( pGlobal->flags.bInitialGPIB_ATN &&
 				(ibcac( pGlobal->GPIBcontrollerDevice, 0 ) & ERR ) == ERR )
 			LOG( G_LOG_LEVEL_WARNING, "ibcac (true) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+#endif
 	}
     // reinitialize controller (parameters in /etc/gpib.conf)
     // if we opened the device with ibfind(), release the resources
@@ -345,6 +347,7 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
 gint
 openGPIBcontroller( tGlobal *pGlobal ) {
 	short	lineStatus;
+	int		ibaskResult = 0;
 
 	/* The board index can be used as a device descriptor; however,
 	 * if a device descriptor was returned from the ibfind, it must be freed
@@ -367,6 +370,14 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 	if( pGlobal->GPIBcontrollerDevice == INVALID )
 		goto err;
 
+	// As if we are the system controller
+	if( ibask( pGlobal->GPIBcontrollerDevice, IbaSC, &ibaskResult ) & ERR ) {
+		LOG( G_LOG_LEVEL_WARNING, "ibask (IbaSC) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+		goto err;
+	}
+	// Remember if we are the system controller or not
+	pGlobal->flags.bInitialActiveController = (ibaskResult != 0);
+
 	// Set the EOT (assert EOI with last data byte)
 	if( ibeot( pGlobal->GPIBcontrollerDevice, GPIB_EOI ) & ERR ) {
 		LOG( G_LOG_LEVEL_WARNING, "ibeot error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
@@ -382,12 +393,13 @@ openGPIBcontroller( tGlobal *pGlobal ) {
 
 	// If we have another system controller on the bus, the commands here will cause a problem
 	// Do not change to controller mode unless the setting is checked.
-	if( !pGlobal->flags.bDoNotEnableSystemController) {
+	if( !pGlobal->flags.bDoNotEnableSystemController && pGlobal->flags.bInitialActiveController ) {
 		// Request system control (board
 		// i.e. make board system controller
+#if 0
 		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
 			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-
+#endif
 		// perform interface clear (board)
 		// this is to get the instrument (e.g. HP8595E) to release the GPIB
 		// without this we get "not controller in charge" errors

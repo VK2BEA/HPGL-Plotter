@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.14-2"
+   #define VERSION "1.14-3"
 #endif
 
 #define INVALID	(-1)
@@ -90,6 +90,7 @@ typedef struct {
 		gushort bGPIB_UseControllerIndex : 1;
 		gushort bGPIB_ControllerOpenedWithIndex : 1;
 		gushort bInitialGPIB_ATN         : 1;
+		gushort bInitialActiveController : 1;
 		gushort bErasePrimed			 : 1;
 		gushort bAutoClear				 : 1;
 		gushort bPortrait				 : 1;
