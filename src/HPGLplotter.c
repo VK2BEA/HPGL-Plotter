@@ -202,10 +202,10 @@ on_DBUSresume(GDBusConnection *connection,
         GVariant *parameters, gpointer udata)
 {
 	tGlobal *pGlobal= (tGlobal *)udata;
-	gboolean bState = g_variant_get_boolean(parameters);
+	gboolean bState;
 
-	// FWIU this boolean should be TRUE for sleeping and FALSE for wake
-	// but it always seems FALSE
+	g_variant_get (parameters, "(b)", &bState);
+
 	if( !bState ) {
 		messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
 		messageData->command = TG_REINITIALIZE_GPIB;
@@ -369,7 +369,7 @@ on_activate (GApplication *app, gpointer udata)
     pGlobal->pGThread = g_thread_new( "GPIBthread", threadGPIB, (gpointer)pGlobal );
 
     if( conSystemBus ) {
-		   g_dbus_connection_signal_subscribe( conSystemBus,
+    	g_dbus_connection_signal_subscribe( conSystemBus,
 				   "org.freedesktop.login1",
 				   "org.freedesktop.login1.Manager",
 				   "PrepareForSleep",
