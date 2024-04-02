@@ -121,13 +121,6 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	guint HPGLserialCount;
 	guint16 strLength;
 
-	// It may not be able to tell when the start of a new plot begins
-	// If no HPGL is received in 250ms, we reset the plot
-	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > ms( 250 ) && pGlobal->flags.bAutoClear ) {
-		g_free( pGlobal->plotHPGL );
-		pGlobal->plotHPGL = 0;
-	}
-	g_timer_start( pGlobal->timeSinceLastHPGLcommand );
 
 	if( pGlobal->plotHPGL )
 		HPGLserialCount = *(guint *)(pGlobal->plotHPGL);
@@ -340,7 +333,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			    				pGlobal->HPGLplotterP1P2[ P1 ].x, pGlobal->HPGLplotterP1P2[ P1 ].y,
 								pGlobal->HPGLplotterP1P2[ P2 ].x, pGlobal->HPGLplotterP1P2[ P2 ].y );
 		sendGPIBreply( sReply, pGlobal );
-
+#if 0
 		// Erase if we had previously seen a pen park (SR;) command
 		if( pGlobal->flags.bAutoClear  &&
 				pGlobal->flags.bErasePrimed ) {
@@ -348,7 +341,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			pGlobal->plotHPGL = NULL;
 			HPGLserialCount = sizeof( gint );
 		}
-
+#endif
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_OP, &pGlobal->HPGLplotterP1P2[ P1 ], sizeof( tCoord)  );
 		append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY, &pGlobal->HPGLplotterP1P2[ P2 ], sizeof( tCoord)  );
 
@@ -396,6 +389,21 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 	// initialize HPGLcmdArgs if needed
 	if( HPGLcmdArgs == 0 )
 		HPGLcmdArgs = g_string_new(0);
+	if( pGlobal->verbatumHPGLplot == 0 ) {
+		pGlobal->verbatumHPGLplot = g_string_new(0);
+	}
+
+	// It may not be able to tell when the start of a new plot begins; therefore,
+	//       if no HPGL is received in 250ms, we reset the plot
+	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > ms( 250 ) && pGlobal->flags.bAutoClear ) {
+		g_free( pGlobal->plotHPGL );
+		pGlobal->plotHPGL = 0;
+		g_string_truncate( pGlobal->verbatumHPGLplot, 0 );
+	}
+	g_timer_start( pGlobal->timeSinceLastHPGLcommand );
+
+	// Append the received HPGL to the copy we are keeping for possible storage
+	g_string_append( pGlobal->verbatumHPGLplot, sHPGLserial );
 
 	while( *ptrHPGL != 0 ) {
 		// are wee looking for the command

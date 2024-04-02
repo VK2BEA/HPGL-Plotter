@@ -39,6 +39,8 @@ static gint     optControllerIndex = INVALID;
 static gchar    *sOptControllerName = NULL;
 static gchar    **argsRemainder = NULL;
 
+GDBusConnection *conSystemBus = NULL;
+
 static const GOptionEntry optionEntries[] =
 {
   { "debug",           'b', 0, G_OPTION_ARG_INT,
@@ -152,6 +154,68 @@ CB_KeyReleased (GtkWidget *drawing_area)
 {
   return FALSE;
 }
+
+
+
+/* It may be necessary to reconfigure the GPIB driver on waking from system suspend
+ * (especially if it is a USB GPIB device that requires firmware).
+ * This is an example.
+
+	#!/bin/sh
+	#
+	# /lib/systemd/system-sleep/20-linux-gpib
+
+	PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+	case "$1" in
+		pre)
+				#code execution BEFORE sleeping/hibernating/suspending
+		;;
+		post)
+			# Re-trigger udev on suspend wakeup so that firmware can be reloaded
+			# AGILENT_BUS_DEV=($(lsusb -d 0957:0718 | sed -nE 's/^Bus ([0-9]+) Device ([0-9]+):.*$/\1 \2/p'))
+			udevadm trigger -a idVendor=0957 -a idProduct=0718
+			udevadm trigger -a idVendor=3923 -a idProduct=709b
+		;;
+	esac
+
+	exit 0
+
+*/
+
+/*!     \brief DBUS signal callback
+ *
+ * \param connection    : connection data
+ * \param sender_name   : sender of signal
+ * \param object_path   :
+ * \param interface_name: interface
+ * \param signal_name   : name
+ * \param parameters    : signal paramateres
+ * \param udata         : unused
+ *
+ * \ingroup callbacks
+ */
+static void
+on_DBUSresume(GDBusConnection *connection,
+        const gchar *sender_name, const gchar *object_path,
+        const gchar *interface_name, const gchar *signal_name,
+        GVariant *parameters, gpointer udata)
+{
+	tGlobal *pGlobal= (tGlobal *)udata;
+	gboolean bState = g_variant_get_boolean(parameters);
+
+	// FWIU this boolean should be TRUE for sleeping and FALSE for wake
+	// but it always seems FALSE
+	if( !bState ) {
+		messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
+		messageData->command = TG_REINITIALIZE_GPIB;
+		g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+	}
+}
+
+
+
+
 /*!     \brief  on_activate (activate signal callback)
  *
  * Activate the main window and add it to the application(show or raise the main window)
@@ -176,7 +240,7 @@ on_activate (GApplication *app, gpointer udata)
 	GSList *widgetList;
 	GtkEventController *event_controller;
 
-	tGlobal *pGlobal= (tGlobal *)udata;
+	tGlobal *pGlobal = (tGlobal *)udata;
 
     if ( pGlobal->flags.bRunning ) {
         // gtk_window_set_screen( GTK_WINDOW( MainWindow ),
@@ -304,6 +368,15 @@ on_activate (GApplication *app, gpointer udata)
     // Start the GPIB communication thread
     pGlobal->pGThread = g_thread_new( "GPIBthread", threadGPIB, (gpointer)pGlobal );
 
+    if( conSystemBus ) {
+		   g_dbus_connection_signal_subscribe( conSystemBus,
+				   "org.freedesktop.login1",
+				   "org.freedesktop.login1.Manager",
+				   "PrepareForSleep",
+				   "/org/freedesktop/login1", NULL,
+				   G_DBUS_SIGNAL_FLAGS_NONE, on_DBUSresume, (gpointer) pGlobal, NULL);
+    }
+
 }
 
 /*!     \brief  on_startup (startup signal callback)
@@ -370,6 +443,10 @@ on_startup (GApplication *app, gpointer udata)
 	if( optDeviceID != INVALID ) {
 		pGlobal->GPIBdevicePID = optDeviceID;
 	}
+
+    if( !(conSystemBus = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, NULL)) ) {
+    	LOG( G_LOG_LEVEL_WARNING, "Cannot get system dbus bus" );
+    }
 
 	if( bAbort )
 		g_application_quit (G_APPLICATION ( app ));
