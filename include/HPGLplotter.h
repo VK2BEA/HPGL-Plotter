@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.15-1"
+   #define VERSION "1.16-1"
 #endif
 
 #define INVALID	(-1)
@@ -84,17 +84,18 @@ typedef struct {
 typedef struct {
 
 	struct {
-		gushort bRunning         		 : 1;
-		gushort bbDebug					 : 3;
-		gushort bGPIBcommsActive		 : 1;
-		gushort bGPIB_UseControllerIndex : 1;
-		gushort bGPIB_ControllerOpenedWithIndex : 1;
-		gushort bInitialGPIB_ATN         : 1;
-		gushort bInitialActiveController : 1;
-		gushort bErasePrimed			 : 1;
-		gushort bAutoClear				 : 1;
-		gushort bPortrait				 : 1;
-		gushort bDoNotEnableSystemController : 1;
+		guint32 bRunning         		 : 1;
+		guint32 bbDebug					 : 3;
+		guint32 bGPIBcommsActive		 : 1;
+		guint32 bGPIB_UseControllerIndex : 1;
+		guint32 bGPIB_ControllerOpenedWithIndex : 1;
+		guint32 bInitialGPIB_ATN         : 1;
+		guint32 bInitialActiveController : 1;
+		guint32 bErasePrimed			 : 1;
+		guint32 bAutoClear				 : 1;
+		guint32 bPortrait				 : 1;
+		guint32 bDoNotEnableSystemController : 1;
+		guint32 bMuteGPIBreply           : 1;
 	} flags;
 	gint		PDFpaperSize;
 #define P1	0
@@ -120,7 +121,7 @@ typedef struct {
 	GAsyncQueue 	*messageQueueToGPIB;
 
 	void 			*plotHPGL;				// Optimized HPGL - potentially better for redrawing plot on the screen
-	GString  		*verbatumHPGLplot;		// The HPGL as received
+	GString  		*verbatimHPGLplot;		// The HPGL as received
 
 	GTimer   		*timeSinceLastHPGLcommand;
 	GThread 		*pGThread;
@@ -248,5 +249,6 @@ gint splashDestroy (tGlobal *pGlobal);
 void drawHPlogo (cairo_t *cr, gdouble centreX, gdouble lowerLeftY, gdouble scale);
 
 gboolean plotCompiledHPGL (cairo_t *cr, gdouble areaWidth, gdouble areaHeight, tGlobal *pGlobal);
+void clearHPGL( tGlobal *pGlobal );
 
 #define GSETTINGS_SCHEMA	"us.heterodyne.HPGLplotter"

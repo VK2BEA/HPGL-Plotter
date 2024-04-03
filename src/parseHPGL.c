@@ -61,6 +61,15 @@ append( void **pCompiledHPGL, guint *countOfBytes, eHPGL HPGLfn, void *pObject, 
 	*countOfBytes += size;
 }
 
+void
+clearHPGL( tGlobal *pGlobal ) {
+	g_free( pGlobal->plotHPGL );
+	pGlobal->plotHPGL = 0;
+	g_string_free( pGlobal->verbatimHPGLplot, TRUE );
+	pGlobal->verbatimHPGLplot = NULL;
+	gtk_widget_set_sensitive( WLOOKUP( pGlobal, "btn_SaveHPGL" ), FALSE );
+}
+
 /*!     \brief  Parse an HPGL command
  *
  * Parse an HPGL command and prepare data for plotting.
@@ -386,24 +395,22 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 #define FIRSTcmdBYTE	0xFF00
 #define SECONDcmdBYTE	0x00FF
 
-	// initialize HPGLcmdArgs if needed
-	if( HPGLcmdArgs == 0 )
-		HPGLcmdArgs = g_string_new(0);
-	if( pGlobal->verbatumHPGLplot == 0 ) {
-		pGlobal->verbatumHPGLplot = g_string_new(0);
-	}
-
 	// It may not be able to tell when the start of a new plot begins; therefore,
 	//       if no HPGL is received in 250ms, we reset the plot
 	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > ms( 250 ) && pGlobal->flags.bAutoClear ) {
-		g_free( pGlobal->plotHPGL );
-		pGlobal->plotHPGL = 0;
-		g_string_truncate( pGlobal->verbatumHPGLplot, 0 );
+		clearHPGL( pGlobal );
 	}
-	g_timer_start( pGlobal->timeSinceLastHPGLcommand );
 
-	// Append the received HPGL to the copy we are keeping for possible storage
-	g_string_append( pGlobal->verbatumHPGLplot, sHPGLserial );
+	// initialize HPGLcmdArgs if needed
+	if( HPGLcmdArgs == 0 )
+		HPGLcmdArgs = g_string_new(0);
+
+	if( pGlobal->verbatimHPGLplot == 0 ) {
+		pGlobal->verbatimHPGLplot = g_string_new(0);
+	}
+	g_string_append( pGlobal->verbatimHPGLplot, sHPGLserial );
+
+	g_timer_start( pGlobal->timeSinceLastHPGLcommand );
 
 	while( *ptrHPGL != 0 ) {
 		// are wee looking for the command
@@ -448,5 +455,6 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 		}
 	}
 
+	gtk_widget_set_sensitive( WLOOKUP( pGlobal, "btn_SaveHPGL" ), pGlobal->verbatimHPGLplot->len > 0 );
 	return bPenParked;
 }

@@ -468,6 +468,9 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
 	gint GPIBstatus;
 	gboolean bWaitingForTalker = TRUE;
 
+	if( pGlobal->flags.bMuteGPIBreply )
+		return TRUE;
+
 	while ( bWaitingForTalker ) {
 		GPIBstatus = 0;
 

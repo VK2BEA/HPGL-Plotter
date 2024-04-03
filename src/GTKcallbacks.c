@@ -57,12 +57,175 @@ CB_chk_AutoErase ( GtkCheckButton* wBtnAutoErase, gpointer user_data ) {
 void
 CB_btn_Erase ( GtkButton* wBtnErase, gpointer user_data ) {
 	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT( wBtnErase ), "data");
-	g_free( pGlobal->plotHPGL );
-	pGlobal->plotHPGL = NULL;
-	g_string_truncate( pGlobal->verbatumHPGLplot, 0 );
+	clearHPGL( pGlobal );
 	gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }
 
+// Call back when file is selected
+static void
+CB_HPGLsave( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
+	GtkFileDialog *dialog = GTK_FILE_DIALOG (source_object);
+	tGlobal *pGlobal = (tGlobal *)gpGlobal;
+	FILE *fHPGL = NULL;
+
+	GFile *file;
+	GError *err = NULL;
+	GtkAlertDialog *alert_dialog;
+
+	if (((file = gtk_file_dialog_save_finish (dialog, res, &err)) != NULL) ) {
+		gchar *sChosenFilename = g_file_get_path( file );
+
+		if( (fHPGL = fopen( sChosenFilename, "w" )) != NULL ) {
+			fwrite( pGlobal->verbatimHPGLplot->str, pGlobal->verbatimHPGLplot->len, 1, fHPGL);
+			fclose( fHPGL );
+		} else {
+			alert_dialog = gtk_alert_dialog_new ("Cannot open file for writing:\n%s", sChosenFilename);
+			gtk_alert_dialog_show (alert_dialog, NULL);
+			g_object_unref (alert_dialog);
+		}
+
+		GFile *dir = g_file_get_parent( file );
+		gchar *sChosenDirectory = g_file_get_path( dir );
+		g_free( pGlobal->sLastDirectory );
+		pGlobal->sLastDirectory = sChosenDirectory;
+
+		g_object_unref( dir );
+		g_object_unref( file );
+		g_free( sChosenFilename );
+	} else {
+		alert_dialog = gtk_alert_dialog_new ("%s", err->message);
+		 // gtk_alert_dialog_show (alert_dialog, GTK_WINDOW (win));
+		g_object_unref (alert_dialog);
+		g_clear_error (&err);
+   }
+}
+
+void
+CB_btn_SaveHPGL ( GtkButton* wBtnSaveHPGL, gpointer user_data ) {
+	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT( wBtnSaveHPGL ), "data");
+
+	GtkFileDialog *fileDialogSave = gtk_file_dialog_new ();
+	GtkWidget *win = gtk_widget_get_ancestor (GTK_WIDGET (wBtnSaveHPGL), GTK_TYPE_WINDOW);
+	gchar *sSuggestedFilename = NULL;
+	GDateTime *now = g_date_time_new_now_local ();
+
+	g_autoptr (GListModel) filters = (GListModel *)g_list_store_new (GTK_TYPE_FILE_FILTER);
+	g_autoptr (GtkFileFilter) filter = NULL;
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_add_pattern (filter, "*.[Hh][Pp][Gg][Ll]");
+	gtk_file_filter_set_name (filter, "HPGL");
+	sSuggestedFilename = g_date_time_format( now, "HPGL.%d%b%y.%H%M%S.hpgl");
+	g_list_store_append ( (GListStore*)filters, filter);
+
+	// All files
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_add_pattern (filter, "*");
+	gtk_file_filter_set_name (filter, "All Files");
+	g_list_store_append ( (GListStore*) filters, filter);
+
+	gtk_file_dialog_set_filters (fileDialogSave, G_LIST_MODEL (filters));
+
+	GFile *fPath =  g_file_new_for_path( pGlobal->sLastDirectory );
+	gtk_file_dialog_set_initial_folder( fileDialogSave, fPath );
+	gtk_file_dialog_set_initial_name( fileDialogSave, sSuggestedFilename );
+
+	gtk_file_dialog_save ( fileDialogSave, GTK_WINDOW (win), NULL, CB_HPGLsave, pGlobal);
+
+	g_object_unref (fileDialogSave);
+	g_object_unref( fPath );
+	g_free( sSuggestedFilename );
+	g_date_time_unref( now );
+
+}
+
+// Call back when open/recall file is selected
+static void
+CB_HPGLopen( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
+	GtkFileDialog *dialog = GTK_FILE_DIALOG (source_object);
+	tGlobal *pGlobal = (tGlobal *)gpGlobal;
+	FILE *fHPGL = NULL;
+
+	GFile *file;
+	GError *err = NULL;
+	GtkAlertDialog *alert_dialog;
+
+	if (((file = gtk_file_dialog_open_finish (dialog, res, &err)) != NULL) ) {
+		gchar *sChosenFilename = g_file_get_path( file );
+
+#define TBUF_SIZE	10000
+		if( (fHPGL = fopen( sChosenFilename, "r" )) != NULL ) {
+			gchar tbuf[ TBUF_SIZE+1 ];
+			gint n = 0;
+
+			pGlobal->flags.bMuteGPIBreply = TRUE;
+
+			clearHPGL( pGlobal );
+
+			do {
+				n = fread( tbuf, sizeof( gchar ), TBUF_SIZE, fHPGL);
+				tbuf[ n ] = 0;	// null terminate
+				deserializeHPGL( tbuf, pGlobal );
+			} while ( n == TBUF_SIZE );
+			gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
+			pGlobal->flags.bMuteGPIBreply = FALSE;
+			fclose( fHPGL );
+		} else {
+			alert_dialog = gtk_alert_dialog_new ("Cannot open file for writing:\n%s", sChosenFilename);
+			gtk_alert_dialog_show (alert_dialog, NULL);
+			g_object_unref (alert_dialog);
+		}
+
+		GFile *dir = g_file_get_parent( file );
+		gchar *sChosenDirectory = g_file_get_path( dir );
+		g_free( pGlobal->sLastDirectory );
+		pGlobal->sLastDirectory = sChosenDirectory;
+
+		g_object_unref( dir );
+		g_object_unref( file );
+		g_free( sChosenFilename );
+	} else {
+		alert_dialog = gtk_alert_dialog_new ("%s", err->message);
+		 // gtk_alert_dialog_show (alert_dialog, GTK_WINDOW (win));
+		g_object_unref (alert_dialog);
+		g_clear_error (&err);
+   }
+}
+
+void
+CB_btn_RecallHPGL ( GtkButton* wBtnRecallHPGL, gpointer user_data ) {
+	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT( wBtnRecallHPGL ), "data");
+
+	GtkFileDialog *fileDialogRecall = gtk_file_dialog_new ();
+	GtkWidget *win = gtk_widget_get_ancestor (GTK_WIDGET (wBtnRecallHPGL), GTK_TYPE_WINDOW);
+	gchar *sSuggestedFilename = NULL;
+	GDateTime *now = g_date_time_new_now_local ();
+
+	g_autoptr (GListModel) filters = (GListModel *)g_list_store_new (GTK_TYPE_FILE_FILTER);
+	g_autoptr (GtkFileFilter) filter = NULL;
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_add_pattern (filter, "*.[Hh][Pp][Gg][Ll]");
+	gtk_file_filter_set_name (filter, "HPGL");
+	sSuggestedFilename = g_date_time_format( now, "HPGL.%d%b%y.%H%M%S.hpgl");
+	g_list_store_append ( (GListStore*)filters, filter);
+
+	// All files
+	filter = gtk_file_filter_new ();
+	gtk_file_filter_add_pattern (filter, "*");
+	gtk_file_filter_set_name (filter, "All Files");
+	g_list_store_append ( (GListStore*) filters, filter);
+
+	gtk_file_dialog_set_filters (fileDialogRecall, G_LIST_MODEL (filters));
+
+	GFile *fPath =  g_file_new_for_path( pGlobal->sLastDirectory );
+	gtk_file_dialog_set_initial_folder( fileDialogRecall, fPath );
+
+	gtk_file_dialog_open ( fileDialogRecall, GTK_WINDOW (win), NULL, CB_HPGLopen, pGlobal);
+
+	g_object_unref (fileDialogRecall);
+	g_object_unref( fPath );
+	g_free( sSuggestedFilename );
+	g_date_time_unref( now );
+}
 
 void
 CB_btn_DbgPlot ( GtkButton* wBtnDbgPlot, gpointer user_data ) {
