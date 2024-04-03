@@ -397,7 +397,7 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 
 	// It may not be able to tell when the start of a new plot begins; therefore,
 	//       if no HPGL is received in 250ms, we reset the plot
-	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > 0.25 && pGlobal->flags.bAutoClear ) {
+	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > 0.5 && pGlobal->flags.bAutoClear ) {
 		clearHPGL( pGlobal );
 	}
 
