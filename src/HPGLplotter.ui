@@ -64,7 +64,7 @@
                 <child>
                   <object class="GtkButton" id="WID_btn_SaveHPGL">
                     <property name="has-tooltip">True</property>
-                    <property name="icon-name">document-save-as</property>
+                    <property name="icon-name">document-save</property>
                     <property name="margin-end">2</property>
                     <property name="margin-start">2</property>
                     <property name="sensitive">False</property>
@@ -75,7 +75,7 @@
                 <child>
                   <object class="GtkButton" id="WID_btn_Restore">
                     <property name="has-tooltip">True</property>
-                    <property name="icon-name">folder</property>
+                    <property name="icon-name">document-open</property>
                     <property name="margin-end">2</property>
                     <property name="margin-start">2</property>
                     <property name="tooltip-text">Open HPGL file</property>
@@ -124,7 +124,7 @@
                 <property name="has-tooltip">True</property>
                 <property name="label">Auto Clear</property>
                 <property name="margin-start">4</property>
-                <property name="tooltip-text">Clear the plot when HPGL is received following a gap of greater than  of 250ms</property>
+                <property name="tooltip-text">Clear the plot when HPGL is received following a gap of greater than  of 500ms</property>
                 <property name="valign">center</property>
                 <signal name="toggled" handler="CB_chk_AutoErase"/>
               </object>
@@ -178,6 +178,7 @@
                 <property name="hexpand">True</property>
                 <property name="justify">right</property>
                 <property name="label">GPIB 23</property>
+                <property name="margin-bottom">4</property>
                 <property name="margin-end">6</property>
                 <property name="tooltip-text">GPIB PID of this plotter.</property>
               </object>

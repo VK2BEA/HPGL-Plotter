@@ -71,6 +71,8 @@ CB_KeyPressed (GObject             *dataObject,
 	tGlobal *pGlobal = (tGlobal *)g_object_get_data( dataObject, "globalData");
 	GtkWidget *wAspectFrame, *wDrawingArea;
 
+	GtkTextBuffer *wTextBuffer;
+
 //	if (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK))
 //      return FALSE;
 
@@ -136,6 +138,9 @@ CB_KeyPressed (GObject             *dataObject,
 			case GDK_ALT_MASK:
 				break;
 			case GDK_SUPER_MASK:
+				wTextBuffer
+						= gtk_text_view_get_buffer(GTK_TEXT_VIEW( WLOOKUP( pGlobal, "txtview_Debug") ));
+				gtk_text_buffer_set_text ( wTextBuffer, pGlobal->verbatimHPGLplot->str, pGlobal->verbatimHPGLplot->len );
 				gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
 				break;
 			case 0:
