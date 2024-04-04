@@ -290,7 +290,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
 										 &cairoX, &cairoY, &plotterState );
 					cairo_new_path( cr );
-#define DOT_SIZE areaWidth/1000
+#define DOT_SIZE areaWidth/1250
 					cairo_arc( cr, cairoX, cairoY, DOT_SIZE, 0.0, 2.0 * M_PI );
 					cairo_fill( cr );
 					break;

@@ -140,6 +140,7 @@ CB_btn_ColorReset ( GtkButton* wBtnColorReset, gpointer user_data ) {
 		gtk_color_chooser_set_rgba( GTK_COLOR_CHOOSER(wColorButton), &pGlobal->HPGLpens[ pen ] );
 #pragma GCC diagnostic pop
 	}
+	gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }
 
 void
