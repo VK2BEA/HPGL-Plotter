@@ -109,6 +109,10 @@ messageEventDispatch(GSource *source, GSourceFunc callback, gpointer udata) {
 		case TM_REFRESH_PLOT:
 			gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 			g_free( message->data );
+
+			if( gtk_widget_get_visible( WLOOKUP ( pGlobal, "dlg_Debug" )) )
+				gtk_text_buffer_set_text ( gtk_text_view_get_buffer(GTK_TEXT_VIEW( WLOOKUP( pGlobal, "txtview_Debug") )),
+						pGlobal->verbatimHPGLplot->str, pGlobal->verbatimHPGLplot->len );
 			break;
 		case TM_COMPLETE_GPIB:
 			// sensitiseControlsInUse( pGlobal, TRUE );
