@@ -455,6 +455,11 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 		}
 	}
 
+	if( gtk_widget_get_visible( WLOOKUP ( pGlobal, "dlg_Debug" )) )
+		gtk_text_buffer_set_text ( gtk_text_view_get_buffer(GTK_TEXT_VIEW( WLOOKUP( pGlobal, "txtview_Debug") )),
+				pGlobal->verbatimHPGLplot->str, pGlobal->verbatimHPGLplot->len );
+	gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), TRUE );
+
 	gtk_widget_set_sensitive( WLOOKUP( pGlobal, "btn_SaveHPGL" ), pGlobal->verbatimHPGLplot->len > 0 );
 	return bPenParked;
 }
