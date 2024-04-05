@@ -52,7 +52,7 @@ tPaperDimensions paperDimensions[ eNumPaperSizes ] = {
 
 enum eFileType { ePDF, eSVG, ePNG };
 
-
+static gchar *sSuggestedFilename = NULL;
 // Call back when file is selected
 static void
 plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, enum eFileType fileType ) {
@@ -69,7 +69,8 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 
 	if (((file = gtk_file_dialog_save_finish (dialog, res, &err)) != NULL) ) {
 		gchar *sChosenFilename = g_file_get_path( file );
-
+		gchar *selectedFileBasename =  g_file_get_basename( file );
+		gchar **pUserFileName;
 		switch( fileType ) {
 		case ePDF:
 		default:
@@ -82,6 +83,7 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 			}
 			cs = cairo_pdf_surface_create ( sChosenFilename, width, height );
 			cairo_pdf_surface_set_metadata (cs, CAIRO_PDF_METADATA_CREATOR, "Linux GPIB/HPGL plotter");
+			pUserFileName = &pGlobal->sUsersPDFImageFilename;
 			break;
 		case eSVG:
 			if( pGlobal->flags.bPortrait ) {
@@ -92,6 +94,7 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 				height = paperDimensions[pGlobal->PDFpaperSize].height;
 			}
 			cs = cairo_svg_surface_create ( sChosenFilename, width, height );
+			pUserFileName = &pGlobal->sUsersSVGImageFilename;
 			break;
 		case ePNG:
 			if( pGlobal->flags.bPortrait ) {
@@ -102,9 +105,18 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 				height = PNG_WIDTH / pGlobal->aspectRatio;
 			}
 			cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+			pUserFileName = &pGlobal->sUsersPNGImageFilename;
 			break;
 		}
 		cr = cairo_create (cs);
+
+		// If the user chose a specific filename .. then remember it for the next time
+		if( strcmp( selectedFileBasename, sSuggestedFilename ) ) {
+			g_free( *pUserFileName );
+			*pUserFileName = selectedFileBasename;
+		} else {
+			g_free( selectedFileBasename );
+		}
 
 		// Letter and Tabloid size are not in the ratio of our data ( height = width / sqrt( 2 ) )
 		// we need to adjust
@@ -156,6 +168,7 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
      g_object_unref (alert_dialog);
      g_clear_error (&err);
    }
+	g_free( sSuggestedFilename );
 }
 
 // Call back when file is selected
@@ -183,8 +196,9 @@ presentFileSaveDialog ( GtkButton *wBtn, gpointer user_data, enum eFileType file
 
 	GtkFileDialog *fileDialogSave = gtk_file_dialog_new ();
 	GtkWidget *win = gtk_widget_get_ancestor (GTK_WIDGET (wBtn), GTK_TYPE_WINDOW);
-	gchar *sSuggestedFilename = NULL;
+
 	GDateTime *now = g_date_time_new_now_local ();
+	gchar **pUserFileName = NULL;
 
 	g_autoptr (GListModel) filters = (GListModel *)g_list_store_new (GTK_TYPE_FILE_FILTER);
 
@@ -197,16 +211,19 @@ presentFileSaveDialog ( GtkButton *wBtn, gpointer user_data, enum eFileType file
 		gtk_file_filter_add_mime_type (filter, "application/pdf");
 		gtk_file_filter_set_name (filter, "PDF");
 		sSuggestedFilename = g_date_time_format( now, "HPGL.%d%b%y.%H%M%S.pdf");
+		pUserFileName = &pGlobal->sUsersPDFImageFilename;
 		break;
 	case eSVG:
 		gtk_file_filter_add_mime_type (filter, "image/svg+xml");
 		gtk_file_filter_set_name (filter, "SVG");
 		sSuggestedFilename = g_date_time_format( now, "HPGL.%d%b%y.%H%M%S.svg");
+		pUserFileName = &pGlobal->sUsersSVGImageFilename;
 		break;
 	case ePNG:
 		gtk_file_filter_add_mime_type (filter, "image/png");
 		gtk_file_filter_set_name (filter, "PNG");
 		sSuggestedFilename = g_date_time_format( now, "HPGL.%d%b%y.%H%M%S.png");
+		pUserFileName = &pGlobal->sUsersPNGImageFilename;
 		break;
 	default: break;
 	}
@@ -224,7 +241,7 @@ presentFileSaveDialog ( GtkButton *wBtn, gpointer user_data, enum eFileType file
 	GFile *fPath =  g_file_new_for_path( pGlobal->sLastDirectory );
 	gtk_file_dialog_set_initial_folder( fileDialogSave, fPath );
 
-	gtk_file_dialog_set_initial_name( fileDialogSave, sSuggestedFilename );
+	gtk_file_dialog_set_initial_name( fileDialogSave, *pUserFileName != NULL ? *pUserFileName : sSuggestedFilename );
 
 	switch( fileType ) {
 	case ePDF:
@@ -242,7 +259,6 @@ presentFileSaveDialog ( GtkButton *wBtn, gpointer user_data, enum eFileType file
 
 	g_object_unref (fileDialogSave);
 	g_object_unref( fPath );
-	g_free( sSuggestedFilename );
 	g_date_time_unref( now );
 }
 

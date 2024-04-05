@@ -494,6 +494,11 @@ on_shutdown (GApplication *app, gpointer userData)
 
 	g_timer_destroy ( pGlobal->timeSinceLastHPGLcommand );
 
+	g_free( pGlobal->sUsersHPGLfilename );
+	g_free( pGlobal->sUsersPDFImageFilename );
+	g_free( pGlobal->sUsersPNGImageFilename );
+	g_free( pGlobal->sUsersSVGImageFilename );
+
     LOG( G_LOG_LEVEL_INFO, "Ending");
 }
 

@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.16-1"
+   #define VERSION "1.17-1"
 #endif
 
 #define INVALID	(-1)
@@ -72,6 +72,7 @@ typedef struct {
 	} flags;
 
 	tCoord		HPGLplotterP1P2[2];			// The plotter sheet
+	tCoord		HPGLplotterP1P2rotated[2];	// The plotter sheet
 	tCoord		HPGLinputP1P2  [2];			// The part of the plotter sheet we are using
 	tCoord		HPGLscaledP1P2 [2];			// The user coordinates mapped to the input P1, P2
 	tCoord		HPGLscaleIsotropicOffset;	// left bottom position of isotropic area
@@ -123,6 +124,10 @@ typedef struct {
 	void 			*plotHPGL;				// Optimized HPGL - potentially better for redrawing plot on the screen
 	GString  		*verbatimHPGLplot;		// The HPGL as received
 
+	gchar			*sUsersHPGLfilename;	// filename chose by user for saving HPGL file
+	gchar			*sUsersPDFImageFilename;	// filename chosen by user for PDF file
+	gchar			*sUsersPNGImageFilename;	// filename chosen by user for PNG file
+	gchar			*sUsersSVGImageFilename;	// filename chosen by user for SVG file
 	GTimer   		*timeSinceLastHPGLcommand;
 	GThread 		*pGThread;
 
