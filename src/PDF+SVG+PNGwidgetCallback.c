@@ -122,20 +122,22 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
 		// we need to adjust
 		if( fileType != ePNG )	{	// we know PNG is the right aspect ratio
 			if( pGlobal->flags.bPortrait ) {
+				// aspect ratio is 1/sqrt( 2 )
 				if( (height / width) * pGlobal->aspectRatio > 1.01 ) {// this should leave A4 and A3 untouched
-				  cairo_translate( cr, 0.0, (height - width / pGlobal->aspectRatio) / 2.0  );
-				  height = width / pGlobal->aspectRatio;
+					cairo_translate( cr, 0.0, (height - width / pGlobal->aspectRatio) / 2.0  );
+					height = width / pGlobal->aspectRatio;
 				} else if( (height / width) * pGlobal->aspectRatio < 0.99 ) {
-				  cairo_translate( cr, (width - height * pGlobal->aspectRatio) / 2.0, 0.0  );
-				  width = height * pGlobal->aspectRatio;
+					cairo_translate( cr, (width - height * pGlobal->aspectRatio) / 2.0, 0.0  );
+					width = height * pGlobal->aspectRatio;
 				}
 			} else {
+				// aspect ratio is sqrt( 2 )
 				if( (height / width) / pGlobal->aspectRatio > 1.01 ) {// this should leave A4 and A3 untouched
-				  cairo_translate( cr, 0.0, (height - width / pGlobal->aspectRatio) / 2.0  );
-				  height = width / pGlobal->aspectRatio;
-				} else if( (height / width) / pGlobal->aspectRatio < 0.99 ) {
-				  cairo_translate( cr, (width - height * pGlobal->aspectRatio) / 2.0, 0.0  );
-				  width = height * pGlobal->aspectRatio;
+					cairo_translate( cr, width - (height * pGlobal->aspectRatio) / 2.0, 0.0  );
+					width = height * pGlobal->aspectRatio;
+				} else if( (height / width) / pGlobal->aspectRatio < 0.99 ) {	// wider
+					cairo_translate( cr, 0.0, (height - width / pGlobal->aspectRatio) / 2.0  );
+					height = width / pGlobal->aspectRatio;
 				}
 			}
 		}

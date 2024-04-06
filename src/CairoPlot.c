@@ -84,8 +84,7 @@ setSurfaceRotation( cairo_t *cr, tPlotterState *plotterState, gdouble areaWidth,
 		gdouble *areaWidthModified, gdouble *areaHeightModified) {
 
 	gdouble t;
-	tCoord  tc;
-	// cairo_identity_matrix ( cr );
+
 	cairo_set_matrix (cr, &plotterState->intitalMatrix );
 
 	// flip Y axis
@@ -97,8 +96,10 @@ setSurfaceRotation( cairo_t *cr, tPlotterState *plotterState, gdouble areaWidth,
 	default:
 		break;
 	case 0:
-    	plotterState->HPGLplotterP1P2rotated[ P1 ] = plotterState->HPGLplotterP1P2[ P1 ];
-    	plotterState->HPGLplotterP1P2rotated[ P2 ] = plotterState->HPGLplotterP1P2[ P2 ];
+		plotterState->widthTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].x - plotterState->HPGLplotterP1P2[ P1 ].x;
+		plotterState->heightTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].y - plotterState->HPGLplotterP1P2[ P1 ].y;
     	break;
 	case 90:
 		cairo_rotate( cr, M_PI / 2.0 );	// 90 degrees
@@ -106,18 +107,18 @@ setSurfaceRotation( cairo_t *cr, tPlotterState *plotterState, gdouble areaWidth,
     	t = areaWidth;
     	areaWidth  = areaHeight;
     	areaHeight = t;
-    	tc = plotterState->HPGLplotterP1P2[ P1 ];
-    	plotterState->HPGLplotterP1P2rotated[ P1 ].x = tc.y;
-    	plotterState->HPGLplotterP1P2rotated[ P1 ].y = tc.x;
-    	tc = plotterState->HPGLplotterP1P2[ P2 ];
-    	plotterState->HPGLplotterP1P2rotated[ P2 ].x = tc.y;
-    	plotterState->HPGLplotterP1P2rotated[ P2 ].y = tc.x;
+		plotterState->widthTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].y - plotterState->HPGLplotterP1P2[ P1 ].y;
+		plotterState->heightTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].x - plotterState->HPGLplotterP1P2[ P1 ].x;
 		break;
 	case 180:
 		cairo_rotate( cr, M_PI  );	// 180 degrees
     	cairo_translate( cr, -areaHeight, -areaWidth);
-    	plotterState->HPGLplotterP1P2rotated[ P1 ] = plotterState->HPGLplotterP1P2[ P1 ];
-    	plotterState->HPGLplotterP1P2rotated[ P2 ] = plotterState->HPGLplotterP1P2[ P2 ];
+		plotterState->widthTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].x - plotterState->HPGLplotterP1P2[ P1 ].x;
+		plotterState->heightTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].y - plotterState->HPGLplotterP1P2[ P1 ].y;
 		break;
 	case 270:
 		cairo_rotate( cr, -M_PI / 2.0 );	// 90 degrees
@@ -125,12 +126,10 @@ setSurfaceRotation( cairo_t *cr, tPlotterState *plotterState, gdouble areaWidth,
     	t = areaWidth;
     	areaWidth  = areaHeight;
     	areaHeight = t;
-    	tc = plotterState->HPGLplotterP1P2[ P1 ];
-    	plotterState->HPGLplotterP1P2rotated[ P1 ].x = tc.y;
-    	plotterState->HPGLplotterP1P2rotated[ P1 ].y = tc.x;
-    	tc = plotterState->HPGLplotterP1P2[ P2 ];
-    	plotterState->HPGLplotterP1P2rotated[ P2 ].x = tc.y;
-    	plotterState->HPGLplotterP1P2rotated[ P2 ].y = tc.x;
+		plotterState->widthTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].y - plotterState->HPGLplotterP1P2[ P1 ].y;
+		plotterState->heightTransformed =
+				plotterState->HPGLplotterP1P2[ P2 ].x - plotterState->HPGLplotterP1P2[ P1 ].x;
 		break;
 	}
 	// Add a border
@@ -150,8 +149,8 @@ translateHPGLpointToCairo( tCoord *HPGLpoint,
 	gdouble fractionX, fractionY;
 	gdouble cairoScaleFactorX, cairoScaleFactorY;
 
-	cairoScaleFactorX = cairoWidth  / (gdouble)(plotterState->HPGLplotterP1P2rotated[ P2 ].x - plotterState->HPGLplotterP1P2rotated[ P1 ].x);
-	cairoScaleFactorY = cairoHeight / (gdouble)(plotterState->HPGLplotterP1P2rotated[ P2 ].y - plotterState->HPGLplotterP1P2rotated[ P1 ].y);
+	cairoScaleFactorX = cairoWidth  / (gdouble)(plotterState->widthTransformed);
+	cairoScaleFactorY = cairoHeight / (gdouble)(plotterState->heightTransformed);
 
 	if( plotterState->flags.bHPGLscaled ) {
 		// HPGL coords may be scaled to the input coords (which may be a part of the plotter coords)
@@ -186,8 +185,8 @@ translateHPGLfontSizeToCairo( gdouble HPGLcharSizeX, gdouble HPGLcharSizeY,
 	heightInPlotterUnits = (gdouble)HPGLcharSizeY *
 			(gdouble)(plotterState->HPGLinputP1P2[ P2 ].y - plotterState->HPGLinputP1P2[ P1 ].y) / 100.0;
 
-	cairoScaleFactorX = cairoWidth  / (gdouble)(plotterState->HPGLplotterP1P2rotated[ P2 ].x - plotterState->HPGLplotterP1P2rotated[ P1 ].x);
-	cairoScaleFactorY = cairoHeight / (gdouble)(plotterState->HPGLplotterP1P2rotated[ P2 ].y - plotterState->HPGLplotterP1P2rotated[ P1 ].y);
+	cairoScaleFactorX = cairoWidth  / (gdouble)(plotterState->widthTransformed);
+	cairoScaleFactorY = cairoHeight / (gdouble)(plotterState->heightTransformed);
 
 
 #define X_HPGL_TO_CAIRO_EM	2.4 // 2.4

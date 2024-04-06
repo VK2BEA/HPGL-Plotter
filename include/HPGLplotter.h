@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.17-1"
+   #define VERSION "1.17-3"
 #endif
 
 #define INVALID	(-1)
@@ -72,7 +72,7 @@ typedef struct {
 	} flags;
 
 	tCoord		HPGLplotterP1P2[2];			// The plotter sheet
-	tCoord		HPGLplotterP1P2rotated[2];	// The plotter sheet
+	gint		widthTransformed, heightTransformed;
 	tCoord		HPGLinputP1P2  [2];			// The part of the plotter sheet we are using
 	tCoord		HPGLscaledP1P2 [2];			// The user coordinates mapped to the input P1, P2
 	tCoord		HPGLscaleIsotropicOffset;	// left bottom position of isotropic area

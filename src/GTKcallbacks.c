@@ -22,6 +22,7 @@
 
 #include <glib-2.0/glib.h>
 #include <HPGLplotter.h>
+#include <messageEvent.h>
 #include <math.h>
 
 //  WID_entry_ControllerName
@@ -180,7 +181,7 @@ CB_HPGLopen( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
 				tbuf[ n ] = 0;	// null terminate
 				deserializeHPGL( tbuf, pGlobal );
 			} while ( n == TBUF_SIZE );
-			gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
+			postMessageToMainLoop(TM_REFRESH_PLOT, NULL);
 			pGlobal->flags.bMuteGPIBreply = FALSE;
 			fclose( fHPGL );
 		} else {
