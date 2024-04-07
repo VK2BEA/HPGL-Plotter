@@ -105,18 +105,13 @@ clearHPGL( tGlobal *pGlobal ) {
  */
 gboolean
 parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
-	static gboolean bPenDown = FALSE;
-	static tCoord posn = {0}, p;
+	static tCoord p;
 	static gfloat charSizeX = 0.0, charSizeY = 0.0;
 	static guint8 colour = 0;
 	static guint8 lineType = 0;
 	gboolean bMorePoints;
 	gchar  *pNextChar;
 	// If a line is started .. we add to it
-	static tCoord *currentLine = 0;
-	static guint16	nPointsInLine = 0;
-	static gboolean	bNewPosition = FALSE;
-	static gboolean bRelative = FALSE;
 
 	gint   nargs, arg1, arg2, arg3, arg4, arg5, arg6, arg7;
 
@@ -154,28 +149,12 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			p.x = (guint16)x;
 			p.y = (guint16)y;
 
-			if( bPenDown ) {
-				// make sure we have enough space .. quantized by 100 points
-				currentLine = g_realloc_n( currentLine, QUANTIZE(nPointsInLine + 1, 100) + sizeof(guint16), sizeof( tCoord ) );
-				currentLine[ nPointsInLine ] = p;
-				nPointsInLine++;
-			} else {
-				append( &pGlobal->plotHPGL, &HPGLserialCount,
-						HPGLcmd == HPGL_POSN_ABS ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
-			}
-
-			if( HPGLcmd == HPGL_POSN_ABS ) {
-				posn = p;
-			} else {
-				posn.x += p.x;
-				posn.y += p.y;
-			}
+			append( &pGlobal->plotHPGL, &HPGLserialCount,
+					HPGLcmd == HPGL_POSN_ABS ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
 
 			if( !(g_ascii_isdigit( *pNextChar ) || *pNextChar == '-' || *pNextChar == '.' ))
 				bMorePoints = FALSE;
 		}
-		bNewPosition = TRUE;
-		bRelative = (HPGLcmd == HPGL_POSN_REL);
 		break;
 
 	case HPGL_DEF_TERMINATOR:
@@ -188,51 +167,20 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 		if( strLength == 0 )
 			break;	// don't bother adding null labels ("LB;")
 
-		// Compiled HPGL Function, and label position
-		if( bRelative || !bNewPosition)
-			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LABEL_REL,  &posn, sizeof(tCoord)  );
-		else
-			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LABEL,  &posn, sizeof(tCoord)  );
-
+		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LABEL, NULL, 0  );
 		// Length of string
 		append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY, &strLength, sizeof(guint16)  );
 		// The string (and the trailing null)
 		append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY, sHPGLargs, strLength+1  );
 
-		bNewPosition = FALSE;
 		break;
 
 	case HPGL_PEN_UP:	// PU
-		if( bPenDown ) {
-			// End of a line ...
-			// this concludes the line..  Add the accumulated line points to the compiled HPGL serial store
-			// Insert the compiled HPGL command (either CHPGL_LINE2PT or CHPGL_LINE)
-			if( nPointsInLine == 1) {
-				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_DOT,  NULL, 0  );
-			} else if( nPointsInLine == 2 ) {
-				append( &pGlobal->plotHPGL, &HPGLserialCount, bRelative ? CHPGL_RLINE2PT : CHPGL_LINE2PT,  NULL, 0  );
-			} else {
-				append( &pGlobal->plotHPGL, &HPGLserialCount, bRelative ? CHPGL_RLINE : CHPGL_LINE,  &nPointsInLine, sizeof(guint16)  );
-			}
-			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  currentLine, nPointsInLine * sizeof(tCoord) );
-		}
-
-		// We have completed the line, so dispose of the malloced memory
-		g_free( currentLine );
-		nPointsInLine = 0;
-		currentLine = NULL;
-		// Remember that the pen is up
-		bPenDown = FALSE;
+		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_PEN_UP,  NULL, 0  );
 		break;
 
 	case HPGL_PEN_DOWN:	// PD
-		// assume we are starting a new line and save the start point
-		if( !bPenDown ) {
-			currentLine = g_realloc_n( currentLine, QUANTIZE(1, 100), sizeof( tCoord ) );
-			currentLine[0] = posn;
-			nPointsInLine = 1;
-			bPenDown = TRUE;
-		}
+		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_PEN_DOWN,  NULL, 0  );
 		break;
 
 	case HPGL_CHAR_SIZE_REL:	// SR
@@ -251,14 +199,6 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	case HPGL_SELECT_PEN:	// SP
 		colour = 0;		// if we have "SP;" without arguments, it equals SP0;
 		sscanf(sHPGLargs, "%"SCNu8, &colour);
-		// bizarrely there is, occasionally, a pen change while 4.0the pen is down..
-		// so close the current line (so the old color will be used when it is stroked)
-		// and start a new line from the current point
-		if( bPenDown ) {
-            parseHPGLcmd( HPGL_PEN_UP, NULL, pGlobal );
-            HPGLserialCount = *(guint *)(pGlobal->plotHPGL);
-            parseHPGLcmd( HPGL_PEN_DOWN, NULL, pGlobal );
-		}
 
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_PEN,  &colour, sizeof( guint8 )  );
 
