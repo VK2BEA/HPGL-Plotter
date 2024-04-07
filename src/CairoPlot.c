@@ -141,11 +141,13 @@ setSurfaceRotation( cairo_t *cr, tPlotterState *plotterState, gdouble areaWidth,
 }
 
 
+#define SCALE_ONLY			TRUE
+#define SCALEandTRANSLATE	FALSE
 static void
 translateHPGLpointToCairo( tCoord *HPGLpoint,
 					 gdouble cairoWidth, gdouble cairoHeight,
 					 gdouble *pCairoX, gdouble *pCairoY,
-					 tPlotterState *plotterState ) {
+					 tPlotterState *plotterState, gdouble bScaleOnly ) {
 	gdouble fractionX, fractionY;
 	gdouble cairoScaleFactorX, cairoScaleFactorY;
 
@@ -154,9 +156,9 @@ translateHPGLpointToCairo( tCoord *HPGLpoint,
 
 	if( plotterState->flags.bHPGLscaled ) {
 		// HPGL coords may be scaled to the input coords (which may be a part of the plotter coords)
-		fractionX = (gdouble)(HPGLpoint->x - plotterState->HPGLscaledP1P2[ P1 ].x) /
+		fractionX = (gdouble)(HPGLpoint->x - (bScaleOnly ? 0 : plotterState->HPGLscaledP1P2[ P1 ].x)) /
 						(gdouble)(plotterState->HPGLscaledP1P2[ P2 ].x - plotterState->HPGLscaledP1P2[ P1 ].x);
-		fractionY = (gdouble)(HPGLpoint->y - plotterState->HPGLscaledP1P2[ P1 ].y) /
+		fractionY = (gdouble)(HPGLpoint->y - (bScaleOnly ? 0 : plotterState->HPGLscaledP1P2[ P1 ].y)) /
 				(gdouble)(plotterState->HPGLscaledP1P2[ P2 ].y - plotterState->HPGLscaledP1P2[ P1 ].y);
 
 		// We want to maintain the margin we setup with the plotter units...
@@ -277,6 +279,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 			// If we don't set the color its black ... but the HP8753 does
 			gdk_cairo_set_source_rgba (cr, &pGlobal->HPGLpens[1] );      // black pen by default
 			cairo_set_line_width( cr, areaWidth/1000.0 );
+			cairo_move_to(cr, 0, 0 );
 
 			do {
 				// get compiled HPGL command byte
@@ -284,53 +287,108 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 				HPGLserialCount += sizeof( eHPGL );
 
 				switch ( cmd ) {
+				case CHPGL_RMOVE:
+					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 1, tCoord );
+					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
+										 &cairoX, &cairoY, &plotterState, SCALE_ONLY );
+					if( cairo_has_current_point( cr ) )
+						cairo_rel_move_to(cr, cairoX, cairoY );
+					else
+						cairo_move_to(cr, cairoX, cairoY );
+					break;
+
+				case CHPGL_MOVE:
+					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 1, tCoord );
+					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
+										 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
+					cairo_move_to(cr, cairoX, cairoY );
+					break;
+
+				case CHPGL_RLINE:
+					// the points in the line are preceded by the point count
+					EXTRACT( ptsInLine, pGlobal->plotHPGL, HPGLserialCount, guint16 );
+					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, ptsInLine, tCoord );
+
+					// We we are moving relative, we need to preserve the current point
+					cairo_get_current_point( cr, &cairoX, &cairoY );
+
+					cairo_new_path( cr );
+					// move to first point
+					cairo_move_to(cr, cairoX, cairoY );
+					// plot to each subsequent point
+					for( i=1, pPoint++; i < ptsInLine; pPoint++, i++ ) {
+						translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
+											 &cairoX, &cairoY, &plotterState, SCALE_ONLY );
+							cairo_rel_line_to(cr, cairoX, cairoY );
+					}
+					cairo_stroke_preserve( cr );
+
+					break;
+
 				case CHPGL_LINE:
 					// the points in the line are preceded by the point count
 					EXTRACT( ptsInLine, pGlobal->plotHPGL, HPGLserialCount, guint16 );
 					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, ptsInLine, tCoord );
 
+					// We we are moving relative, we need to preserve the current point
+					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
+											 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
 					cairo_new_path( cr );
 					// move to first point
-					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
-										 &cairoX, &cairoY, &plotterState );
 					cairo_move_to(cr, cairoX, cairoY );
 					// plot to each subsequent point
 					for( i=1, pPoint++; i < ptsInLine; pPoint++, i++ ) {
 						translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
-											 &cairoX, &cairoY, &plotterState );
+											 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
 						cairo_line_to(cr, cairoX, cairoY );
 					}
-					cairo_stroke( cr );
+					cairo_stroke_preserve( cr );
 
 					break;
 				case CHPGL_DOT:
 					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 1, tCoord );
 					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
-										 &cairoX, &cairoY, &plotterState );
+										 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
 					cairo_new_path( cr );
 #define DOT_SIZE areaWidth/1250
 					cairo_arc( cr, cairoX, cairoY, DOT_SIZE, 0.0, 2.0 * M_PI );
 					cairo_fill( cr );
 					break;
+
+				case CHPGL_RLINE2PT:
+					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 2, tCoord );
+					cairo_get_current_point( cr, &cairoX, &cairoY );
+					cairo_new_path( cr );
+					// move to first point
+					cairo_move_to(cr, cairoX, cairoY );
+					pPoint++;
+					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
+										 &cairoX, &cairoY, &plotterState, SCALE_ONLY );
+					cairo_rel_line_to(cr, cairoX, cairoY );
+					cairo_stroke_preserve( cr );
+					break;
+
 				case CHPGL_LINE2PT:
 					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 2, tCoord );
 					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
-										 &cairoX, &cairoY, &plotterState );
+										 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
 					cairo_new_path( cr );
 					// move to first point
 					//cairo_move_to(cr, pPoint->x * scaleX, pPoint->y * scaleY );
 					cairo_move_to(cr, cairoX, cairoY );
 					pPoint++;
 					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
-										 &cairoX, &cairoY, &plotterState );
+										 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
 					cairo_line_to(cr, cairoX, cairoY );
 					// cairo_line_to(cr, pPoint->x * scaleX, pPoint->y * scaleY );
-					cairo_stroke( cr );
+					cairo_stroke_preserve( cr );
 					break;
+
 				case CHPGL_PEN:
 					EXTRACT( HPGLpen, pGlobal->plotHPGL, HPGLserialCount, guint8 );
 					gdk_cairo_set_source_rgba (cr, &pGlobal->HPGLpens[ HPGLpen < NUM_HPGL_PENS ? HPGLpen : 1 ] );
 					break;
+
 				case CHPGL_LINETYPE:
 					EXTRACT( HPGLlineType, pGlobal->plotHPGL, HPGLserialCount, guint8 );
 					switch ( HPGLlineType ) {
@@ -346,13 +404,14 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 						break;
 					}
 					break;
+
 				case CHPGL_LABEL:
 				case CHPGL_LABEL_REL:
 					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 1, tCoord );
 
 					if( cmd == CHPGL_LABEL ) {
 						translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
-											 &cairoX, &cairoY, &plotterState );
+											 &cairoX, &cairoY, &plotterState, SCALEandTRANSLATE );
 						cairo_move_to(cr, cairoX, cairoY );
 					}
 					EXTRACT( labelLength, pGlobal->plotHPGL, HPGLserialCount, guint16 );
@@ -360,8 +419,8 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					EXTRACT_ARRAY( pLabel, pGlobal->plotHPGL, HPGLserialCount, labelLength+1, gchar );
 					showLabel (cr, pLabel);
 					// display the label
-
 					break;
+
 				case CHPGL_TEXT_SIZE:
 				    cairo_matrix_init_identity( &matrix );
 				    EXTRACT( charSizeX, pGlobal->plotHPGL, HPGLserialCount, gfloat );
@@ -373,6 +432,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					// matrix.y0 = -matrix.yy * 0.15;
 					cairo_set_font_matrix (cr, &matrix);
 					break;
+
 				case CHPGL_OP:
 					EXTRACT( plotterState.HPGLplotterP1P2[ P1 ], pGlobal->plotHPGL, HPGLserialCount, tCoord );
 					EXTRACT( plotterState.HPGLplotterP1P2[ P2 ], pGlobal->plotHPGL, HPGLserialCount, tCoord );
@@ -384,12 +444,13 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					plotterState.HPGLinputP1P2[ P2 ] = plotterState.HPGLplotterP1P2[ P2 ];
 			    	setSurfaceRotation( cr, &plotterState, imageWidth, imageHeight,
 			    			&areaWidth, &areaHeight );
-
 					break;
+
 				case CHPGL_IP:
 					EXTRACT( plotterState.HPGLinputP1P2[ P1 ], pGlobal->plotHPGL, HPGLserialCount, tCoord );
 					EXTRACT( plotterState.HPGLinputP1P2[ P2 ], pGlobal->plotHPGL, HPGLserialCount, tCoord );
 					break;
+
 				case CHPGL_SCALING:
 					EXTRACT( scaleType, pGlobal->plotHPGL, HPGLserialCount, eHPGLscalingType );
 					if( scaleType == SCALING_NONE ) {
@@ -407,11 +468,13 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 						}
 					}
 					break;
+
 				case CHPGL_ROTATION:
 					EXTRACT( plotterState.HPGLrotation, pGlobal->plotHPGL, HPGLserialCount, gint );
 			    	setSurfaceRotation( cr, &plotterState, imageWidth, imageHeight,
 			    			&areaWidth, &areaHeight );
 					break;
+
 				default:
 					break;
 				}

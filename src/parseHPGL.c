@@ -106,7 +106,7 @@ clearHPGL( tGlobal *pGlobal ) {
 gboolean
 parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	static gboolean bPenDown = FALSE;
-	static tCoord posn = {0};
+	static tCoord posn = {0}, p;
 	static gfloat charSizeX = 0.0, charSizeY = 0.0;
 	static guint8 colour = 0;
 	static guint8 lineType = 0;
@@ -116,6 +116,7 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 	static tCoord *currentLine = 0;
 	static guint16	nPointsInLine = 0;
 	static gboolean	bNewPosition = FALSE;
+	static gboolean bRelative = FALSE;
 
 	gint   nargs, arg1, arg2, arg3, arg4, arg5, arg6, arg7;
 
@@ -143,32 +144,38 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 		// When the pen is lifted (PU), we add this sequence of points to the compiled plot
 		bMorePoints = TRUE; pNextChar = sHPGLargs;
 		while ( bMorePoints ) {
-			gint64 x=0, y=0;
-			if( HPGLcmd == HPGL_POSN_REL ) {
-				x = posn.x;
-				y = posn.y;
-			}
-			x += g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+			gint64 x = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
 			while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
 				pNextChar++;
-			y += g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+			gint64 y = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
 			while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
 				pNextChar++;
 
-			posn.x = (guint16)x;
-			posn.y = (guint16)y;
+			p.x = (guint16)x;
+			p.y = (guint16)y;
 
 			if( bPenDown ) {
 				// make sure we have enough space .. quantized by 100 points
 				currentLine = g_realloc_n( currentLine, QUANTIZE(nPointsInLine + 1, 100) + sizeof(guint16), sizeof( tCoord ) );
-				currentLine[ nPointsInLine ] = posn;
+				currentLine[ nPointsInLine ] = p;
 				nPointsInLine++;
+			} else {
+				append( &pGlobal->plotHPGL, &HPGLserialCount,
+						HPGLcmd == HPGL_POSN_ABS ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
+			}
+
+			if( HPGLcmd == HPGL_POSN_ABS ) {
+				posn = p;
+			} else {
+				posn.x += p.x;
+				posn.y += p.y;
 			}
 
 			if( !(g_ascii_isdigit( *pNextChar ) || *pNextChar == '-' || *pNextChar == '.' ))
 				bMorePoints = FALSE;
 		}
 		bNewPosition = TRUE;
+		bRelative = (HPGLcmd == HPGL_POSN_REL);
 		break;
 
 	case HPGL_DEF_TERMINATOR:
@@ -182,7 +189,11 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			break;	// don't bother adding null labels ("LB;")
 
 		// Compiled HPGL Function, and label position
-		append( &pGlobal->plotHPGL, &HPGLserialCount, bNewPosition ? CHPGL_LABEL:CHPGL_LABEL_REL,  &posn, sizeof(tCoord)  );
+		if( bRelative || !bNewPosition)
+			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LABEL_REL,  &posn, sizeof(tCoord)  );
+		else
+			append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LABEL,  &posn, sizeof(tCoord)  );
+
 		// Length of string
 		append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY, &strLength, sizeof(guint16)  );
 		// The string (and the trailing null)
@@ -199,9 +210,9 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 			if( nPointsInLine == 1) {
 				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_DOT,  NULL, 0  );
 			} else if( nPointsInLine == 2 ) {
-				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINE2PT,  NULL, 0  );
+				append( &pGlobal->plotHPGL, &HPGLserialCount, bRelative ? CHPGL_RLINE2PT : CHPGL_LINE2PT,  NULL, 0  );
 			} else {
-				append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINE,  &nPointsInLine, sizeof(guint16)  );
+				append( &pGlobal->plotHPGL, &HPGLserialCount, bRelative ? CHPGL_RLINE : CHPGL_LINE,  &nPointsInLine, sizeof(guint16)  );
 			}
 			append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  currentLine, nPointsInLine * sizeof(tCoord) );
 		}

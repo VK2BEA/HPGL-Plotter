@@ -341,6 +341,7 @@
 	(1,137,"GtkCheckButton","label","Tabloid (11″ × 17″)",None,None,None,None,None,None,None,None,None),
 	(1,138,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
 	(1,138,"GtkWindow","decorated","False",None,None,None,None,None,None,None,None,None),
+	(1,138,"GtkWindow","transient-for","1",None,None,None,None,None,None,None,None,None),
 	(1,139,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
 	(1,140,"GtkLabel","label","1.0",None,None,None,None,None,None,None,None,None),
 	(1,140,"GtkWidget","margin-end","15",None,None,None,None,None,None,None,None,None),

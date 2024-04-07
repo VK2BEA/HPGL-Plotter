@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.17-3"
+   #define VERSION "1.18-1"
 #endif
 
 #define INVALID	(-1)
@@ -140,9 +140,12 @@ extern GdkRGBA HPGLpensFactory[ NUM_HPGL_PENS ];
 
 // Lines of HPGL commands are compiled into a serial sream that can be quickly drawn and stored
 // Each variable length command is prceeded by a CHPGL (compiled HPGL) byte
-typedef enum { PAYLOAD_ONLY=0,   CHPGL_DOT=1,     CHPGL_LINE2PT=2, CHPGL_LINE=3,      CHPGL_PEN=4,
-	           CHPGL_LINETYPE=5, CHPGL_TEXT_SIZE=6, CHPGL_LABEL=7,   CHPGL_LABEL_REL=8, CHPGL_OP=9,
-			   CHPGL_IP=10,      CHPGL_SCALING=11,  CHPGL_ROTATION=12 } eHPGL;
+typedef enum { PAYLOAD_ONLY=0,     CHPGL_MOVE=1,       CHPGL_RMOVE=2,
+			   CHPGL_DOT=3,        CHPGL_LINE2PT=4,    CHPGL_RLINE2PT=5,
+			   CHPGL_RLINE=6,      CHPGL_LINE=7,       CHPGL_PEN=8,
+               CHPGL_LINETYPE=9,   CHPGL_TEXT_SIZE=10, CHPGL_LABEL=11,
+			   CHPGL_LABEL_REL=12, CHPGL_OP=13,        CHPGL_IP=14,
+			   CHPGL_SCALING=15,   CHPGL_ROTATION=16 } eHPGL;
 typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALING_POINT=3, SCALING_ISOTROLIC_LB=4 } eHPGLscalingType;
 
 // The subset of HPGL commands that the 8753 provides are the following

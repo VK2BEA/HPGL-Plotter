@@ -95,8 +95,8 @@ CB_KeyPressed (GObject             *dataObject,
 		  break;
 		case 0:
 #if 0
-			gtk_window_get_default_size( GTK_WINDOW( WLOOKUP( pGlobal, "HPGLplotter_main" )), &width, &height );
-			g_print( "Main w: %d, h: %d\n", width, height ); width=0; height=0;
+		gtk_window_set_default_size( GTK_WINDOW( WLOOKUP( pGlobal, "HPGLplotter_main" )), 1500, 1000 );
+		gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "HPGLplotter_main") );
 #endif
 			break;
 		}
