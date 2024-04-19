@@ -254,8 +254,8 @@ on_activate (GApplication *app, gpointer udata)
     	gtk_widget_set_visible(GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(g_hash_table_lookup ( pGlobal->widgetHashTable,
 				(gconstpointer)"WID_HPGLplotter_main")))), TRUE);
 
-        gtk_window_present_with_time( GTK_WINDOW( g_hash_table_lookup ( pGlobal->widgetHashTable,
-				(gconstpointer)"WID_HPGLplotter_main")), GDK_CURRENT_TIME /*time_*/ );
+        gtk_window_present( GTK_WINDOW( g_hash_table_lookup ( pGlobal->widgetHashTable,
+				(gconstpointer)"WID_HPGLplotter_main")) );
         return;
     } else {
     	pGlobal->flags.bRunning = TRUE;

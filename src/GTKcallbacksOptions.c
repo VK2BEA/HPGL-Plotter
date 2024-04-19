@@ -39,6 +39,7 @@ void
 initializeOptionsDialog( tGlobal *pGlobal ) {
 	gtk_spin_button_set_value( WLOOKUP( pGlobal, "spin_ControllerIndex"), pGlobal->GPIBcontrollerIndex );
 	gtk_spin_button_set_value( WLOOKUP( pGlobal, "spin_DevicePID"), pGlobal->GPIBdevicePID );
+    gtk_spin_button_set_value( WLOOKUP( pGlobal, "spin_EndOfPlotPeriod" ), pGlobal->HPGLperiodEnd );
 	gtk_entry_buffer_set_text(
 				gtk_entry_get_buffer( WLOOKUP( pGlobal, "entry_ControllerName") ),
 				pGlobal->sGPIBcontrollerName, -1 );
@@ -97,6 +98,8 @@ CB_btn_OK ( GtkButton* wBtnOK, gpointer user_data ) {
 	gchar *sPID = g_strdup_printf( "GPIB %d", pGlobal->GPIBdevicePID );
 	gtk_label_set_label( WLOOKUP( pGlobal, "label_PID" ), sPID );
 	g_free( sPID );
+
+	pGlobal->HPGLperiodEnd = gtk_spin_button_get_value( WLOOKUP( pGlobal, "spin_EndOfPlotPeriod" )  );
 
 	if( bGPIBchanged ) {
 	    messageEventData *messageData = g_malloc0( sizeof(messageEventData) );

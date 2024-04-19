@@ -597,10 +597,10 @@
                 <property name="margin-bottom">4</property>
                 <property name="margin-top">4</property>
                 <property name="valign">start</property>
-                <property name="visible">False</property>
                 <child>
                   <object class="GtkBox">
                     <property name="halign">start</property>
+                    <property name="orientation">vertical</property>
                     <property name="valign">start</property>
                     <child>
                       <object class="GtkCheckButton" id="WID_cbutton_NoGPIBSystemCtrlr">
@@ -610,6 +610,44 @@ the GPIB, the interface is temporarily configured
 as a sytem controller.
 If there is another GPIB system controller on the
 GPIB, check this box to avoid contention.</property>
+                        <property name="visible">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <child>
+                          <object class="GtkSpinButton" id="WID_spin_EndOfPlotPeriod">
+                            <property name="adjustment">
+                              <object class="GtkAdjustment">
+                                <property name="lower">0.1</property>
+                                <property name="page-increment">0.1</property>
+                                <property name="page-size">0.1</property>
+                                <property name="step-increment">0.1</property>
+                                <property name="upper">2.100000000000001</property>
+                                <property name="value">0.7</property>
+                              </object>
+                            </property>
+                            <property name="climb-rate">0.1</property>
+                            <property name="digits">1</property>
+                            <property name="has-tooltip">True</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-start">4</property>
+                            <property name="numeric">True</property>
+                            <property name="tooltip-text">Period after last HPGL received to assume
+the plot has ended. This primes the erase
+flag so that receipt of the next HPGL command
+will trigger a screen clear.</property>
+                            <property name="value">0.7</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">end of plot period (s)</property>
+                            <property name="margin-bottom">4</property>
+                            <property name="margin-end">4</property>
+                            <property name="margin-start">4</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -642,6 +680,7 @@ GPIB, check this box to avoid contention.</property>
   <object class="GtkWindow" id="WID_Splash">
     <property name="decorated">False</property>
     <property name="hexpand">True</property>
+    <property name="transient-for">WID_HPGLplotter_main</property>
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>

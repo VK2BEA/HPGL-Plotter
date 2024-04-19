@@ -51,6 +51,13 @@
         GPIB PID of the plotter we are emulating.
       </description>
     </key>
+    <key name="hpgl-end-period" type="d">
+      <default>0.7</default>
+      <summary>HPGL end period</summary>
+      <description>
+        Period after last HPGL command to assume plot has ended.
+      </description>
+    </key>
     <key name="gpib-use-controller-index" type="b">
       <default>true</default>
       <summary>Selection of whether to use the index or name of the GPIB controller</summary>

@@ -103,7 +103,11 @@
 	(1,161,"GtkLabel","WID_label_PID",159,None,None,None,1,None,None),
 	(1,162,"GtkButton","WID_btn_SaveHPGL",5,None,None,None,4,None,None),
 	(1,163,"GtkButton","WID_btn_Restore",5,None,None,None,5,None,None),
-	(1,164,"GtkLabel",None,4,None,None,None,1,None,None)
+	(1,164,"GtkLabel",None,4,None,None,None,1,None,None),
+	(1,165,"GtkBox",None,157,None,None,None,1,None,None),
+	(1,166,"GtkSpinButton","WID_spin_EndOfPlotPeriod",165,None,None,None,None,None,None),
+	(1,167,"GtkLabel",None,165,None,None,None,1,None,None),
+	(1,168,"GtkAdjustment",None,166,None,None,None,-1,None,None)
   </object>
   <object_property>
 	(1,1,"GtkWindow","title","HPGL Plotter",None,None,None,None,None,None,None,None,None),
@@ -404,11 +408,12 @@
 	(1,156,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
 	(1,156,"GtkWidget","margin-top","4",None,None,None,None,None,None,None,None,None),
 	(1,156,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
-	(1,156,"GtkWidget","visible","False",None,None,None,None,None,None,None,None,None),
+	(1,157,"GtkOrientable","orientation","vertical",None,None,None,None,None,None,None,None,None),
 	(1,157,"GtkWidget","halign","start",None,None,None,None,None,None,None,None,None),
 	(1,157,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
 	(1,158,"GtkCheckButton","label","GPIB - never set to system controller",None,None,None,None,None,None,None,None,None),
 	(1,158,"GtkWidget","tooltip-text","To clear the GPIB interface and better probe \nthe GPIB, the interface is temporarily configured\nas a sytem controller.\nIf there is another GPIB system controller on the\nGPIB, check this box to avoid contention.",None,None,None,None,None,None,None,None,None),
+	(1,158,"GtkWidget","visible","False",None,None,None,None,None,None,None,None,None),
 	(1,159,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
 	(1,160,"GtkLabel","label","GPIB controller 🡄 no connection",None,None,None,None,None,None,None,None,None),
 	(1,160,"GtkLabel","xalign","0.0",None,None,None,None,None,None,None,None,None),
@@ -436,7 +441,26 @@
 	(1,163,"GtkWidget","margin-start","2",None,None,None,None,None,None,None,None,None),
 	(1,163,"GtkWidget","tooltip-text","Open HPGL file",None,None,None,None,None,None,None,None,None),
 	(1,164,"GtkLabel","label"," ",None,None,None,None,None,None,None,None,None),
-	(1,164,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None)
+	(1,164,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkSpinButton","adjustment",None,None,None,None,None,168,None,None,None,None),
+	(1,166,"GtkSpinButton","climb-rate","0.1",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkSpinButton","digits","1",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkSpinButton","numeric","True",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkSpinButton","value","0.7",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkWidget","has-tooltip","True",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
+	(1,166,"GtkWidget","tooltip-text","Period after last HPGL received to assume\nthe plot has ended. This primes the erase\nflag so that receipt of the next HPGL command\nwill trigger a screen clear.",None,None,None,None,None,None,None,None,None),
+	(1,167,"GtkLabel","label","end of plot period (s)",None,None,None,None,None,None,None,None,None),
+	(1,167,"GtkWidget","margin-bottom","4",None,None,None,None,None,None,None,None,None),
+	(1,167,"GtkWidget","margin-end","4",None,None,None,None,None,None,None,None,None),
+	(1,167,"GtkWidget","margin-start","4",None,None,None,None,None,None,None,None,None),
+	(1,168,"GtkAdjustment","lower","0.1",None,None,None,None,None,None,None,None,None),
+	(1,168,"GtkAdjustment","page-increment","0.1",None,None,None,None,None,None,None,None,None),
+	(1,168,"GtkAdjustment","page-size","0.1",None,None,None,None,None,None,None,None,None),
+	(1,168,"GtkAdjustment","step-increment","0.1",None,None,None,None,None,None,None,None,None),
+	(1,168,"GtkAdjustment","upper","2.100000000000001",None,None,None,None,None,None,None,None,None),
+	(1,168,"GtkAdjustment","value","0.7",None,None,None,None,None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(1,130,133,"GtkGridLayoutChild","column","1",None,None,None,None),

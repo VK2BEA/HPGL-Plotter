@@ -87,6 +87,7 @@ saveSettings( tGlobal *pGlobal ) {
     g_settings_set_string( gs, "last-directory", pGlobal->sLastDirectory );
     g_settings_set_int( gs, "gpib-controller-index", pGlobal->GPIBcontrollerIndex );
     g_settings_set_int( gs, "gpib-device-pid", pGlobal->GPIBdevicePID );
+    g_settings_set_double( gs, "hpgl-end-period", pGlobal->HPGLperiodEnd );
     g_settings_set_string( gs, "gpib-controller-name", pGlobal->sGPIBcontrollerName );
     g_settings_set_boolean( gs, "gpib-use-controller-index", pGlobal->flags.bGPIB_UseControllerIndex);
     g_settings_set_boolean( gs, "gpib-do-not-enable-system", pGlobal->flags.bDoNotEnableSystemController);
@@ -135,6 +136,7 @@ recoverSettings( tGlobal *pGlobal ) {
 
     pGlobal->GPIBcontrollerIndex  = g_settings_get_int( gs, "gpib-controller-index" );
     pGlobal->GPIBdevicePID = g_settings_get_int( gs, "gpib-device-pid" );
+    pGlobal->HPGLperiodEnd = g_settings_get_double( gs, "hpgl-end-period" );
     pGlobal->sGPIBcontrollerName = g_settings_get_string( gs, "gpib-controller-name" );
     pGlobal->sLastDirectory = g_settings_get_string( gs, "last-directory" );
     pGlobal->flags.bGPIB_UseControllerIndex = g_settings_get_boolean( gs, "gpib-use-controller-index" );

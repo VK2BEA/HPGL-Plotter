@@ -263,7 +263,6 @@ CB_btn_DbgPlot ( GtkButton* wBtnDbgPlot, gpointer user_data ) {
 void
 CB_btn_DbgClose ( GtkButton* wBtnDbgClose, gpointer user_data ) {
 	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnDbgClose), "data");
-
 	gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Debug" ), FALSE );
 }
 

@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.18-2"
+   #define VERSION "1.19-1"
 #endif
 
 #define INVALID	(-1)
@@ -110,6 +110,8 @@ typedef struct {
 	gint			GPIBdevicePID;
 	gchar 			*sGPIBcontrollerName;
 	gint			GPIBcontrollerDevice;		// from ibfind (or copied from controllerIndex) when opened
+
+	gdouble         HPGLperiodEnd;              // period after last HPGL command to assume plot has ended
 
     GtkPrintSettings *printSettings;
     GtkPageSetup     *pageSetup;
