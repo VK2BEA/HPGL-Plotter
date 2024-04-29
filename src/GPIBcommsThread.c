@@ -212,8 +212,8 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	// set the timout for the ibwait to 30ms
 	ibtmo( GPIBdescriptor, T30ms );
 	do {
-		// Wait for read completion or timeout
-		*pGPIBstatus = ibwait(GPIBdescriptor, TIMO | CMPL | END);
+		// Wait for read completion or timeout or being set as a talker
+		*pGPIBstatus = ibwait(GPIBdescriptor, TIMO | CMPL | END );
 
 		if( (*pGPIBstatus & TIMO) == TIMO ){
 			// Timeout
@@ -226,15 +226,18 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 			}
 		} else {
 			// did we have a read error
-			if((*pGPIBstatus & ERR) == ERR )
+			if((*pGPIBstatus & ERR) == ERR ) {
 				rtn= eRDWT_ERROR;
 			// or did we complete the read
-			else if( (*pGPIBstatus & CMPL) == CMPL ||  (*pGPIBstatus & END) == END )
+			} else if( (*pGPIBstatus & CMPL) == CMPL ||  (*pGPIBstatus & END) == END ) {
 				rtn = eRDWT_OK;
+		    }
 		}
+
 		// If we get a message on the queue, it is assumed to be an abort
 		if( GPIB_checkQueue( NULL ) )
 			rtn = eRDWT_ABORT;
+
 	} while( rtn == eRDWT_CONTINUE
 			&& (timeoutSecs != TIMEOUT_NONE ? (waitTime < timeoutSecs) : TRUE)  );
 
@@ -249,7 +252,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 
 	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", AsyncIbcnt(), maxBytes );
 
-	if( (*pGPIBstatus & CMPL) != CMPL ) {
+	if( (*pGPIBstatus & CMPL) != CMPL && (*pGPIBstatus & TACS) == 0 ) {
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
 			LOG( G_LOG_LEVEL_WARNING, "GPIB async read timeout after %.2f sec. status %04X", timeoutSecs, *pGPIBstatus);
 		else

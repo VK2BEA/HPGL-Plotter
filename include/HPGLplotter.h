@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.19-1"
+   #define VERSION "1.20-1"
 #endif
 
 #define INVALID	(-1)
@@ -150,6 +150,7 @@ typedef enum { PAYLOAD_ONLY=0,   CHPGL_MOVE=1,      CHPGL_RMOVE=2,
 typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALING_POINT=3, SCALING_ISOTROLIC_LB=4 } eHPGLscalingType;
 
 // The subset of HPGL commands that the 8753 provides are the following
+#define HPGL_CHARACTER_SET  ('C'<<8|'S')    // DT (Define Terminator (label))
 #define HPGL_DEF_TERMINATOR ('D'<<8|'T')    // DT (Define Terminator (label))
 #define HPGL_INPUT_MASK     ('I'<<8|'M')    // IM (Input Mask)
 #define HPGL_INPUT_POINTS   ('I'<<8|'P')    // IP (Input P1 & P2)

@@ -315,6 +315,8 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					break;
 
 				case CHPGL_RMOVE:
+                    if( HPGLserialCount == 0 )
+                        break;
 					EXTRACT_ARRAY( pPoint, pGlobal->plotHPGL, HPGLserialCount, 1, tCoord );
 					translateHPGLpointToCairo( pPoint, areaWidth, areaHeight,
 										 &cairoX, &cairoY, &plotterState, SCALE_ONLY );
