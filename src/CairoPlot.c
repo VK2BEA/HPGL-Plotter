@@ -47,6 +47,36 @@ GdkRGBA HPGLpensFactory[ NUM_HPGL_PENS ] = {
 };
 
 static void
+showUserChar ( cairo_t *cr, tCoordFloat *pLabel, gint nPoints ) {
+    gdouble startX, startY, deltaX, deltaY;
+    cairo_get_current_point ( cr, &startX, &startY );
+    cairo_matrix_t fontMatrix;
+    cairo_text_extents_t fontExtents;
+
+    cairo_text_extents ( cr, "0", &fontExtents);
+    cairo_get_font_matrix ( cr, &fontMatrix );
+    cairo_new_path( cr );
+    cairo_move_to( cr, startX, startY );
+
+    for( int i=0; i < nPoints; i++ ) {
+        gfloat dx = pLabel[i].x;
+        gfloat dy = pLabel[i].y;
+        gboolean bDraw = dx > (UCPENDOWN_INDICATOR / 2);
+        if( bDraw )
+            dx -= UCPENDOWN_INDICATOR;
+        deltaX = dx * fontExtents.x_advance / 6.0;
+        deltaY = dy * (fontExtents.height * 2.0) / 22.0;
+        if( bDraw )
+            cairo_rel_line_to( cr, deltaX, deltaY );
+        else
+            cairo_rel_move_to( cr, deltaX, deltaY );
+    }
+    cairo_stroke( cr );
+    cairo_move_to( cr, startX + fontExtents.x_advance, startY + fontExtents.y_advance );
+
+}
+
+static void
 showLabel ( cairo_t *cr, gchar *pLabel) {
 	gdouble startX, startY;
 	cairo_matrix_t fontMatrix;
@@ -227,7 +257,8 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 		gint HPGLpen = 0;
 		gboolean bFirstPoint = FALSE;
 		gchar *pLabel;
-		guint labelLength;
+		tCoordFloat *pUserChar;
+		guint labelLength, nPoints;
 		gboolean bPenDown = FALSE;
 		cairo_matrix_t matrix;
 		__attribute__((unused)) gint HPGLlineType = 0;
@@ -375,9 +406,15 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					EXTRACT( labelLength, pGlobal->plotHPGL, HPGLserialCount, guint16 );
 					// label is null terminated
 					EXTRACT_ARRAY( pLabel, pGlobal->plotHPGL, HPGLserialCount, labelLength+1, gchar );
-					showLabel (cr, pLabel);
+					showLabel( cr, pLabel);
 					// display the label
 					break;
+
+				case CHPGL_UCHAR:
+				    EXTRACT( nPoints, pGlobal->plotHPGL, HPGLserialCount, guint16 );
+				    EXTRACT_ARRAY( pUserChar, pGlobal->plotHPGL, HPGLserialCount, nPoints, tCoordFloat );
+				    showUserChar( cr, pUserChar, nPoints );
+				    break;
 
 				case CHPGL_TEXT_SIZE:
 				    cairo_matrix_init_identity( &matrix );

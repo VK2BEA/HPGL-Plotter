@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.20-1"
+   #define VERSION "1.20-2"
 #endif
 
 #define INVALID	(-1)
@@ -50,6 +50,12 @@ typedef struct {
 typedef struct {
 		gint16 x, y;
 	} tCoord;
+
+typedef struct {
+        gfloat x, y;
+    } tCoordFloat;
+
+#define UCPENDOWN_INDICATOR 10000
 
 #define A4882( pad, sad )       ( (pad & 0xFF) | ((sad & 0xFF) << 8) )
 
@@ -146,11 +152,11 @@ typedef enum { PAYLOAD_ONLY=0,   CHPGL_MOVE=1,      CHPGL_RMOVE=2,
                CHPGL_PEN_UP=3,   CHPGL_PEN_DOWN=4,  CHPGL_PEN=5,
                CHPGL_LINETYPE=6, CHPGL_TEXT_SIZE=7, CHPGL_LABEL=8,
                CHPGL_OP=9,       CHPGL_IP=10,       CHPGL_SCALING=12,
-               CHPGL_ROTATION=13 } eHPGL;
+               CHPGL_ROTATION=13, CHPGL_UCHAR=14 } eHPGL;
 typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALING_POINT=3, SCALING_ISOTROLIC_LB=4 } eHPGLscalingType;
 
 // The subset of HPGL commands that the 8753 provides are the following
-#define HPGL_CHARACTER_SET  ('C'<<8|'S')    // DT (Define Terminator (label))
+#define HPGL_CHARACTER_SET  ('C'<<8|'S')    // CS (Character Set)
 #define HPGL_DEF_TERMINATOR ('D'<<8|'T')    // DT (Define Terminator (label))
 #define HPGL_INPUT_MASK     ('I'<<8|'M')    // IM (Input Mask)
 #define HPGL_INPUT_POINTS   ('I'<<8|'P')    // IP (Input P1 & P2)
@@ -167,10 +173,11 @@ typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALI
 #define HPGL_POSN_REL		('P'<<8|'R')	// PA (position relative)
 #define HPGL_PEN_UP			('P'<<8|'U')	// PU (pen up)
 #define HPGL_ROTATION		('R'<<8|'O')	// RO (rotation)
-#define HPGL_CHAR_SIZE_REL	('S'<<8|'R')	// SR (character size relative)
-#define HPGL_SELECT_PEN		('S'<<8|'P')	// SP (Select Pen)
-#define HPGL_VELOCITY		('V'<<8|'S')	// VS (Velocity Select)
 #define HPGL_SCALING        ('S'<<8|'C')    // SC (Scaling)
+#define HPGL_SELECT_PEN     ('S'<<8|'P')    // SP (Select Pen)
+#define HPGL_CHAR_SIZE_REL	('S'<<8|'R')	// SR (character size relative)
+#define HPGL_USER_CHARACTER ('U'<<8|'C')    // UC (User Character)
+#define HPGL_VELOCITY		('V'<<8|'S')	// VS (Velocity Select)
 
 #define HPGL_DEFAULT        ('D'<<8|'F')    // DF (Default)
 #define HPGL_PAGE_FEED      ('P'<<8|'G')    // PG (Page Feed)

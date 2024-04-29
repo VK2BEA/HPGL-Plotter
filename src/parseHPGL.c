@@ -448,6 +448,45 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 
 	    break;
 
+    case HPGL_USER_CHARACTER:
+        // We accumulate points in the currentLine malloced array while the pen is down.
+        // When the pen is lifted (PU), we add this sequence of points to the compiled plot
+        pNextChar = sHPGLargs;
+        bMorePoints = *pNextChar != 0;
+        if( bMorePoints ){
+            gboolean bPenDown = FALSE;
+            guint16     nDummy = 0;
+            guint16    *pnPoints = &nDummy;
+            tCoordFloat pf;
+            // nPoints is a place holder that we will update
+            append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_UCHAR,  &nDummy, sizeof(guint16)  );
+            pnPoints = pGlobal->plotHPGL + HPGLserialCount - sizeof( guint16 );
+
+            while ( bMorePoints ) {
+                gdouble x = g_ascii_strtod( pNextChar, &pNextChar );
+                while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
+                    pNextChar++;
+                if ( x >= 99.0 ) {
+                    bPenDown = TRUE;
+                } else if ( x <= -99.0 ){
+                    bPenDown = FALSE;
+                } else {
+                    gdouble y = g_ascii_strtod( pNextChar, &pNextChar );
+                    while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
+                        pNextChar++;
+
+                    pf.x = (float)x + (bPenDown ? UCPENDOWN_INDICATOR : 0.0);    // this will also indicate if the pen is up/down
+                    pf.y = (float)y;
+
+                    append( &pGlobal->plotHPGL, &HPGLserialCount, PAYLOAD_ONLY,  &pf, sizeof(tCoordFloat)  );
+                    (*pnPoints)++;
+                }
+                if( !(g_ascii_isdigit( *pNextChar ) || *pNextChar == '-' || *pNextChar == '.' ))
+                    bMorePoints = FALSE;
+            }
+        }
+        break;
+
 	case HPGL_OUTPUT_ERROR:
 		sendGPIBreply( "0\n", pGlobal );	// nothing to see here
 		break;
