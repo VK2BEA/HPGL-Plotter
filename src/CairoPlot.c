@@ -65,7 +65,7 @@ showUserChar ( cairo_t *cr, tCoordFloat *pLabel, gint nPoints ) {
         if( bDraw )
             dx -= UCPENDOWN_INDICATOR;
         deltaX = dx * fontExtents.x_advance / 6.0;
-        deltaY = dy * (fontExtents.height * 2.0) / 22.0;
+        deltaY = dy * (fontExtents.height * 2.0) / 22.5;
         if( bDraw )
             cairo_rel_line_to( cr, deltaX, deltaY );
         else
