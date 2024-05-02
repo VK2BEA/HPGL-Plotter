@@ -225,13 +225,12 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 				g_free( sMessage );
 			}
 		} else {
-			// did we have a read error
-			if((*pGPIBstatus & ERR) == ERR ) {
-				rtn= eRDWT_ERROR;
-			// or did we complete the read
-			} else if( (*pGPIBstatus & CMPL) == CMPL ||  (*pGPIBstatus & END) == END ) {
-				rtn = eRDWT_OK;
-		    }
+			// did we complete the read
+			if( (*pGPIBstatus & CMPL) == CMPL ||  (*pGPIBstatus & END) == END ) {
+			    rtn = eRDWT_OK;
+			} else if((*pGPIBstatus & ERR) == ERR ) { // or did we have a read error
+			    rtn= eRDWT_ERROR;
+			}
 		}
 
 		// If we get a message on the queue, it is assumed to be an abort
@@ -249,6 +248,11 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	if( pNbytesRead )
 		*pNbytesRead = AsyncIbcnt();
 	*pGPIBstatus = AsyncIbsta();
+
+	// Dave P. request
+    if ( *pNbytesRead > 0 ) {
+        *pGPIBstatus &=  ~ERR;
+    }
 
 	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", AsyncIbcnt(), maxBytes );
 

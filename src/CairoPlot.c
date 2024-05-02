@@ -81,11 +81,23 @@ showLabel ( cairo_t *cr, gchar *pLabel) {
 	gdouble startX, startY;
 	cairo_matrix_t fontMatrix;
 	cairo_text_extents_t fontExtents;
+	int i, j;
 
 	GString *strLabel = g_string_new ( pLabel );
 
 	// replace composite zero stroke with zero
 	g_string_replace ( strLabel, "0\b/", "0", 0 );
+
+	// Remove any NOPs from the string (see HP7475A Interfacing & Programming Manual (C8 7475 ASCII Code Definitions)
+	for( i=0, j=0; i < strLabel->len; i++ ) {
+	    gchar ch = strLabel->str[i];
+	    if( !( (ch >= 4 && ch <= 7)
+	        || (ch >= 16 && ch <= 31)
+	        || ch == 1 || ch == 2 ) )
+	        strLabel->str[j++] = ch;
+	}
+	 strLabel->str[j] = 0;
+
 	g_string_replace ( strLabel, "\x1E", "", 0 );
 	g_string_replace ( strLabel, "\x1D", "", 0 );
 
