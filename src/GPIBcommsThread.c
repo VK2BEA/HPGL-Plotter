@@ -249,8 +249,10 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		*pNbytesRead = AsyncIbcnt();
 	*pGPIBstatus = AsyncIbsta();
 
-	// Dave P. request
-    if ( *pNbytesRead > 0 ) {
+	/* A change of state from listener to talker may occur  before a terminating
+	 * condition (EOI or eos character). If characters have been received, treat
+	 * the change of state as an end of read and return the characters received. */
+    if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO && *pNbytesRead > 0 ) {
         *pGPIBstatus &=  ~ERR;
     }
 
