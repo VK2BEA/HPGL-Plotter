@@ -261,53 +261,51 @@ translateHPGLfontSizeToCairo( gdouble HPGLcharSizeX, gdouble HPGLcharSizeY,
 gboolean
 plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal *pGlobal)
 {
-	if( pGlobal->plotHPGL ) {
-		guint HPGLserialCount = 0;
-		gfloat charSizeX = 1.0, charSizeY = 1.0;
-		tPlotterState plotterState = {0};
-		guint length = *((guint *)pGlobal->plotHPGL);
-		gint HPGLpen = 0;
-		gboolean bFirstPoint = FALSE;
-		gchar *pLabel;
-		tCoordFloat *pUserChar;
-		guint labelLength, nPoints;
-		gboolean bPenDown = FALSE;
-		cairo_matrix_t matrix;
-		__attribute__((unused)) gint HPGLlineType = 0;
+    cairo_save(cr); {
+        cairo_font_options_t *pFontOptions = cairo_font_options_create();
+        cairo_get_font_options (cr, pFontOptions);
+        cairo_font_options_set_hint_metrics( pFontOptions, CAIRO_HINT_METRICS_OFF );
+        cairo_set_font_options (cr, pFontOptions);
+        cairo_font_options_destroy( pFontOptions );
 
-		gdouble cairoX, cairoY;
-		gdouble areaWidth = imageWidth, areaHeight = imageHeight;
+        if( pGlobal->plotHPGL ) {
+            guint HPGLserialCount = 0;
+            gfloat charSizeX = 1.0, charSizeY = 1.0;
+            tPlotterState plotterState = {0};
+            guint length = *((guint *)pGlobal->plotHPGL);
+            gint HPGLpen = 0;
+            gboolean bFirstPoint = FALSE;
+            gchar *pLabel;
+            tCoordFloat *pUserChar;
+            guint labelLength, nPoints;
+            gboolean bPenDown = FALSE;
+            cairo_matrix_t matrix;
+            __attribute__((unused)) gint HPGLlineType = 0;
 
-		tCoord *pPoint;
-		eHPGLscalingType scaleType;
+            gdouble cairoX, cairoY;
+            gdouble areaWidth = imageWidth, areaHeight = imageHeight;
 
-		plotterState.HPGLplotterP1P2[ P1 ] = pGlobal->HPGLplotterP1P2[P1];
-		plotterState.HPGLplotterP1P2[ P2 ] = pGlobal->HPGLplotterP1P2[P2];
-		plotterState.HPGLinputP1P2[ P1 ] = plotterState.HPGLplotterP1P2[ P1 ];
-		plotterState.HPGLinputP1P2[ P2 ] = plotterState.HPGLplotterP1P2[ P2 ];
-		// The surface may have been adjusted (i.e. for printing, PDF & SVG
-		// to position correctly on a page that is not 1.414:1 aspect ratio
-		// We need to save the transformation matrix, so that is can be recovered
-		// if we get one or more rotation commands
-		cairo_get_matrix (cr, &plotterState.intitalMatrix );
+            tCoord *pPoint;
+            eHPGLscalingType scaleType;
 
-		// There is always a character count at the head of the data
-		HPGLserialCount += sizeof(guint);
+            plotterState.HPGLplotterP1P2[ P1 ] = pGlobal->HPGLplotterP1P2[P1];
+            plotterState.HPGLplotterP1P2[ P2 ] = pGlobal->HPGLplotterP1P2[P2];
+            plotterState.HPGLinputP1P2[ P1 ] = plotterState.HPGLplotterP1P2[ P1 ];
+            plotterState.HPGLinputP1P2[ P2 ] = plotterState.HPGLplotterP1P2[ P2 ];
+            // The surface may have been adjusted (i.e. for printing, PDF & SVG
+            // to position correctly on a page that is not 1.414:1 aspect ratio
+            // We need to save the transformation matrix, so that is can be recovered
+            // if we get one or more rotation commands
+            cairo_get_matrix (cr, &plotterState.intitalMatrix );
 
-		// Use a font that is monospaced (like the HP vector plotter)
+            // There is always a character count at the head of the data
+            HPGLserialCount += sizeof(guint);
 
-	    cairo_save(cr);
-	    {
 	    	setSurfaceRotation( cr, &plotterState, imageWidth, imageHeight,
 	    			&areaWidth, &areaHeight );
-
+	        // Use a font that is monospaced (like the HP vector plotter)
 			// Noto Sans Mono Light
 			cairo_select_font_face(cr, HPGL_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-			cairo_font_options_t *pFontOptions = cairo_font_options_create();
-			cairo_get_font_options (cr, pFontOptions);
-			cairo_font_options_set_hint_metrics( pFontOptions, CAIRO_HINT_METRICS_OFF );
-			cairo_set_font_options (cr, pFontOptions);
-			cairo_font_options_destroy( pFontOptions );
 
 			// The default character size is 0.19 cm wide by 0.27 cm high..
 			// Our A4 page is 297 wide x 210 high i.e 156.3 characters along the wide side
@@ -492,10 +490,10 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 					break;
 				}
 			} while (HPGLserialCount < length);
-		} cairo_restore( cr );
-	} else {
-		drawHPlogo ( cr, imageWidth / 2.0, imageHeight * 0.8, imageWidth / 1000.0 );
-	}
+        } else {
+            drawHPlogo ( cr, imageWidth / 2.0, imageHeight * 0.8, imageWidth / 1000.0 );
+        }
+    } cairo_restore( cr );
 	return TRUE;
 }
 
