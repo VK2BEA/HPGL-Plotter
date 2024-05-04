@@ -303,6 +303,12 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
 
 			// Noto Sans Mono Light
 			cairo_select_font_face(cr, HPGL_FONT, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+			cairo_font_options_t *pFontOptions = cairo_font_options_create();
+			cairo_get_font_options (cr, pFontOptions);
+			cairo_font_options_set_hint_metrics( pFontOptions, CAIRO_HINT_METRICS_OFF );
+			cairo_set_font_options (cr, pFontOptions);
+			cairo_font_options_destroy( pFontOptions );
+
 			// The default character size is 0.19 cm wide by 0.27 cm high..
 			// Our A4 page is 297 wide x 210 high i.e 156.3 characters along the wide side
 			//
