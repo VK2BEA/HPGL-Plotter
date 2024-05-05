@@ -174,7 +174,8 @@ CB_HPGLopen( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
 
 			pGlobal->flags.bMuteGPIBreply = TRUE;
 
-			clearHPGL( pGlobal );
+			if( pGlobal->flags.bAutoClear )
+			    clearHPGL( pGlobal );
 
 			do {
 				n = fread( tbuf, sizeof( gchar ), TBUF_SIZE, fHPGL);
