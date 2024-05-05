@@ -538,6 +538,7 @@ threadGPIB(gpointer _pGlobal) {
 
 	gulong __attribute__((unused)) datum = 0;
 	glong  nBytesRead;
+	tGPIBReadWriteStatus readResult;
 
 	// The HP662X formats numbers like 3.141 not, the continental European way 3,14159
     setlocale(LC_NUMERIC, "C");
@@ -573,20 +574,21 @@ threadGPIB(gpointer _pGlobal) {
 				case TG_END:
 					closeGPIBcontroller( pGlobal );
 					bRunning = FALSE;
-					continue;
+					break;
 				case TG_REINITIALIZE_GPIB:
 					openGPIBcontroller( pGlobal, TRUE );
 					if( pGlobal->flags.bDoNotEnableSystemController )
 						postInfo("GPIB controller configured");
 					else
 						postInfo("GPIB interfaced cleared and controller configured");
-					continue;
+					break;;
 				default:
 					break;
 			}
 			g_free(message->sMessage);
 			g_free(message->data);
 			g_free(message);
+			continue;
 		}
 
 		// Open the GPIB controller as a device if not already opened
@@ -627,9 +629,14 @@ threadGPIB(gpointer _pGlobal) {
 
 		// We cannot timeout, but will return if there is a message to abort
 		// or we detect that we are no longer addressed as a listener
-		if( GPIBasyncRead( pGlobal->GPIBcontrollerDevice, sHPGL,
-				MAX_HPGL_PLOT_CHUNK,  &nBytesRead,
-				&GPIBstatus, TIMEOUT_NONE) != eRDWT_OK )
+	    readResult = GPIBasyncRead( pGlobal->GPIBcontrollerDevice, sHPGL,
+	                    MAX_HPGL_PLOT_CHUNK,  &nBytesRead,
+	                    &GPIBstatus, TIMEOUT_NONE);
+	    // If we were interrupted by a message... it's not an error.. see what the message is
+        if( readResult == eRDWT_ABORT )
+            continue;
+
+		if( readResult != eRDWT_OK )
 			LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 
 		if ( GPIBfailed( GPIBstatus ) ) {
