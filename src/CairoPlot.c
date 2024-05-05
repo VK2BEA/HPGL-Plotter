@@ -264,6 +264,7 @@ plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal 
     cairo_save(cr); {
         cairo_font_options_t *pFontOptions = cairo_font_options_create();
         cairo_get_font_options (cr, pFontOptions);
+        cairo_font_options_set_hint_style( pFontOptions, CAIRO_HINT_STYLE_NONE );
         cairo_font_options_set_hint_metrics( pFontOptions, CAIRO_HINT_METRICS_OFF );
         cairo_set_font_options (cr, pFontOptions);
         cairo_font_options_destroy( pFontOptions );
