@@ -311,7 +311,8 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
 	if( !pGlobal->flags.bDoNotEnableSystemController && pGlobal->flags.bInitialActiveController) {
 		// Request system control
 		// i.e. make board system controller
-#if 0
+#if 1
+
 		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
 			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 #endif
@@ -321,7 +322,11 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
 		if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
 			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 		}
-#if 0
+
+        if( ibsre( pGlobal->GPIBcontrollerDevice, true ) & ERR )  {
+            LOG( G_LOG_LEVEL_WARNING, "ibsre (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+        }
+#if 1
 		// assert ATN (board)
 		// i.e. become active controller (if it was set when we started )
 		if( pGlobal->flags.bInitialGPIB_ATN &&
