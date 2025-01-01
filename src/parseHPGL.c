@@ -172,6 +172,9 @@ static const gchar *codeSets7475A[ N_CODE_SETS ][ 127-33 ] = {
          "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~"
         }
 };
+
+static  gboolean    bAbsolutePoint = TRUE;
+
 void
 initializeHPGL( tGlobal *pGlobal, gboolean bLandscape ) {
 
@@ -186,6 +189,8 @@ initializeHPGL( tGlobal *pGlobal, gboolean bLandscape ) {
 		pGlobal->HPGLplotterP1P2[ P2 ].y = HPGL_A3_LONG;
 		pGlobal->aspectRatio = 1.0 / sqrt( 2.0 );
 	}
+
+	bAbsolutePoint = TRUE;
 }
 
 static gchar labelTerminator = '\003';
@@ -213,6 +218,50 @@ clearHPGL( tGlobal *pGlobal ) {
 	g_string_free( pGlobal->verbatimHPGLplot, TRUE );
 	pGlobal->verbatimHPGLplot = NULL;
 	gtk_widget_set_sensitive( WLOOKUP( pGlobal, "btn_SaveHPGL" ), FALSE );
+}
+
+/*!     \brief  Add points listed as arguments to cammands
+ *
+ * Commands (PA, PR, UP, DN) may be followed by line points
+ * This indicates to move the pen to these points. We capture these movements.
+ *
+ * \param pGlobal          : pointer to global data
+ * \param sXYpoints        : pointer to the command arguments (points)
+ * \param pHPGLserialCount : pointer to count of characters in parsed HPGL data
+ * \param bAbsolute        : is the line absolute or relative
+ * \return number of points added
+ */
+gint
+addLinePoints( tGlobal *pGlobal, gchar *sXYpoints, guint *pHPGLserialCount, gboolean bAbsolute ) {
+    gboolean bMorePoints;
+    gchar  *pNextChar;
+    gint nPoints = 0;
+    tCoord p;
+
+    pNextChar = sXYpoints;
+    bMorePoints = *pNextChar != 0;
+
+    while ( bMorePoints ) {
+        gint64 x = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+        while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
+            pNextChar++;
+        gint64 y = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+        while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
+            pNextChar++;
+
+        p.x = (guint16)x;
+        p.y = (guint16)y;
+
+        append( &pGlobal->plotHPGL, pHPGLserialCount,
+                bAbsolute ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
+
+        if( !(g_ascii_isdigit( *pNextChar ) || *pNextChar == '-' || *pNextChar == '.' ))
+            bMorePoints = FALSE;
+
+        nPoints++;
+    }
+    return nPoints;
+
 }
 
 /*!     \brief  Parse an HPGL command
@@ -250,7 +299,6 @@ clearHPGL( tGlobal *pGlobal ) {
  */
 gboolean
 parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
-	static tCoord p;
 	static gfloat charSizeX = 0.0, charSizeY = 0.0;
 	static guint8 colour = 0;
 	static guint8 lineType = 0;
@@ -280,29 +328,15 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 
 	switch( HPGLcmd ) {
 	case HPGL_POSN_ABS:	// PA
+        addLinePoints( pGlobal, sHPGLargs, &HPGLserialCount, bAbsolutePoint = TRUE );
+	    break;
+
 	case HPGL_POSN_REL:	// PR
 		// We accumulate points in the currentLine malloced array while the pen is down.
 		// When the pen is lifted (PU), we add this sequence of points to the compiled plot
-        pNextChar = sHPGLargs;
-        bMorePoints = *pNextChar != 0;
-		while ( bMorePoints ) {
-			gint64 x = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
-			while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
-				pNextChar++;
-			gint64 y = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
-			while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
-				pNextChar++;
 
-			p.x = (guint16)x;
-			p.y = (guint16)y;
-
-			append( &pGlobal->plotHPGL, &HPGLserialCount,
-					HPGLcmd == HPGL_POSN_ABS ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
-
-			if( !(g_ascii_isdigit( *pNextChar ) || *pNextChar == '-' || *pNextChar == '.' ))
-				bMorePoints = FALSE;
-		}
-		break;
+        addLinePoints( pGlobal, sHPGLargs, &HPGLserialCount, bAbsolutePoint = FALSE );
+        break;
 
 	case HPGL_DEF_TERMINATOR:
 		if( *sHPGLargs == 0 )
@@ -336,10 +370,12 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 
 	case HPGL_PEN_UP:	// PU
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_PEN_UP,  NULL, 0  );
+		addLinePoints( pGlobal, sHPGLargs, &HPGLserialCount, bAbsolutePoint );
 		break;
 
 	case HPGL_PEN_DOWN:	// PD
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_PEN_DOWN,  NULL, 0  );
+		addLinePoints( pGlobal, sHPGLargs, &HPGLserialCount, bAbsolutePoint );
 		break;
 
 	case HPGL_CHAR_SIZE_REL:	// SR
