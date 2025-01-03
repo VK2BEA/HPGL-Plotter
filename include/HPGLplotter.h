@@ -159,6 +159,7 @@ typedef enum { SCALING_NONE=0, SCALING_ANISOTROPIC=1, SCALING_ISOTROPIC=2, SCALI
 #define HPGL_CHARACTER_SET  ('C'<<8|'S')    // CS (Character Set)
 #define HPGL_DEF_TERMINATOR ('D'<<8|'T')    // DT (Define Terminator (label))
 #define HPGL_INPUT_MASK     ('I'<<8|'M')    // IM (Input Mask)
+#define HPGL_INITIALIZE     ('I'<<8|'N')    // IN (Initialize)
 #define HPGL_INPUT_POINTS   ('I'<<8|'P')    // IP (Input P1 & P2)
 #define HPGL_INPUT_WINDOW	('I'<<8|'W')    // IW (Input Window)
 #define HPGL_LABEL    		('L'<<8|'B')	// LB (label)

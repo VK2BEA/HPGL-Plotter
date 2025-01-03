@@ -338,6 +338,10 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
         addLinePoints( pGlobal, sHPGLargs, &HPGLserialCount, bAbsolutePoint = FALSE );
         break;
 
+    case HPGL_INITIALIZE: // PR
+        bAbsolutePoint = TRUE;
+        break;
+
 	case HPGL_DEF_TERMINATOR:
 		if( *sHPGLargs == 0 )
 			break;
