@@ -34,6 +34,7 @@ tGlobal globalData = {0};
 static gint     optDebug = 0;
 static gboolean bOptQuiet = 0;
 static gint     bOptDoNotEnableSystemController = 0;
+       gint     optInitializeGPIBasListener = INVALID;
 static gint     optDeviceID = INVALID;
 static gint     optControllerIndex = INVALID;
 static gchar    *sOptControllerName = NULL;
@@ -43,19 +44,21 @@ GDBusConnection *conSystemBus = NULL;
 
 static const GOptionEntry optionEntries[] =
 {
-  { "debug",           'b', 0, G_OPTION_ARG_INT,
+  { "debug",           'b', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
           &optDebug, "Print diagnostic messages in journal (0-7)", NULL },
-  { "quiet",           'q', 0, G_OPTION_ARG_NONE,
+  { "quiet",           'q', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
           &bOptQuiet, "No GUI sounds", NULL },
-  { "GPIBnoSystemController",  'n', 0, G_OPTION_ARG_NONE,
+  { "GPIBnoSystemController",  'n', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
           &bOptDoNotEnableSystemController, "Do not enable GPIB interface as a system controller", NULL },
-  { "GPIBdeviceID",      'd', 0, G_OPTION_ARG_INT,
+  { "GPIBinitialListener",  'l', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
+                  &optInitializeGPIBasListener, "Force GPIB interface as a listener (1) or not (0)", NULL },
+  { "GPIBdeviceID",      'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
           &optDeviceID, "GPIB device ID for HPGL plotter", NULL },
-  { "GPIBcontrollerIndex",  'c', 0, G_OPTION_ARG_INT,
+  { "GPIBcontrollerIndex",  'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
           &optControllerIndex, "GPIB controller board index", NULL },
-  { "GPIBcontrollerName",  'C', 0, G_OPTION_ARG_STRING,
+  { "GPIBcontrollerName",  'C', G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING,
 		          &sOptControllerName, "GPIB controller name (in /etc/gpib.conf)", NULL },
-  { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &argsRemainder, "", NULL },
+  { G_OPTION_REMAINING, 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING_ARRAY, &argsRemainder, "", NULL },
   { NULL }
 };
 
@@ -434,6 +437,13 @@ on_startup (GApplication *app, gpointer udata)
     // The command line switches should override the recovered settings
     if( bOptDoNotEnableSystemController ) {
     	pGlobal->flags.bDoNotEnableSystemController = TRUE;
+    }
+
+    if( optInitializeGPIBasListener != INVALID ) {
+        if( optInitializeGPIBasListener == 0 || optInitializeGPIBasListener == 1 )
+            pGlobal->flags.bGPIB_InitialListener = optInitializeGPIBasListener;
+        else
+            optInitializeGPIBasListener = INVALID;
     }
 
 	if( sOptControllerName )  {

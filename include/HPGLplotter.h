@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.25-1"
+   #define VERSION "1.25-2"
 #endif
 
 #define INVALID	(-1)
@@ -61,6 +61,7 @@ typedef struct {
 
 extern GPIBdevice devices[];
 extern GHashTable *widgetHashTable;
+extern gint       optInitializeGPIBasListener;
 
 #define ERROR   (-1)
 #define OK      ( 0)

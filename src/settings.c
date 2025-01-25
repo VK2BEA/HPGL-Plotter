@@ -141,7 +141,8 @@ recoverSettings( tGlobal *pGlobal ) {
     pGlobal->sGPIBcontrollerName = g_settings_get_string( gs, "gpib-controller-name" );
     pGlobal->sLastDirectory = g_settings_get_string( gs, "last-directory" );
     pGlobal->flags.bGPIB_UseControllerIndex = g_settings_get_boolean( gs, "gpib-use-controller-index" );
-    pGlobal->flags.bGPIB_InitialListener = g_settings_get_boolean( gs, "gpib-initial-listener" );
+    if( optInitializeGPIBasListener == INVALID )
+        pGlobal->flags.bGPIB_InitialListener = g_settings_get_boolean( gs, "gpib-initial-listener" );
     pGlobal->flags.bDoNotEnableSystemController = g_settings_get_boolean( gs, "gpib-do-not-enable-system" );
     pGlobal->flags.bAutoClear = g_settings_get_boolean( gs, "auto-clear" );
     pGlobal->PDFpaperSize = g_settings_get_int( gs, "pdf-paper-size" );
