@@ -65,6 +65,13 @@
         Selection of whether to use the index or name of the GPIB controller
       </description>
     </key>
+    <key name="gpib-initial-listener" type="b">
+      <default>false</default>
+      <summary>Force GPIB as listenter on initialization</summary>
+      <description>
+        Selection of whether force GPIB as listenter on initialization
+      </description>
+    </key>
     <key name="gpib-do-not-enable-system" type="b">
       <default>false</default>
       <summary>Do not enable GPIB as system controller</summary>

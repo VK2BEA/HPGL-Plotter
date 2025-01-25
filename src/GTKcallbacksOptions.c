@@ -46,6 +46,7 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
 	// gboolean bUseGPIBcontrollerName = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ) );
 	gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ), !pGlobal->flags.bGPIB_UseControllerIndex );
 	gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_NoGPIBSystemCtrlr" ), pGlobal->flags.bDoNotEnableSystemController );
+    gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_Listner" ), pGlobal->flags.bGPIB_InitialListener );
 
 	for( gint pen = 1; pen < NUM_HPGL_PENS; pen++ ) {	// Pen 0 is always white
 		gchar sWID[] = "1_Color";
@@ -70,10 +71,12 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
 
 void
 CB_btn_OK ( GtkButton* wBtnOK, gpointer user_data ) {
+    tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnOK), "data");
 
+    gboolean bPreviousGPIB_InitialListener = pGlobal->flags.bGPIB_InitialListener;
 	//note: Pen colors and PDF/SVF page sizes are collected when they change
 
-	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnOK), "data");
+
 	gdouble GPIBcontrollerIndex = gtk_spin_button_get_value( WLOOKUP( pGlobal, "spin_ControllerIndex") );
 	gdouble GPIBplotterID = gtk_spin_button_get_value( WLOOKUP( pGlobal, "spin_DevicePID") );
 	const gchar *sGPIBcontrollerName = gtk_entry_buffer_get_text(
@@ -81,12 +84,14 @@ CB_btn_OK ( GtkButton* wBtnOK, gpointer user_data ) {
 	gboolean bUseGPIBcontrollerName = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ) );
 
 	pGlobal->flags.bDoNotEnableSystemController = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_NoGPIBSystemCtrlr" ) );
+    pGlobal->flags.bGPIB_InitialListener = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_Listener" ) );
+
 
 	gboolean bGPIBchanged = FALSE;
 
 	bGPIBchanged = (pGlobal->GPIBcontrollerIndex != (gint)GPIBcontrollerIndex)
 			|| (pGlobal->GPIBdevicePID != (gint)GPIBplotterID)
-			|| !g_strcmp0( pGlobal->sGPIBcontrollerName, sGPIBcontrollerName )
+			|| (g_strcmp0( pGlobal->sGPIBcontrollerName, sGPIBcontrollerName ) != 0)
 			|| (pGlobal->flags.bGPIB_UseControllerIndex != !bUseGPIBcontrollerName );
 
 	pGlobal->GPIBcontrollerIndex = (gint)GPIBcontrollerIndex;
@@ -101,14 +106,13 @@ CB_btn_OK ( GtkButton* wBtnOK, gpointer user_data ) {
 
 	pGlobal->HPGLperiodEnd = gtk_spin_button_get_value( WLOOKUP( pGlobal, "spin_EndOfPlotPeriod" )  );
 
-	if( bGPIBchanged ) {
+	if( bGPIBchanged || bPreviousGPIB_InitialListener != pGlobal->flags.bGPIB_InitialListener ) {
 	    messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
 	    messageData->command = TG_REINITIALIZE_GPIB;
 	    g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
 	}
 
 	gtk_widget_set_visible( WLOOKUP ( pGlobal, "dlg_Options" ), FALSE );
-
 }
 
 void

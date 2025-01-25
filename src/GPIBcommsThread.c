@@ -358,8 +358,9 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
  */
 gint
 openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
-	short	lineStatus;
-	int		ibaskResult = 0;
+	gshort	lineStatus;
+	gint	ibaskResult = 0;
+	gboolean bNoListeners = FALSE;
 
 	/* The board index can be used as a device descriptor; however,
 	 * if a device descriptor was returned from the ibfind, it must be freed
@@ -438,6 +439,23 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
 		}
 	}
 
+	if( pGlobal->flags.bGPIB_InitialListener ) {
+	    guchar listenGPIBcmds[] = { UNT, UNL, LAD | pGlobal->GPIBdevicePID };
+	    if( ibcmd( pGlobal->GPIBcontrollerDevice, listenGPIBcmds, sizeof( listenGPIBcmds ) ) & ERR ) {
+	        if( ThreadIberr() != ENOL ) {
+	            LOG( G_LOG_LEVEL_WARNING, "ibcmd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+	            goto err;
+	        } else if( ThreadIberr() == ENOL ) {
+	            bNoListeners = TRUE;
+	        }
+	    }
+
+	    if( ibgts( pGlobal->GPIBcontrollerDevice, 0 ) & ERR ) {
+	        LOG( G_LOG_LEVEL_WARNING, "ibgts error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+	        goto err;
+	    }
+	}
+
 	// Relinquish system control (argument is FALSE)
 	if( ibrsc( pGlobal->GPIBcontrollerDevice, FALSE ) & ERR ) {
 		LOG( G_LOG_LEVEL_WARNING, "ibrsc error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
@@ -450,8 +468,10 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
 		goto err;
 	}
 	// raise(SIGSEGV);
-	pGlobal->flags.bGPIBcommsActive = TRUE;
-	return 0;
+	if( !bNoListeners )
+	    pGlobal->flags.bGPIBcommsActive = TRUE;
+
+	return bNoListeners;
 
 err:
 	if( pGlobal->GPIBcontrollerDevice >= FIRST_ALLOCATED_CONTROLLER_DESCRIPTOR )
@@ -581,12 +601,15 @@ threadGPIB(gpointer _pGlobal) {
 					bRunning = FALSE;
 					break;
 				case TG_REINITIALIZE_GPIB:
-					openGPIBcontroller( pGlobal, TRUE );
-					if( pGlobal->flags.bDoNotEnableSystemController )
-						postInfo("GPIB controller configured");
-					else
-						postInfo("GPIB interfaced cleared and controller configured");
-					break;;
+					if( openGPIBcontroller( pGlobal, TRUE ) == ERROR ) {
+					    postError("GPIB controller no connection");
+					} else {
+                        if( pGlobal->flags.bDoNotEnableSystemController )
+                            postInfo("GPIB controller configured");
+                        else
+                            postInfo("GPIB interfaced cleared and controller configured");
+					}
+					break;
 				default:
 					break;
 			}
@@ -602,12 +625,19 @@ threadGPIB(gpointer _pGlobal) {
 			static gint loops = 0;
 			if( (loops++ % 50) == 0 ) {
 				loops = 1;	// don't do this every time
-				if( openGPIBcontroller( pGlobal, FALSE ) == ERROR ) {
-					postInfo("GPIB controller no connection");
-					usleep( ms(100) );
-					continue; // can't do anything without GPIB
-				} else {
-					postInfo("GPIB controller configured");
+				switch( openGPIBcontroller( pGlobal, FALSE ) ) {
+				case ERROR:
+                    postInfo("GPIB controller no connection");
+                    usleep( ms(100) );
+                    continue; // can't do anything without GPIB
+				    break;
+				case 1:
+                    postInfo("GPIB no listeners on bus");
+                    usleep( ms(100) );
+                    continue; // can't do anything without GPIB
+				default:
+                    postInfo("GPIB controller configured");
+				    break;
 				}
 			} else {
 				usleep( ms(100) );
