@@ -617,7 +617,7 @@ GPIB, check this box to avoid contention.</property>
                       <object class="GtkCheckButton" id="WID_cbutton_Listener">
                         <property name="label">GPIB - initiate as listener</property>
                         <property name="margin-bottom">4</property>
-                        <property name="tooltip-text">Set the GPIB device as a listener initially incase the instrument is incapable of acting as a controller.</property>
+                        <property name="tooltip-text">Set the GPIB device as a listener initially in case the instrument is incapable of acting as a controller.</property>
                       </object>
                     </child>
                     <child>
