@@ -46,7 +46,7 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
 	// gboolean bUseGPIBcontrollerName = gtk_check_button_get_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ) );
 	gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_ControlerNameNotIdx" ), !pGlobal->flags.bGPIB_UseControllerIndex );
 	gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_NoGPIBSystemCtrlr" ), pGlobal->flags.bDoNotEnableSystemController );
-    gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_Listner" ), pGlobal->flags.bGPIB_InitialListener );
+    gtk_check_button_set_active ( WLOOKUP( pGlobal, "cbutton_Listener" ), pGlobal->flags.bGPIB_InitialListener );
 
 	for( gint pen = 1; pen < NUM_HPGL_PENS; pen++ ) {	// Pen 0 is always white
 		gchar sWID[] = "1_Color";
