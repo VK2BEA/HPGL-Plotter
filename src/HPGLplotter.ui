@@ -617,11 +617,7 @@ GPIB, check this box to avoid contention.</property>
                       <object class="GtkCheckButton" id="WID_cbutton_Listener">
                         <property name="label">GPIB - initiate as listener</property>
                         <property name="margin-bottom">4</property>
-                        <property name="tooltip-text">To clear the GPIB interface and better probe 
-the GPIB, the interface is temporarily configured
-as a sytem controller.
-If there is another GPIB system controller on the
-GPIB, check this box to avoid contention.</property>
+                        <property name="tooltip-text">Set the GPIB device as a listener initially incase the instrument is incapable of acting as a controller.</property>
                       </object>
                     </child>
                     <child>
