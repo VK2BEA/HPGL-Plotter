@@ -42,6 +42,39 @@ static gchar    **argsRemainder = NULL;
 
 GDBusConnection *conSystemBus = NULL;
 
+#define OPTION_ERROR           g_quark_from_static_string ("Option error")
+enum option_errors
+{
+    OPTION_OK = 0,
+    OPTION_LISTENER
+};
+
+
+gboolean
+argumentGPIBlistener (
+  const gchar* option_name,
+  const gchar* value,
+  gpointer data,
+  GError** error
+) {
+
+    if( error )
+        *error = (GError *)NULL;
+
+    if( value == NULL || !g_strcmp0( value, "1" ) || !g_strcmp0( value, "true" )) {
+        optInitializeGPIBasListener = 1;
+    } else if( !g_strcmp0( value, "0" ) || !g_strcmp0( value, "false" ) ) {
+        optInitializeGPIBasListener = 0;
+    } else {
+        g_set_error (error, OPTION_ERROR, OPTION_LISTENER,
+                "%s option argument: '%s'; Must be '1', 'true', '0' or 'false' or no value",
+                option_name, value);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 static const GOptionEntry optionEntries[] =
 {
   { "debug",           'b', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
@@ -50,8 +83,8 @@ static const GOptionEntry optionEntries[] =
           &bOptQuiet, "No GUI sounds", NULL },
   { "GPIBnoSystemController",  'n', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
           &bOptDoNotEnableSystemController, "Do not enable GPIB interface as a system controller", NULL },
-  { "GPIBinitialListener",  'l', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
-                  &optInitializeGPIBasListener, "Force GPIB interface as a listener (1) or not (0)", NULL },
+  { "GPIBinitialListener",  'l', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK,
+          argumentGPIBlistener, "Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')", NULL },
   { "GPIBdeviceID",      'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
           &optDeviceID, "GPIB device ID for HPGL plotter", NULL },
   { "GPIBcontrollerIndex",  'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
@@ -61,6 +94,7 @@ static const GOptionEntry optionEntries[] =
   { G_OPTION_REMAINING, 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING_ARRAY, &argsRemainder, "", NULL },
   { NULL }
 };
+
 
 
 static gboolean
