@@ -8,7 +8,7 @@ This is a program to emulate an HPGL plotter for older HP Spectrum and Network A
 
 Once captured, the plot may be printed or saved as PDF, SVG or PNG files.
 
-![image](https://github.com/user-attachments/assets/ff238631-1614-49fb-b833-9f63b8d18424)
+![image](https://github.com/user-attachments/assets/7593348b-f31a-4dce-b2b6-bbe72805f48e)
 
 To install on the Linux Fedora distribution:
 -------------------------------------------
