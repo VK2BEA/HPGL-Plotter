@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.95.0 -->
+<!-- Created with Cambalache 0.97.8 -->
 <interface>
   <!-- interface-name HPGLplotter.ui -->
   <!-- interface-description GPIB HPGL plotter emulator -->
@@ -687,6 +687,7 @@ will trigger a screen clear.</property>
   <object class="GtkWindow" id="WID_Splash">
     <property name="decorated">False</property>
     <property name="hexpand">True</property>
+    <property name="resizable">False</property>
     <property name="transient-for">WID_HPGLplotter_main</property>
     <child>
       <object class="GtkBox">
@@ -738,6 +739,7 @@ limitations under the License</property>
     </child>
   </object>
   <object class="GtkDialog" id="WID_dlg_Debug">
+    <property name="decorated">True</property>
     <property name="height-request">500</property>
     <property name="hide-on-close">True</property>
     <property name="transient-for">WID_HPGLplotter_main</property>

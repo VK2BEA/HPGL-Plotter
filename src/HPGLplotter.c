@@ -347,11 +347,6 @@ on_activate (GApplication *app, gpointer udata)
  	}
  	g_slist_free(widgetList);
 
-#ifndef DEBUG
-	g_timeout_add( 20, (GSourceFunc)splashCreate, pGlobal );
-	g_timeout_add( 5000, (GSourceFunc)splashDestroy, pGlobal );
-#endif
-
  	GtkCssProvider * cssProvider = gtk_css_provider_new();
  	gtk_css_provider_load_from_resource(cssProvider, "/src/HPGLplotter.css");
  	gtk_style_context_add_provider_for_display(gdk_display_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -393,8 +388,6 @@ on_activate (GApplication *app, gpointer udata)
 
 	gtk_window_set_default_icon_name("HPGLplotter");
 
-
-
 	// Get callbacks for keypresss and release
 	event_controller = gtk_event_controller_key_new ();
 	g_signal_connect_object (event_controller, "key-pressed",
@@ -407,6 +400,12 @@ on_activate (GApplication *app, gpointer udata)
 	gtk_application_add_window( GTK_APPLICATION(app), GTK_WINDOW(wApplicationWindow) );
 	gtk_window_set_icon_name(GTK_WINDOW (wApplicationWindow),"HPGLplotter");
 
+#ifndef DEBUG
+        // Splash screen when main window is created
+        // This assures that the splash window is anchored to the main window and thus
+        // it appears in the middle of the screen in wayland
+    g_idle_add((GSourceFunc)splashCreate, pGlobal);
+#endif
 	pGlobal->timeSinceLastHPGLcommand = g_timer_new();
     // Start the GPIB communication thread
     pGlobal->pGThread = g_thread_new( "GPIBthread", threadGPIB, (gpointer)pGlobal );
@@ -419,7 +418,6 @@ on_activate (GApplication *app, gpointer udata)
 				   "/org/freedesktop/login1", NULL,
 				   G_DBUS_SIGNAL_FLAGS_NONE, on_DBUSresume, (gpointer) pGlobal, NULL);
     }
-
 }
 
 /*!     \brief  on_startup (startup signal callback)

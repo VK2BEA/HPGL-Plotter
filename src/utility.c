@@ -52,25 +52,37 @@ logVersion(void) {
  * \ingroup initialize
  *
  * \param  pGlobal : Pointer to global data
+ * \return once only
  */
-gint
+gboolean
 splashCreate (tGlobal *pGlobal)
 {
 	GtkWidget *wSplash = WLOOKUP( pGlobal, "Splash");
-	GtkWidget *wApplicationWidget = WLOOKUP( pGlobal, "HPGLplotter_main");
+	// GtkWidget *wApplicationWidget = WLOOKUP( pGlobal, "HPGLplotter_main");
 	GtkWidget *wVersionLabel = g_hash_table_lookup ( ((tGlobal *)pGlobal)->widgetHashTable, (gconstpointer)"lbl_version");
 	gchar *sVersion;
+	static gboolean bFirst = TRUE;
+
 	if( wSplash ) {
-		sVersion = g_strdup_printf( "Version %s\t(🔨 %s)", VERSION, __DATE__ ); // Changelog date is used in RPM
-		gtk_label_set_label( GTK_LABEL( wVersionLabel ), sVersion );
-		g_free( sVersion );
-    	// this is needed for Wayland to get rid of the warning notice about transient window not attached
-    	// to parent
-    	gtk_window_set_transient_for( GTK_WINDOW( wSplash ), GTK_WINDOW( wApplicationWidget ));
-    	// gtk_window_set_position(GTK_WINDOW(wSplash), GTK_WIN_POS_CENTER_ALWAYS);
-        gtk_window_present( GTK_WINDOW( wSplash ) ); // make sure we are on top
+	    if( bFirst ) {
+	        // This is a kludge because of Wayland not showing the application window immediately
+	        // therefore if we show the splash it is half off the screen
+	        bFirst = FALSE;
+	        g_timeout_add( 20, (GSourceFunc)splashCreate, pGlobal );
+	    } else {
+            sVersion = g_strdup_printf( "Version %s\t(🔨 %s)", VERSION, __DATE__ ); // Changelog date is used in RPM
+            gtk_label_set_label( GTK_LABEL( wVersionLabel ), sVersion );
+            g_free( sVersion );
+            // this is needed for Wayland to get rid of the warning notice about transient window not attached
+            // to parent
+            // gtk_window_set_transient_for( GTK_WINDOW( wSplash ), GTK_WINDOW( wApplicationWidget ));
+            // gtk_window_set_position(GTK_WINDOW(wSplash), GTK_WIN_POS_CENTER_ALWAYS);
+            gtk_window_present( GTK_WINDOW( wSplash ) ); // make sure we are on top
+            // after 5 seconds ... destroy
+            g_timeout_add( 5000, (GSourceFunc)splashDestroy, pGlobal );
+	    }
     }
-    return FALSE;
+    return G_SOURCE_REMOVE;
 }
 
 /*!     \brief  Destroy the splash screen
@@ -80,6 +92,7 @@ splashCreate (tGlobal *pGlobal)
  * \ingroup initialize
  *
  * \param  Splash : Pointer to Splash widget to destroy
+ * \return once only
  */
 gint
 splashDestroy (tGlobal *pGlobal)

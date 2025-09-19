@@ -1,8 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
-<cambalache-project version="0.95.0" target_tk="gtk-4.0">
-  <ui filename="HPGLplotter.ui" sha256="7d76022b16ed43f5a3ba2dd01e172d5bd819bef202d49f3446830262a5c82099"/>
-  <css filename="HPGLplotter.css" is_global="1">
-    <ui>HPGLplotter.ui</ui>
-  </css>
+<!-- Created with Cambalache 0.97.8 -->
+<cambalache-project version="0.96.0" target_tk="gtk-4.0">
+  <css filename="HPGLplotter.css" is_global="1"/>
+  <ui filename="HPGLplotter.ui" sha256="88fc7fa4502ed978ab944d007ec09daf415e6cae9db651ce87dbc4a671fb1852"/>
 </cambalache-project>
