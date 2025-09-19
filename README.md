@@ -47,8 +47,8 @@ If problems are encountered, first confirm that correct GPIB communication is oc
 
 **Note** that the GPIB interface on the Linux computer must be able to act as a simple listener / talker. Some devices (notably the **Agilent 82357A/B**) can only act as system controllers and will not work with this application. (the National Instruments GPIB-USB-HS does work as it does not have this restriction)
 
-The program requires the `gtk4` library, on the Linux system, to be version 4.10 or later. To check, use: 
-`$ gtk4-launch --version`
+The program requires the `gtk4` library, on the Linux system, to be version 4.10 or later. The build system will automatically check for this requirement during configuration. To manually check your GTK4 version, use: 
+`$ pkg-config --modversion gtk4`
 
 The program has been tested with the HP8753C Network Analyzer, HP8595E Spectrum Analyzer, HP8568B Spectrum Analyzer and the HP54100 oscilloscope. <em>(If you use it with other instruments, please report your experience)</em>
 

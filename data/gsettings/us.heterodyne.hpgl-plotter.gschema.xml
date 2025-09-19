@@ -24,7 +24,7 @@
       </description>
     </key>
     <key name="last-directory" type="s">
-      <default>'~'</default>
+      <default>''</default>
       <summary>Last directory used to save PDF, PNG or SVG</summary>
       <description>
         Last directory used to save PDF, PNG or SVG
@@ -51,11 +51,32 @@
         GPIB PID of the plotter we are emulating.
       </description>
     </key>
+    <key name="hpgl-end-period" type="d">
+      <default>0.7</default>
+      <summary>HPGL end period</summary>
+      <description>
+        Period after last HPGL command to assume plot has ended.
+      </description>
+    </key>
     <key name="gpib-use-controller-index" type="b">
       <default>true</default>
       <summary>Selection of whether to use the index or name of the GPIB controller</summary>
       <description>
         Selection of whether to use the index or name of the GPIB controller
+      </description>
+    </key>
+    <key name="gpib-initial-listener" type="b">
+      <default>false</default>
+      <summary>Force GPIB as listenter on initialization</summary>
+      <description>
+        Selection of whether force GPIB as listenter on initialization
+      </description>
+    </key>
+    <key name="gpib-do-not-enable-system" type="b">
+      <default>false</default>
+      <summary>Do not enable GPIB as system controller</summary>
+      <description>
+        Do not switch the GPIB interface to system controller if there is another controller on the bus
       </description>
     </key>
     <key name="auto-clear" type="b">
