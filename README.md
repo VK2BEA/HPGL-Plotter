@@ -28,6 +28,7 @@ The National Instruments GPIB driver *may* also be used, but this has not been t
 
 Once the prerequisites (as listed above) are installed, install the 'HPGL Plotter' with these commands:
 
+        $ mkdir build
         $ ./autogen.sh
         $ cd build/
         $ ../configure

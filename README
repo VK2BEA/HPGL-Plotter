@@ -28,6 +28,8 @@ sudo dnf install linux-gpib-firmware
 * To build on Fedora/Redhat: gtk4-devel, glib2-devel, libgs-devel, https://linux-gpib.sourceforge.io/
 
 To install
+
+        $ mkdir build
         $ ./autogen.sh
         $ cd build/
         $ ../configure
