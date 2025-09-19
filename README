@@ -29,12 +29,19 @@ sudo dnf install linux-gpib-firmware
 
 To install
         $ ./autogen.sh
-        $ ./configure
-        $ make
-        $ sudo make check
+        $ cd build/
+        $ ../configure
+        $ make all
         $ sudo make install
+To run:
+        
+        $ /usr/local/bin/HPGLplotter
 
-To uninstall
+To uninstall:
+        
         $ sudo make uninstall
 
+To see logs:
+
+        journalctl -t HPGLplotter -f
 
