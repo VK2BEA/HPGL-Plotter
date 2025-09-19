@@ -69,6 +69,9 @@ m4_include([config_m4/versioning.m4])
 # libgpib
 AC_CHECK_LIB(gpib,ibask,,AC_MSG_ERROR([Please install Linux GPIB driver before continuing.]))
 
+# libgs (Ghostscript)
+AC_CHECK_LIB(gs,gsapi_new_instance,,AC_MSG_ERROR([Please install Ghostscript development library (libgs-dev on Debian type systems).]))
+
 # libsystemd
 # AC_CHECK_LIB(systemd,sd_journal_print,,AC_MSG_ERROR([Please install systemd library (libsystemd-dev on Debian type systems).]))
 
