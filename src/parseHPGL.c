@@ -591,8 +591,9 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 #define SECONDcmdBYTE	0x00FF
 
 	// It may not be able to tell when the start of a new plot begins; therefore,
-	//       if no HPGL is received in 250ms, we reset the plot
-	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL ) > pGlobal->HPGLperiodEnd && pGlobal->flags.bAutoClear ) {
+	//       if no HPGL is received in 250ms, we reset the plot (if the option is set)
+	if( g_timer_elapsed( pGlobal->timeSinceLastHPGLcommand, NULL )
+	               > pGlobal->HPGLperiodEnd && pGlobal->flags.bAutoClear ) {
 		clearHPGL( pGlobal );
 	}
 
@@ -600,8 +601,12 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 	if( HPGLcmdArgs == 0 )
 		HPGLcmdArgs = g_string_new(0);
 
-	if( pGlobal->verbatimHPGLplot == 0 ) {
+	if( pGlobal->verbatimHPGLplot == NULL ) {
 		pGlobal->verbatimHPGLplot = g_string_new(0);
+	    // If we have cleared the plot (either above or explicitly by pressing the button)
+	    // We also reset the accumulated command (in case there was some snippet partially accumulated)
+        HPGLcmd = 0;
+        g_string_truncate( HPGLcmdArgs, 0 );
 	}
 	g_string_append( pGlobal->verbatimHPGLplot, sHPGLserial );
 

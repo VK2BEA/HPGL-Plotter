@@ -82,8 +82,11 @@ fi
 
 YELP_HELP_INIT
 
-PKG_CHECK_MODULES([GLIB], [glib-2.0])
-PKG_CHECK_MODULES([GTK4], [gtk4 >= 4.10])
+PKG_CHECK_MODULES([GLIB], [glib-2.0], [],
+  [AC_MSG_ERROR([Could not find glib-2.0. Please install the development package for 'glib-2.0'.])])
+PKG_CHECK_MODULES([GTK4], [gtk4 >= 4.10], [],
+  [AC_MSG_ERROR([Could not find gtk4 >= 4.10. Please install the development package for 'gtk4'.])])
+
 
 # files required for building
 

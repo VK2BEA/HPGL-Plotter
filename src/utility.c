@@ -66,15 +66,17 @@ splashCreate (tGlobal *pGlobal)
 	if( wSplash ) {
 	    if( bFirst ) {
 	        // This is a kludge because of Wayland not showing the application window immediately
-	        // therefore if we show the splash it is half off the screen
+	        // therefore if we show the splash screen it is half off the screen.
+	        // Come back here after a delay, so that we can be assured that the splash screen is
+	        // shown in relation to the application window.
 	        bFirst = FALSE;
-	        g_timeout_add( 20, (GSourceFunc)splashCreate, pGlobal );
+	        g_timeout_add( 50, (GSourceFunc)splashCreate, pGlobal );
 	    } else {
             sVersion = g_strdup_printf( "Version %s\t(🔨 %s)", VERSION, __DATE__ ); // Changelog date is used in RPM
             gtk_label_set_label( GTK_LABEL( wVersionLabel ), sVersion );
             g_free( sVersion );
             // this is needed for Wayland to get rid of the warning notice about transient window not attached
-            // to parent
+            // to parent. It is now set in the Cambalache setup (.ui file).
             // gtk_window_set_transient_for( GTK_WINDOW( wSplash ), GTK_WINDOW( wApplicationWidget ));
             // gtk_window_set_position(GTK_WINDOW(wSplash), GTK_WIN_POS_CENTER_ALWAYS);
             gtk_window_present( GTK_WINDOW( wSplash ) ); // make sure we are on top
