@@ -215,7 +215,8 @@ void
 clearHPGL( tGlobal *pGlobal ) {
 	g_free( pGlobal->plotHPGL );
 	pGlobal->plotHPGL = 0;
-	g_string_free( pGlobal->verbatimHPGLplot, TRUE );
+	if ( pGlobal->verbatimHPGLplot )
+	    g_string_free( pGlobal->verbatimHPGLplot, TRUE );
 	pGlobal->verbatimHPGLplot = NULL;
 	gtk_widget_set_sensitive( WLOOKUP( pGlobal, "btn_SaveHPGL" ), FALSE );
 }
