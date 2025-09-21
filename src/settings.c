@@ -35,7 +35,7 @@ static gboolean g_settings_schema_exist (const char * id)
   if( (gss = g_settings_schema_source_lookup (
 		  	  	  g_settings_schema_source_get_default(), id, TRUE)) != NULL ) {
 	  bReturn = TRUE;
-    g_object_unref ( gss );
+    g_settings_schema_unref ( gss );
   }
 
   return bReturn;
