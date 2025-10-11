@@ -17,7 +17,7 @@
 #ifndef GPIBCOMMS_H_
 #define GPIBCOMMS_H_
 
-typedef enum { eRDWT_OK=0, eRDWT_ERROR, eRDWT_TIMEOUT, eRDWT_ABORT, eRDWT_CONTINUE, eRDWT_PREVIOUS_ERROR } tGPIBReadWriteStatus;
+typedef enum { eRDWT_OK=0, eRDWT_ERROR, eRDWT_TIMEOUT, eRDWT_ABORT, eRDWT_CONTINUE, eRDWT_CLEAR, eRDWT_PREVIOUS_ERROR } tGPIBReadWriteStatus;
 
 gint GPIBwriteBinary( gint GPIBdescriptor, const void *sData, gint length, gint *pGPIBstatus );
 gint GPIBread( gint GPIBdescriptor, void *sData, gint length, gint *pGPIBstatus );

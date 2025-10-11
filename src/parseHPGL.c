@@ -250,8 +250,8 @@ addLinePoints( tGlobal *pGlobal, gchar *sXYpoints, guint *pHPGLserialCount, gboo
         while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
             pNextChar++;
 
-        p.x = (guint16)x;
-        p.y = (guint16)y;
+        p.x = (gint32)x;
+        p.y = (gint32)y;
 
         append( &pGlobal->plotHPGL, pHPGLserialCount,
                 bAbsolute ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );

@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.28-1"
+   #define VERSION "1.29-1"
 #endif
 
 #define INVALID	(-1)
@@ -48,7 +48,7 @@ typedef struct {
 } GPIBdevice;
 
 typedef struct {
-		gint16 x, y;
+		gint32 x, y;
 	} tCoord;
 
 typedef struct {

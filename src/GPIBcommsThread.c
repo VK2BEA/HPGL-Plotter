@@ -187,6 +187,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	gint currentTimeout;
 	gdouble waitTime = 0.0;
 	tGPIBReadWriteStatus rtn = eRDWT_CONTINUE;
+	int waitStatus;
 
 	*pNbytesRead = 0;
 
@@ -203,7 +204,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		return eRDWT_ERROR;
 
 	//todo - remove when linux GPIB driver fixed
-	// a bug in the drive means that the timeout used for the ibrda command is not accessed immediately
+	// a bug in the driver means that the timeout used for the ibrda command is not accessed immediately
 	// we delay, so that the timeout used is TNONE before changing to T30ms
 #if !GPIB_CHECK_VERSION(4,3,6)
 	usleep( 20 * 1000 );
@@ -213,9 +214,10 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	ibtmo( GPIBdescriptor, T30ms );
 	do {
 		// Wait for read completion or timeout or being set as a talker
-		*pGPIBstatus = ibwait(GPIBdescriptor, TIMO | CMPL | END );
+	    // We may also receive a device clear
+	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | DCAS );
 
-		if( (*pGPIBstatus & TIMO) == TIMO ){
+		if( (waitStatus & TIMO) == TIMO ){
 			// Timeout
 			rtn = eRDWT_CONTINUE;
 			waitTime += THIRTY_MS;
@@ -226,10 +228,14 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 			}
 		} else {
 			// did we complete the read
-			if( (*pGPIBstatus & CMPL) == CMPL ||  (*pGPIBstatus & END) == END ) {
+		    if((waitStatus & ERR) == ERR ) { // or did we have a read error
+		        // A device clear will set the ERR, DCAS and CMPL bits
+		        if( (waitStatus & DCAS) == DCAS )
+		            rtn = eRDWT_CLEAR;
+		        else
+		            rtn = eRDWT_ERROR;
+		    } else if( (waitStatus & CMPL) == CMPL ) {
 			    rtn = eRDWT_OK;
-			} else if((*pGPIBstatus & ERR) == ERR ) { // or did we have a read error
-			    rtn= eRDWT_ERROR;
 			}
 		}
 
@@ -240,14 +246,16 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	} while( rtn == eRDWT_CONTINUE
 			&& (timeoutSecs != TIMEOUT_NONE ? (waitTime < timeoutSecs) : TRUE)  );
 
-	if( rtn != eRDWT_OK ) {
+    // Only the status bits END | ERR | TIMO | CMPL are valid. (all others are 0)
+    *pGPIBstatus = AsyncIbsta();
+    if( pNbytesRead )
+        *pNbytesRead = AsyncIbcnt();
+
+	// Stop the io operation if it is not complete
+	if( (*pGPIBstatus & CMPL) != CMPL) {
 		ibstop( GPIBdescriptor );
 		postError("GPIB read error");
 	}
-
-	if( pNbytesRead )
-		*pNbytesRead = AsyncIbcnt();
-	*pGPIBstatus = AsyncIbsta();
 
 	/* A change of state from listener to talker may occur  before a terminating
 	 * condition (EOI or eos character). If characters have been received, treat
@@ -258,13 +266,21 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 
 	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", AsyncIbcnt(), maxBytes );
 
-	if( (*pGPIBstatus & CMPL) != CMPL && (*pGPIBstatus & TACS) == 0 ) {
+	if( (*pGPIBstatus & CMPL) != CMPL && (waitStatus & TACS) == 0 ) {
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
 			LOG( G_LOG_LEVEL_WARNING, "GPIB async read timeout after %.2f sec. status %04X", timeoutSecs, *pGPIBstatus);
 		else
 			LOG( G_LOG_LEVEL_WARNING, "GPIB async read status/error: %04X/%d", *pGPIBstatus, AsyncIberr() );
 	}
 	ibtmo( GPIBdescriptor, currentTimeout);
+
+	// Catch 'device clear'. The driver gives a system error when 'device clear' is received.
+	// We will treat this as benign and simply return 0 bytes
+	if( (*pGPIBstatus & CMPL) == CMPL && (waitStatus & DCAS) == DCAS ) {
+	    *pGPIBstatus &= ~ERR;
+	    rtn = eRDWT_OK;
+	    *pNbytesRead = 0;
+	}
 
     if( rtn == eRDWT_CONTINUE ) {
         *pGPIBstatus |= ERR_TIMEOUT;
@@ -323,7 +339,7 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
 			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 		}
 
-        if( ibsre( pGlobal->GPIBcontrollerDevice, true ) & ERR )  {
+        if( ibsre( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR )  {
             LOG( G_LOG_LEVEL_WARNING, "ibsre (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
         }
 #if 1
