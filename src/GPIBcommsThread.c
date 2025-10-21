@@ -248,8 +248,9 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 
     // Only the status bits END | ERR | TIMO | CMPL are valid. (all others are 0)
     *pGPIBstatus = AsyncIbsta();
-    if( pNbytesRead )
+    if( pNbytesRead ) {
         *pNbytesRead = AsyncIbcnt();
+    }
 
 	// Stop the io operation if it is not complete
 	if( (*pGPIBstatus & CMPL) != CMPL) {

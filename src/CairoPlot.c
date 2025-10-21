@@ -284,6 +284,14 @@ translateHPGLfontSizeToCairo( gdouble HPGLcharSizeX, gdouble HPGLcharSizeY,
  * \return          TRUE
  *
  */
+/*
+ * Initially the display is in 'plotter units' with the LL (P1) at 0,0
+ * and UR (P2) at 16800,11880 (A3 297mm x 420mm - one unit = 0.025 mm (0.000 98 in.))
+ * The SC instruction will tell us to use 'user units' defining what
+ * coordinate to map to P1 and P2.
+ * The IN instruction will move P1 and P2 but is only relevant when the
+ * SC command is used.
+ */
 gboolean
 plotCompiledHPGL (cairo_t *cr, gdouble imageWidth, gdouble imageHeight, tGlobal *pGlobal)
 {
