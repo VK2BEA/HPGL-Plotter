@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.29-1"
+   #define VERSION "1.30-1"
 #endif
 
 #define INVALID	(-1)
@@ -261,10 +261,11 @@ void CB_color_Pen      ( GtkColorButton* wColorBtn, gpointer user_data );
 void CB_btn_ColorReset ( GtkButton* wBtnColorReset, gpointer user_data );
 void CB_chk_UseControllerName ( GtkCheckButton* wBtnUseControllerName, gpointer user_data );
 void initializeOptionsDialog( tGlobal *pGlobal );
-gint saveSettings( tGlobal *pGlobal );
-gint recoverSettings( tGlobal *pGlobal );
-gint splashCreate (tGlobal *pGlobal);
-gint splashDestroy (tGlobal *pGlobal);
+gint saveSettings      ( tGlobal *pGlobal );
+gint recoverSettings   ( tGlobal *pGlobal );
+gint splashCreate      ( tGlobal *pGlobal );
+gint splashDestroy     ( tGlobal *pGlobal );
+void HPGLopenFile      ( GFile *file, gboolean bCommandLineFile, tGlobal *pGlobal );
 
 void drawHPlogo (cairo_t *cr, gdouble centreX, gdouble lowerLeftY, gdouble scale);
 

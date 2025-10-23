@@ -154,6 +154,47 @@ CB_btn_SaveHPGL ( GtkButton* wBtnSaveHPGL, gpointer user_data ) {
 }
 
 // Call back when open/recall file is selected
+void
+HPGLopenFile( GFile *file, gboolean bCommandLineFile, tGlobal *pGlobal ) {
+    FILE *fHPGL = NULL;
+    GtkAlertDialog *alert_dialog;
+
+    gchar *sChosenFilename = g_file_get_path( file );
+
+#define TBUF_SIZE   10000
+    if( (fHPGL = fopen( sChosenFilename, "r" )) != NULL ) {
+        gchar tbuf[ TBUF_SIZE+1 ];
+        gint n = 0;
+
+        pGlobal->flags.bMuteGPIBreply = TRUE;
+
+        if( pGlobal->flags.bAutoClear )
+            clearHPGL( pGlobal );
+
+        do {
+            n = fread( tbuf, sizeof( gchar ), TBUF_SIZE, fHPGL);
+            tbuf[ n ] = 0;  // null terminate
+            deserializeHPGL( tbuf, pGlobal );
+        } while ( n == TBUF_SIZE );
+        postMessageToMainLoop(TM_REFRESH_PLOT, NULL);
+        pGlobal->flags.bMuteGPIBreply = FALSE;
+        fclose( fHPGL );
+
+        GFile *dir = g_file_get_parent( file );
+        gchar *sChosenDirectory = g_file_get_path( dir );
+        g_free( pGlobal->sLastDirectory );
+        pGlobal->sLastDirectory = sChosenDirectory;
+        g_object_unref( dir );
+    } else if ( !bCommandLineFile ){
+        alert_dialog = gtk_alert_dialog_new ("Cannot open file for reading:\n%s", sChosenFilename);
+        gtk_alert_dialog_show (alert_dialog, NULL);
+        g_object_unref (alert_dialog);
+    }
+
+    g_free( sChosenFilename );
+}
+
+// Call back when open/recall file is selected
 static void
 CB_HPGLopen( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
 	GtkFileDialog *dialog = GTK_FILE_DIALOG (source_object);
@@ -165,40 +206,7 @@ CB_HPGLopen( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
 	GtkAlertDialog *alert_dialog;
 
 	if (((file = gtk_file_dialog_open_finish (dialog, res, &err)) != NULL) ) {
-		gchar *sChosenFilename = g_file_get_path( file );
-
-#define TBUF_SIZE	10000
-		if( (fHPGL = fopen( sChosenFilename, "r" )) != NULL ) {
-			gchar tbuf[ TBUF_SIZE+1 ];
-			gint n = 0;
-
-			pGlobal->flags.bMuteGPIBreply = TRUE;
-
-			if( pGlobal->flags.bAutoClear )
-			    clearHPGL( pGlobal );
-
-			do {
-				n = fread( tbuf, sizeof( gchar ), TBUF_SIZE, fHPGL);
-				tbuf[ n ] = 0;	// null terminate
-				deserializeHPGL( tbuf, pGlobal );
-			} while ( n == TBUF_SIZE );
-			postMessageToMainLoop(TM_REFRESH_PLOT, NULL);
-			pGlobal->flags.bMuteGPIBreply = FALSE;
-			fclose( fHPGL );
-		} else {
-			alert_dialog = gtk_alert_dialog_new ("Cannot open file for writing:\n%s", sChosenFilename);
-			gtk_alert_dialog_show (alert_dialog, NULL);
-			g_object_unref (alert_dialog);
-		}
-
-		GFile *dir = g_file_get_parent( file );
-		gchar *sChosenDirectory = g_file_get_path( dir );
-		g_free( pGlobal->sLastDirectory );
-		pGlobal->sLastDirectory = sChosenDirectory;
-
-		g_object_unref( dir );
-		g_object_unref( file );
-		g_free( sChosenFilename );
+	    HPGLopenFile( file, FALSE, pGlobal );
 	} else {
 		alert_dialog = gtk_alert_dialog_new ("%s", err->message);
 		 // gtk_alert_dialog_show (alert_dialog, GTK_WINDOW (win));

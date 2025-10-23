@@ -418,6 +418,12 @@ on_activate (GApplication *app, gpointer udata)
 				   "/org/freedesktop/login1", NULL,
 				   G_DBUS_SIGNAL_FLAGS_NONE, on_DBUSresume, (gpointer) pGlobal, NULL);
     }
+    if( argsRemainder ) {
+        LOG( G_LOG_LEVEL_INFO, "Open initial HPGL file: %s\n", argsRemainder[0] );
+        GFile *file = g_file_new_for_path( argsRemainder[0] );
+        HPGLopenFile ( file, TRUE, pGlobal );
+        g_object_unref( file );
+    }
 }
 
 /*!     \brief  on_startup (startup signal callback)
