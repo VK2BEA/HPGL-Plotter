@@ -385,6 +385,8 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 
 	case HPGL_CHAR_SIZE_REL:	// SR
 		COMMA2SPACE( sHPGLargs );
+		charSizeX = 0.75;
+		charSizeY = 1.5;
 		sscanf(sHPGLargs, "%f %f", &charSizeX, &charSizeY);
 		// add the text size change to the compiled HPGL serialized string
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_TEXT_SIZE,  &charSizeX, sizeof( gfloat)  );

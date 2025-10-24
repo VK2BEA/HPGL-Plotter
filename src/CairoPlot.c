@@ -76,6 +76,10 @@ showUserChar ( cairo_t *cr, tCoordFloat *pLabel, gint nPoints ) {
 
 }
 
+#define X_HPGL_TO_CAIRO_EM  2.4
+#define Y_HPGL_TO_CAIRO_EM  1.5
+#define LF_SCALE (X_HPGL_TO_CAIRO_EM/Y_HPGL_TO_CAIRO_EM * 0.88)
+
 static void
 showLabel ( cairo_t *cr, gchar *pLabel) {
     gdouble startX, startY;
@@ -128,7 +132,7 @@ showLabel ( cairo_t *cr, gchar *pLabel) {
             break;
         case '\n':      // line feed (also do carriage return)
             thisLine++;
-            cairo_move_to( cr, startX, startY + thisLine * fontMatrix.yy );
+            cairo_move_to( cr, startX, startY + thisLine * fontMatrix.yy * LF_SCALE );
             break;
         case '\v':      // Verical tab (reverse line feed)
             thisLine--;
@@ -258,9 +262,6 @@ translateHPGLfontSizeToCairo( gdouble HPGLcharSizeX, gdouble HPGLcharSizeY,
     cairoScaleFactorX = cairoWidth  / (gdouble)(plotterState->widthTransformed);
     cairoScaleFactorY = cairoHeight / (gdouble)(plotterState->heightTransformed);
 
-
-#define X_HPGL_TO_CAIRO_EM  2.4 // 2.4
-#define Y_HPGL_TO_CAIRO_EM  2.0 // 2.0
     *pCairoX =    widthInPlotterUnits * cairoScaleFactorX * X_HPGL_TO_CAIRO_EM;
     *pCairoY =  -heightInPlotterUnits * cairoScaleFactorY * Y_HPGL_TO_CAIRO_EM;
 }
