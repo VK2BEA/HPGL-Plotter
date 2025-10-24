@@ -392,8 +392,10 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 		break;
 
 	case HPGL_LINE_TYPE:	// LT
-		sscanf(sHPGLargs, "%"SCNu8, &lineType);
-		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINETYPE,  &lineType, sizeof( guint8 )  );
+		if (sscanf(sHPGLargs, "%"SCNu8, &lineType) != 1) {
+			lineType = 0;
+		}
+		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINETYPE,  &lineType, sizeof(guint8) );
 		break;
 
 	case HPGL_SELECT_PEN:	// SP
