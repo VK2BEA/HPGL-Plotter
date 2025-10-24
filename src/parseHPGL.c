@@ -250,8 +250,8 @@ addLinePoints( tGlobal *pGlobal, gchar *sXYpoints, guint *pHPGLserialCount, gboo
         while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
             pNextChar++;
 
-        p.x = (gint32)round(x); 
-        p.y = (gint32)round(y); 
+        p.x = (gint32)round(x);
+        p.y = (gint32)round(y);
 
         append( &pGlobal->plotHPGL, pHPGLserialCount,
                 bAbsolute ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
@@ -392,7 +392,8 @@ parseHPGLcmd( guint16 HPGLcmd, gchar *sHPGLargs, tGlobal *pGlobal ) {
 		break;
 
 	case HPGL_LINE_TYPE:	// LT
-		sscanf(sHPGLargs, "%"SCNu8, &lineType);
+        lineType = 0;
+	    sscanf(sHPGLargs, "%"SCNu8, &lineType);
 		append( &pGlobal->plotHPGL, &HPGLserialCount, CHPGL_LINETYPE,  &lineType, sizeof( guint8 )  );
 		break;
 

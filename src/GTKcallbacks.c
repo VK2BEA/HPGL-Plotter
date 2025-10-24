@@ -199,7 +199,6 @@ static void
 CB_HPGLopen( GObject *source_object, GAsyncResult *res, gpointer gpGlobal ) {
 	GtkFileDialog *dialog = GTK_FILE_DIALOG (source_object);
 	tGlobal *pGlobal = (tGlobal *)gpGlobal;
-	FILE *fHPGL = NULL;
 
 	GFile *file;
 	GError *err = NULL;
