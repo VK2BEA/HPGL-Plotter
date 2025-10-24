@@ -243,15 +243,15 @@ addLinePoints( tGlobal *pGlobal, gchar *sXYpoints, guint *pHPGLserialCount, gboo
     bMorePoints = *pNextChar != 0;
 
     while ( bMorePoints ) {
-        gint64 x = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+        gdouble x = g_ascii_strtod( pNextChar, &pNextChar );
         while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
             pNextChar++;
-        gint64 y = g_ascii_strtoll( pNextChar, &pNextChar, 10 );
+        gdouble y = g_ascii_strtod( pNextChar, &pNextChar );
         while( g_ascii_isspace(*pNextChar) || *pNextChar == ',' )
             pNextChar++;
 
-        p.x = (gint32)x;
-        p.y = (gint32)y;
+        p.x = (gint32)round(x); 
+        p.y = (gint32)round(y); 
 
         append( &pGlobal->plotHPGL, pHPGLserialCount,
                 bAbsolute ? CHPGL_MOVE : CHPGL_RMOVE,  &p, sizeof(tCoord)  );
