@@ -78,7 +78,7 @@ showUserChar ( cairo_t *cr, tCoordFloat *pLabel, gint nPoints ) {
 
 #define X_HPGL_TO_CAIRO_EM  2.4
 #define Y_HPGL_TO_CAIRO_EM  1.5
-#define LF_SCALE (X_HPGL_TO_CAIRO_EM/Y_HPGL_TO_CAIRO_EM * 0.88)
+#define LF_SCALE (2.1/Y_HPGL_TO_CAIRO_EM)
 
 static void
 showLabel ( cairo_t *cr, gchar *pLabel) {
