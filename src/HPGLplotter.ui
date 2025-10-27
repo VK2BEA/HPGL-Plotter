@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.97.8 -->
+<!-- Created with Cambalache 0.99.1 -->
 <interface>
   <!-- interface-name HPGLplotter.ui -->
   <!-- interface-description GPIB HPGL plotter emulator -->
@@ -604,13 +604,14 @@
                     <property name="valign">start</property>
                     <child>
                       <object class="GtkCheckButton" id="WID_cbutton_NoGPIBSystemCtrlr">
-                        <property name="label">GPIB - never set to system controller</property>
+                        <property name="active">False</property>
+                        <property name="label">GPIB - no commands requiring CIC</property>
                         <property name="tooltip-text">To clear the GPIB interface and better probe 
 the GPIB, the interface is temporarily configured
 as a sytem controller.
 If there is another GPIB system controller on the
 GPIB, check this box to avoid contention.</property>
-                        <property name="visible">False</property>
+                        <property name="visible">True</property>
                       </object>
                     </child>
                     <child>

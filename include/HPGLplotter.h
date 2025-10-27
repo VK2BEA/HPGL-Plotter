@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.31-1"
+   #define VERSION "1.32-1"
 #endif
 
 #define INVALID	(-1)
@@ -92,19 +92,19 @@ typedef struct {
 typedef struct {
 
 	struct {
-		guint32 bRunning         		 : 1;
-		guint32 bbDebug					 : 3;
-		guint32 bGPIBcommsActive		 : 1;
-		guint32 bGPIB_UseControllerIndex : 1;
+		guint32 bRunning         		        : 1;
+		guint32 bbDebug					        : 3;
+		guint32 bGPIBcommsActive		        : 1;
+		guint32 bGPIB_UseControllerIndex        : 1;
 		guint32 bGPIB_ControllerOpenedWithIndex : 1;
-        guint32 bGPIB_InitialListener    : 1;
-		guint32 bInitialGPIB_ATN         : 1;
-		guint32 bInitialActiveController : 1;
-		guint32 bErasePrimed			 : 1;
-		guint32 bAutoClear				 : 1;
-		guint32 bPortrait				 : 1;
-		guint32 bDoNotEnableSystemController : 1;
-		guint32 bMuteGPIBreply           : 1;
+        guint32 bGPIB_InitialListener           : 1;
+		guint32 bInitialGPIB_ATN                : 1;
+		guint32 bInitialActiveController        : 1;
+		guint32 bErasePrimed			        : 1;
+		guint32 bAutoClear				        : 1;
+		guint32 bPortrait				        : 1;
+		guint32 bDoNotEnableSystemController    : 1;
+		guint32 bMuteGPIBreply                  : 1;
 	} flags;
 	gint		PDFpaperSize;
 #define P1	0

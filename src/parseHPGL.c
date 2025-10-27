@@ -617,7 +617,7 @@ deserializeHPGL( gchar *sHPGLserial, tGlobal *pGlobal ) {
 	g_timer_start( pGlobal->timeSinceLastHPGLcommand );
 
 	while( *ptrHPGL != 0 ) {
-		// are wee looking for the command
+		// are we looking for the command
 		if( (HPGLcmd & FIRSTcmdBYTE) == 0 ) {
 			// looking for first byte of two byte command
 			if( g_ascii_isupper( *ptrHPGL ) ) {

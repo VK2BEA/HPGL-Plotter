@@ -34,6 +34,7 @@ tGlobal globalData = {0};
 static gint     optDebug = 0;
 static gboolean bOptQuiet = 0;
 static gint     bOptDoNotEnableSystemController = 0;
+static gint     bOptEnableSystemController = 0;
        gint     optInitializeGPIBasListener = INVALID;
 static gint     optDeviceID = INVALID;
 static gint     optControllerIndex = INVALID;
@@ -83,6 +84,8 @@ static const GOptionEntry optionEntries[] =
           &bOptQuiet, "No GUI sounds", NULL },
   { "GPIBnoSystemController",  'n', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
           &bOptDoNotEnableSystemController, "Do not enable GPIB interface as a system controller", NULL },
+  { "GPIBuseSystemController",  'N', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
+                  &bOptEnableSystemController, "Enable GPIB interface as a system controller when needed", NULL },
   { "GPIBinitialListener",  'l', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK,
           argumentGPIBlistener, "Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')", NULL },
   { "GPIBdeviceID",      'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
@@ -257,6 +260,49 @@ on_DBUSresume(GDBusConnection *connection,
 }
 
 
+/*!     \brief  on_shutdown (shutdown signal callback)
+ *
+ * Cleanup on shutdown
+ *
+ * \param  app      : pointer to this GApplication
+ * \param  userData : unused
+ */
+static void
+on_shutdown (GApplication *app, gpointer userData)
+{
+    tGlobal *pGlobal __attribute__((unused)) = (tGlobal *)userData;
+
+    saveSettings( pGlobal );
+
+    // cleanup
+    messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
+    messageData->command = TG_END;
+    g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+
+//   saveProgramOptions( pGlobal );
+
+
+    if( pGlobal->pGThread ) {
+        g_thread_join( pGlobal->pGThread );
+        g_thread_unref( pGlobal->pGThread );
+    }
+
+    // Destroy queue and source
+    g_async_queue_unref( pGlobal->messageQueueToMain );
+    g_source_destroy( pGlobal->messageEventSource );
+    g_source_unref ( pGlobal->messageEventSource );
+
+    g_hash_table_destroy( globalData.widgetHashTable );
+
+    g_timer_destroy ( pGlobal->timeSinceLastHPGLcommand );
+
+    g_free( pGlobal->sUsersHPGLfilename );
+    g_free( pGlobal->sUsersPDFImageFilename );
+    g_free( pGlobal->sUsersPNGImageFilename );
+    g_free( pGlobal->sUsersSVGImageFilename );
+
+    LOG( G_LOG_LEVEL_INFO, "Ending");
+}
 
 
 /*!     \brief  on_activate (activate signal callback)
@@ -440,11 +486,19 @@ static void
 on_startup (GApplication *app, gpointer udata)
 {
 	tGlobal *pGlobal = (tGlobal *)udata;
-	gboolean bAbort = FALSE;
 
     LOG( G_LOG_LEVEL_INFO, "Starting");
 	setenv("IB_NO_ERROR", "1", 0);	// no noise
 	logVersion();
+
+    if( bOptDoNotEnableSystemController && bOptEnableSystemController ) {
+        LOG( G_LOG_LEVEL_WARNING, "command line options -n and -N are mutually exclusive" );
+        g_printerr( "command line options -n and -N are mutually exclusive\n" );
+        g_signal_handlers_disconnect_by_func (app, G_CALLBACK (on_activate), (gpointer)&globalData);
+        g_signal_handlers_disconnect_by_func (app, G_CALLBACK (on_shutdown), (gpointer)&globalData);
+        g_application_quit (G_APPLICATION ( app ));
+        return;
+    }
 
 	pGlobal->GPIBdevicePID       = DEFAULT_GPIB_DEVICE_ID;
 	pGlobal->GPIBcontrollerIndex = DEFAULT_GPIB_CONTROLLER_INDEX;
@@ -469,12 +523,16 @@ on_startup (GApplication *app, gpointer udata)
     }
 
     initializeHPGL( pGlobal, TRUE );
-
     recoverSettings( pGlobal );
 
     // The command line switches should override the recovered settings
     if( bOptDoNotEnableSystemController ) {
     	pGlobal->flags.bDoNotEnableSystemController = TRUE;
+    }
+
+    // The command line switches should override the recovered settings
+    if( bOptEnableSystemController ) {
+        pGlobal->flags.bDoNotEnableSystemController = FALSE;
     }
 
     if( optInitializeGPIBasListener != INVALID ) {
@@ -502,53 +560,6 @@ on_startup (GApplication *app, gpointer udata)
     	LOG( G_LOG_LEVEL_WARNING, "Cannot get system dbus bus" );
     }
 
-	if( bAbort )
-		g_application_quit (G_APPLICATION ( app ));
-
-}
-
-/*!     \brief  on_shutdown (shutdown signal callback)
- *
- * Cleanup on shutdown
- *
- * \param  app      : pointer to this GApplication
- * \param  userData : unused
- */
-static void
-on_shutdown (GApplication *app, gpointer userData)
-{
-	tGlobal *pGlobal __attribute__((unused)) = (tGlobal *)userData;
-
-	saveSettings( pGlobal );
-
-    // cleanup
-    messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
-    messageData->command = TG_END;
-    g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
-
-//   saveProgramOptions( pGlobal );
-
-
-    if( pGlobal->pGThread ) {
-        g_thread_join( pGlobal->pGThread );
-        g_thread_unref( pGlobal->pGThread );
-    }
-
-    // Destroy queue and source
-    g_async_queue_unref( pGlobal->messageQueueToMain );
-    g_source_destroy( pGlobal->messageEventSource );
-    g_source_unref ( pGlobal->messageEventSource );
-
-	g_hash_table_destroy( globalData.widgetHashTable );
-
-	g_timer_destroy ( pGlobal->timeSinceLastHPGLcommand );
-
-	g_free( pGlobal->sUsersHPGLfilename );
-	g_free( pGlobal->sUsersPDFImageFilename );
-	g_free( pGlobal->sUsersPNGImageFilename );
-	g_free( pGlobal->sUsersSVGImageFilename );
-
-    LOG( G_LOG_LEVEL_INFO, "Ending");
 }
 
 
@@ -569,6 +580,8 @@ main(int argc, char *argv[]) {
     setlocale(LC_ALL, "en_US");
     setenv("IB_NO_ERROR", "1", 0);	// no noise for GPIB library
     g_log_set_writer_func (g_log_writer_journald, NULL, NULL);
+    // g_log_set_handler(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, g_log_default_handler, NULL);
+    // gtk_set_debug_flags( 0 );
 
     // ensure only one instance of program runs ..
     app = gtk_application_new ("us.heterodyne.HPGLplotter", G_APPLICATION_HANDLES_OPEN);
