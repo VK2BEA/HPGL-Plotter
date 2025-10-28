@@ -260,8 +260,9 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 
 	/* A change of state from listener to talker may occur  before a terminating
 	 * condition (EOI or eos character). If characters have been received, treat
-	 * the change of state as an end of read and return the characters received. */
-    if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO && *pNbytesRead > 0 ) {
+	 * Don't treat an abort as an error. It can come from an ibclr()
+	 */
+    if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO  ) {
         *pGPIBstatus &=  ~ERR;
     }
 
@@ -688,13 +689,17 @@ threadGPIB(gpointer _pGlobal) {
         if( readResult == eRDWT_ABORT )
             continue;
 
-		if( readResult != eRDWT_OK )
-			LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-
-		if ( GPIBfailed( GPIBstatus ) ) {
-			LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-			sHPGL[0] = 0;
-			continue;
+		if( readResult != eRDWT_OK ) {
+		    if( readResult == eRDWT_CLEAR )
+		        LOG( G_LOG_LEVEL_WARNING, "clear received during ibrd / status: 0x%04x", ThreadIbsta());
+		    else
+		        LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+		} else {
+		    if ( GPIBfailed( GPIBstatus ) ) {
+                LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+                sHPGL[0] = 0;
+                continue;
+		    }
 		}
 
 		sHPGL[ nBytesRead ] = 0;	// Null terminate
