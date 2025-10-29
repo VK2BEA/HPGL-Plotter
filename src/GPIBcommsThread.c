@@ -89,9 +89,9 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 
 	if( GPIBfailed( *pGPIBstatus ) )
 		return eRDWT_ERROR;
-	//todo - remove when linux GPIB driver fixed
-	// a bug in the drive means that the timout used for the ibrda command is not accessed immediatly
-	// we delay, so that the timeout used is TNONE bedore changing to T30ms
+	//todo - remove when Linux GPIB driver fixed
+	// a bug in the drive means that the timeout used for the ibrda command is not accessed immediately
+	// we delay, so that the timeout used is TNONE before changing to T30ms
 #if !GPIB_CHECK_VERSION(4,3,6)
 	usleep( 20 * 1000 );
 #endif
@@ -125,8 +125,10 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 			&& (timeoutSecs != TIMEOUT_NONE ? (waitTime < timeoutSecs) : TRUE)  );
 
 
-	if( rtn != eRDWT_OK )
-		ibstop( GPIBdescriptor );;
+    if( (*pGPIBstatus & CMPL) != CMPL) {
+        ibstop( GPIBdescriptor );
+        postError("GPIB write error");
+    }
 
 	if( pBytesWritten )
 		*pBytesWritten = AsyncIbcnt();
@@ -232,6 +234,8 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		        // A device clear will set the ERR, DCAS and CMPL bits
 		        if( (waitStatus & DCAS) == DCAS )
 		            rtn = eRDWT_CLEAR;
+                else if( (waitStatus & CMPL) == CMPL && AsyncIberr() == EABO )
+                    rtn = eRDWT_OK;
 		        else
 		            rtn = eRDWT_ERROR;
 		    } else if( (waitStatus & CMPL) == CMPL ) {

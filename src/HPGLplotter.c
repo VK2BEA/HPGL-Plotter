@@ -562,6 +562,50 @@ on_startup (GApplication *app, gpointer udata)
 
 }
 
+/*!     \brief  Filter the log messages
+ *
+ * Filter the log messages, including those debug messages from libraries (gnome and gtk4)
+ *
+ * \param log_level  log level
+ * \param fields     pointer to message fields
+ * \param n_fields   number of fields
+ * \param gpGlobal   pointer to global data
+ * \return           G_LOG_WRITER_HANDLED or G_LOG_WRITER_UNHANDLED
+ */
+static GLogWriterOutput
+filtered_log_writer_journald (GLogLevelFlags log_level,
+                        const GLogField *fields,
+                        gsize n_fields,
+                        gpointer gpGlobal)
+{
+    tGlobal *pGlobal = (tGlobal *)gpGlobal;
+
+    // No message from HPGLplotter has additional fields
+    if( n_fields >= 6 && pGlobal->flags.bbDebug != eDEBUG_MAXIMUM )
+        return G_LOG_WRITER_HANDLED;
+
+    switch (log_level) {
+    case G_LOG_LEVEL_ERROR:
+    case G_LOG_LEVEL_CRITICAL:
+    case G_LOG_LEVEL_WARNING:
+    case G_LOG_LEVEL_MESSAGE:
+    case G_LOG_LEVEL_INFO:
+        /* important enough to force to the journal */
+        return g_log_writer_journald (log_level, fields, n_fields, gpGlobal);
+        break;
+    case G_LOG_LEVEL_DEBUG:
+        /* Not important enough unless verbose mode has been explicitly
+         * enabled. */
+        if ( pGlobal->flags.bbDebug == eDEBUG_MAXIMUM )
+            return g_log_writer_journald (log_level, fields, n_fields, gpGlobal);
+        else
+            return G_LOG_WRITER_HANDLED;
+    default:
+        break;
+    }
+
+    return G_LOG_WRITER_UNHANDLED;
+}
 
 /*!     \brief  Start of program
  *
@@ -579,7 +623,7 @@ main(int argc, char *argv[]) {
 
     setlocale(LC_ALL, "en_US");
     setenv("IB_NO_ERROR", "1", 0);	// no noise for GPIB library
-    g_log_set_writer_func (g_log_writer_journald, NULL, NULL);
+    g_log_set_writer_func (filtered_log_writer_journald, (gpointer)&globalData, NULL);
     // g_log_set_handler(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, g_log_default_handler, NULL);
     // gtk_set_debug_flags( 0 );
 
