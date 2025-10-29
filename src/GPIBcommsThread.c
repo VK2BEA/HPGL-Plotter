@@ -75,6 +75,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	gint currentTimeout;
 	gdouble waitTime = 0.0;
 	tGPIBReadWriteStatus rtn = eRDWT_CONTINUE;
+    int waitStatus;
 
 	*pBytesWritten = 0;
 
@@ -100,8 +101,8 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	ibtmo( GPIBdescriptor, T30ms );
 	do {
 		// Wait for read completion or timeout
-		*pGPIBstatus = ibwait(GPIBdescriptor, TIMO | CMPL | END);
-		if( (*pGPIBstatus & TIMO) == TIMO ){
+	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | END);
+		if( (waitStatus & TIMO) == TIMO ){
 			// Timeout
 			rtn = eRDWT_CONTINUE;
 			waitTime += THIRTY_MS;
@@ -112,10 +113,10 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
             }
 		} else {
 			// did we have a read error
-			if((*pGPIBstatus & ERR) == ERR )
+			if((waitStatus & ERR) == ERR )
 				rtn= eRDWT_ERROR;
 			// or did we complete the read
-			else if( (*pGPIBstatus & CMPL) == CMPL ||  (*pGPIBstatus & END) == END )
+			else if( (waitStatus & CMPL) == CMPL ||  (waitStatus & END) == END )
 				rtn = eRDWT_OK;
 		}
 		// If we get a message on the queue, it is assumed to be an abort
@@ -124,6 +125,15 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	} while( rtn == eRDWT_CONTINUE
 			&& (timeoutSecs != TIMEOUT_NONE ? (waitTime < timeoutSecs) : TRUE)  );
 
+	*pGPIBstatus = AsyncIbsta();
+#if !GPIB_CHECK_VERSION(4,3,8)
+    // A bug in AsyncIbsta() gives unreliable values for CMPL
+    // We use the value returned by ibwait() until this is fixed
+    if( (waitStatus & CMPL) == CMPL )
+        *pGPIBstatus |=  CMPL;
+    else
+        *pGPIBstatus &= ~CMPL;
+#endif
 
     if( (*pGPIBstatus & CMPL) != CMPL) {
         ibstop( GPIBdescriptor );
@@ -132,11 +142,10 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 
 	if( pBytesWritten )
 		*pBytesWritten = AsyncIbcnt();
-	*pGPIBstatus = AsyncIbsta();
 
 	DBG( eDEBUG_EXTENSIVE, "🖊: %d / %ld bytes", AsyncIbcnt(), length );
 
-	if( (*pGPIBstatus & CMPL) != CMPL ) {
+	if( (*pGPIBstatus & CMPL) != CMPL && rtn != eRDWT_ABORT ) {
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
 			LOG( G_LOG_LEVEL_WARNING, "GPIB async write timeout after %.2f sec. status %04X", timeoutSecs, *pGPIBstatus);
 		else
@@ -217,7 +226,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	do {
 		// Wait for read completion or timeout or being set as a talker
 	    // We may also receive a device clear
-	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | DCAS );
+	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL );
 
 		if( (waitStatus & TIMO) == TIMO ){
 			// Timeout
@@ -252,27 +261,37 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 
     // Only the status bits END | ERR | TIMO | CMPL are valid. (all others are 0)
     *pGPIBstatus = AsyncIbsta();
+#if !GPIB_CHECK_VERSION(4,3,8)
+    // A bug in AsyncIbsta() gives unreliable values for CMPL
+    // We use the value returned by ibwait() until this is fixed
+    if( (waitStatus & CMPL) == CMPL )
+        *pGPIBstatus |=  CMPL;
+    else
+        *pGPIBstatus &= ~CMPL;
+#endif
+
     if( pNbytesRead ) {
         *pNbytesRead = AsyncIbcnt();
     }
 
 	// Stop the io operation if it is not complete
-	if( (*pGPIBstatus & CMPL) != CMPL) {
+	if( ( *pGPIBstatus & CMPL ) != CMPL) {
 		ibstop( GPIBdescriptor );
 		postError("GPIB read error");
 	}
 
 	/* A change of state from listener to talker may occur  before a terminating
-	 * condition (EOI or eos character). If characters have been received, treat
+	 * condition (EOI or eos character).
 	 * Don't treat an abort as an error. It can come from an ibclr()
 	 */
     if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO  ) {
         *pGPIBstatus &=  ~ERR;
     }
 
-	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", AsyncIbcnt(), maxBytes );
+	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", *pNbytesRead, maxBytes );
 
-	if( (*pGPIBstatus & CMPL) != CMPL && (waitStatus & TACS) == 0 ) {
+	if( (*pGPIBstatus & CMPL) != CMPL && (waitStatus & TACS) == 0 && rtn != eRDWT_ABORT ) {
+	    // Log if we are not a talker and we did not complete the read
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
 			LOG( G_LOG_LEVEL_WARNING, "GPIB async read timeout after %.2f sec. status %04X", timeoutSecs, *pGPIBstatus);
 		else
@@ -282,10 +301,8 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 
 	// Catch 'device clear'. The driver gives a system error when 'device clear' is received.
 	// We will treat this as benign and simply return 0 bytes
-	if( (*pGPIBstatus & CMPL) == CMPL && (waitStatus & DCAS) == DCAS ) {
+	if( rtn == eRDWT_CLEAR ) {
 	    *pGPIBstatus &= ~ERR;
-	    rtn = eRDWT_OK;
-	    *pNbytesRead = 0;
 	}
 
     if( rtn == eRDWT_CONTINUE ) {
@@ -294,7 +311,6 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
     } else {
         return (rtn);
     }
-
 }
 
 /*!     \brief  Read configuration value from the GPIB device
@@ -330,17 +346,20 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
 #define FIRST_ALLOCATED_CONTROLLER_DESCRIPTOR 16
 	// If we have another system controller on the bus, the commands here will cause a problem
 	// Do not change to controller mode unless the setting is checked.
+
+    if( pGlobal->GPIBcontrollerDevice == INVALID ) {
+        return 0;
+    }
+
 	if( !pGlobal->flags.bDoNotEnableSystemController && pGlobal->flags.bInitialActiveController) {
 		// Request system control
 		// i.e. make board system controller
-#if 1
-
 		if( (ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) == ERR )
 			LOG( G_LOG_LEVEL_WARNING, "ibrsc (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-#endif
 		// perform interface clear (board)
 		// this is to get the instrument (e.g. HP8595E) to release the GPIB
 		// without this we get "not controller in charge" errors
+
 		if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
 			LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 		}
@@ -348,13 +367,11 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
         if( ibsre( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR )  {
             LOG( G_LOG_LEVEL_WARNING, "ibsre (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
         }
-#if 1
 		// assert ATN (board)
 		// i.e. become active controller (if it was set when we started )
 		if( pGlobal->flags.bInitialGPIB_ATN &&
 				(ibcac( pGlobal->GPIBcontrollerDevice, 0 ) & ERR ) == ERR )
 			LOG( G_LOG_LEVEL_WARNING, "ibcac (true) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-#endif
 	}
     // reinitialize controller (parameters in /etc/gpib.conf)
     // if we opened the device with ibfind(), release the resources
@@ -383,6 +400,7 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
 	gshort	lineStatus;
 	gint	ibaskResult = 0;
 	gboolean bNoListeners = FALSE;
+	static gboolean bFirst = TRUE;
 
 	/* The board index can be used as a device descriptor; however,
 	 * if a device descriptor was returned from the ibfind, it must be freed
@@ -406,12 +424,15 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
 		goto err;
 
 	// ask if we are the system controller
-	if( ibask( pGlobal->GPIBcontrollerDevice, IbaSC, &ibaskResult ) & ERR ) {
-		LOG( G_LOG_LEVEL_WARNING, "ibask (IbaSC) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-		goto err;
+	if( bFirst ) {
+        if( ibask( pGlobal->GPIBcontrollerDevice, IbaSC, &ibaskResult ) & ERR ) {
+            LOG( G_LOG_LEVEL_WARNING, "ibask (IbaSC) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+            goto err;
+        }
+        // Remember if we are the system controller or not
+        pGlobal->flags.bInitialActiveController = (ibaskResult != 0);
 	}
-	// Remember if we are the system controller or not
-	pGlobal->flags.bInitialActiveController = (ibaskResult != 0);
+    bFirst = FALSE;
 
 	// Set the EOT (assert EOI with last data byte)
 	if( ibeot( pGlobal->GPIBcontrollerDevice, GPIB_EOI ) & ERR ) {
@@ -693,18 +714,15 @@ threadGPIB(gpointer _pGlobal) {
         if( readResult == eRDWT_ABORT )
             continue;
 
-		if( readResult != eRDWT_OK ) {
-		    if( readResult == eRDWT_CLEAR )
-		        LOG( G_LOG_LEVEL_WARNING, "clear received during ibrd / status: 0x%04x", ThreadIbsta());
-		    else
-		        LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-		} else {
-		    if ( GPIBfailed( GPIBstatus ) ) {
+        if( readResult != eRDWT_OK ) {
+            if( readResult == eRDWT_CLEAR )
+                LOG( G_LOG_LEVEL_WARNING, "clear received during ibrd / status: 0x%04x", ThreadIbsta());
+            else
                 LOG( G_LOG_LEVEL_WARNING, "ibrd error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-                sHPGL[0] = 0;
-                continue;
-		    }
-		}
+
+            sHPGL[0] = 0;
+            continue;
+        }
 
 		sHPGL[ nBytesRead ] = 0;	// Null terminate
 
