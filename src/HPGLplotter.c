@@ -580,10 +580,6 @@ filtered_log_writer_journald (GLogLevelFlags log_level,
 {
     tGlobal *pGlobal = (tGlobal *)gpGlobal;
 
-    // No message from HPGLplotter has additional fields
-    if( n_fields >= 6 && pGlobal->flags.bbDebug != eDEBUG_MAXIMUM )
-        return G_LOG_WRITER_HANDLED;
-
     switch (log_level) {
     case G_LOG_LEVEL_ERROR:
     case G_LOG_LEVEL_CRITICAL:
@@ -596,15 +592,17 @@ filtered_log_writer_journald (GLogLevelFlags log_level,
     case G_LOG_LEVEL_DEBUG:
         /* Not important enough unless verbose mode has been explicitly
          * enabled. */
-        if ( pGlobal->flags.bbDebug == eDEBUG_MAXIMUM )
+        // No message from HPGLplotter has additional fields
+        if( n_fields < 6 )
             return g_log_writer_journald (log_level, fields, n_fields, gpGlobal);
         else
-            return G_LOG_WRITER_HANDLED;
+            return G_LOG_WRITER_UNHANDLED;
+        break;
     default:
         break;
     }
 
-    return G_LOG_WRITER_UNHANDLED;
+    return G_LOG_WRITER_HANDLED;
 }
 
 /*!     \brief  Start of program
