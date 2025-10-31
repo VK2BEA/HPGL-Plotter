@@ -116,7 +116,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 			if((waitStatus & ERR) == ERR )
 				rtn= eRDWT_ERROR;
 			// or did we complete the read
-			else if( (waitStatus & CMPL) == CMPL ||  (waitStatus & END) == END )
+			else // must have CMPL or END set
 				rtn = eRDWT_OK;
 		}
 		// If we get a message on the queue, it is assumed to be an abort
@@ -125,31 +125,29 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	} while( rtn == eRDWT_CONTINUE
 			&& (timeoutSecs != TIMEOUT_NONE ? (waitTime < timeoutSecs) : TRUE)  );
 
-	*pGPIBstatus = AsyncIbsta();
-#if !GPIB_CHECK_VERSION(4,3,8)
-    // A bug in AsyncIbsta() gives unreliable values for CMPL
-    // We use the value returned by ibwait() until this is fixed
-    if( (waitStatus & CMPL) == CMPL )
-        *pGPIBstatus |=  CMPL;
-    else
-        *pGPIBstatus &= ~CMPL;
-#endif
-
-    if( (*pGPIBstatus & CMPL) != CMPL) {
+    // Stop the I/O operation if it is not complete
+    if( ( waitStatus & CMPL ) != CMPL) {
+        //  On successfully aborting an asynchronous operation,
+        //  the ERR bit is set in ibsta, and iberr is set to EABO.
+        //  If the ERR bit is not set in ibsta, then there was no asynchronous i/o operation in progress.
         ibstop( GPIBdescriptor );
-        postError("GPIB write error");
     }
+
+	*pGPIBstatus = AsyncIbsta();
 
 	if( pBytesWritten )
 		*pBytesWritten = AsyncIbcnt();
 
 	DBG( eDEBUG_EXTENSIVE, "🖊: %d / %ld bytes", AsyncIbcnt(), length );
 
-	if( (*pGPIBstatus & CMPL) != CMPL && rtn != eRDWT_ABORT ) {
+	if( rtn == eRDWT_ABORT )
+        LOG( G_LOG_LEVEL_WARNING, "GPIB async write abort status/error: %04X/%d", *pGPIBstatus, AsyncIberr() );
+
+	if( rtn == eRDWT_CONTINUE && rtn != eRDWT_ABORT ) {
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
-			LOG( G_LOG_LEVEL_WARNING, "GPIB async write timeout after %.2f sec. status %04X", timeoutSecs, *pGPIBstatus);
+			LOG( G_LOG_LEVEL_WARNING, "GPIB async write timeout after %.2f sec. status %04X", timeoutSecs, waitStatus);
 		else
-			LOG( G_LOG_LEVEL_WARNING, "GPIB async write status/error: %04X/%d", *pGPIBstatus, AsyncIberr() );
+			LOG( G_LOG_LEVEL_WARNING, "GPIB async write status/error: %04X/%d", waitStatus, AsyncIberr() );
 	}
 	ibtmo( GPIBdescriptor, currentTimeout);
 
@@ -226,7 +224,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	do {
 		// Wait for read completion or timeout or being set as a talker
 	    // We may also receive a device clear
-	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL );
+	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | END | DCAS);
 
 		if( (waitStatus & TIMO) == TIMO ){
 			// Timeout
@@ -240,14 +238,12 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 		} else {
 			// did we complete the read
 		    if((waitStatus & ERR) == ERR ) { // or did we have a read error
-		        // A device clear will set the ERR, DCAS and CMPL bits
-		        if( (waitStatus & DCAS) == DCAS )
-		            rtn = eRDWT_CLEAR;
-                else if( (waitStatus & CMPL) == CMPL && AsyncIberr() == EABO )
+                if( (waitStatus & CMPL) == CMPL && AsyncIberr() == EABO )
                     rtn = eRDWT_OK;
 		        else
 		            rtn = eRDWT_ERROR;
-		    } else if( (waitStatus & CMPL) == CMPL ) {
+		    } else {
+		        // We must be here because either CMPL or END is set
 			    rtn = eRDWT_OK;
 			}
 		}
@@ -259,26 +255,20 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	} while( rtn == eRDWT_CONTINUE
 			&& (timeoutSecs != TIMEOUT_NONE ? (waitTime < timeoutSecs) : TRUE)  );
 
+    // Stop the I/O operation if it is not complete
+    if( ( waitStatus & CMPL ) != CMPL) {
+        //  On successfully aborting an asynchronous operation,
+        //  the ERR bit is set in ibsta, and iberr is set to EABO.
+        //  If the ERR bit is not set in ibsta, then there was no asynchronous i/o operation in progress.
+        ibstop( GPIBdescriptor );
+    }
+
     // Only the status bits END | ERR | TIMO | CMPL are valid. (all others are 0)
     *pGPIBstatus = AsyncIbsta();
-#if !GPIB_CHECK_VERSION(4,3,8)
-    // A bug in AsyncIbsta() gives unreliable values for CMPL
-    // We use the value returned by ibwait() until this is fixed
-    if( (waitStatus & CMPL) == CMPL )
-        *pGPIBstatus |=  CMPL;
-    else
-        *pGPIBstatus &= ~CMPL;
-#endif
 
     if( pNbytesRead ) {
         *pNbytesRead = AsyncIbcnt();
     }
-
-	// Stop the io operation if it is not complete
-	if( ( *pGPIBstatus & CMPL ) != CMPL) {
-		ibstop( GPIBdescriptor );
-		postError("GPIB read error");
-	}
 
 	/* A change of state from listener to talker may occur  before a terminating
 	 * condition (EOI or eos character).
@@ -286,24 +276,29 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	 */
     if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO  ) {
         *pGPIBstatus &=  ~ERR;
+
+        // A device clear will set the ERR, DCAS and CMPL bits
+        // the iberr will be EABO
+        // Catch 'device clear'. The driver gives a system error when 'device clear' is received.
+        // We will treat this as benign and simply return 0 bytes
+        // AsyncIbsta() doesn't give DCAS, so use that obtained by the last wait.
+        if( (waitStatus & DCAS) == DCAS ) {
+            DBG( eDEBUG_EXTENSIVE, "👓 received device clear" );
+            rtn = eRDWT_CLEAR;
+        }
     }
 
 	DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", *pNbytesRead, maxBytes );
 
-	if( (*pGPIBstatus & CMPL) != CMPL && (waitStatus & TACS) == 0 && rtn != eRDWT_ABORT ) {
+	if( rtn == eRDWT_CONTINUE && (waitStatus & TACS) != TACS && rtn != eRDWT_ABORT ) {
 	    // Log if we are not a talker and we did not complete the read
 		if( timeoutSecs != TIMEOUT_NONE && waitTime >= timeoutSecs )
-			LOG( G_LOG_LEVEL_WARNING, "GPIB async read timeout after %.2f sec. status %04X", timeoutSecs, *pGPIBstatus);
+			LOG( G_LOG_LEVEL_WARNING, "GPIB async read timeout after %.2f sec. status %04X", timeoutSecs, waitStatus);
 		else
-			LOG( G_LOG_LEVEL_WARNING, "GPIB async read status/error: %04X/%d", *pGPIBstatus, AsyncIberr() );
+			LOG( G_LOG_LEVEL_WARNING, "GPIB async read status/error: %04X/%d", waitStatus, AsyncIberr() );
 	}
-	ibtmo( GPIBdescriptor, currentTimeout);
 
-	// Catch 'device clear'. The driver gives a system error when 'device clear' is received.
-	// We will treat this as benign and simply return 0 bytes
-	if( rtn == eRDWT_CLEAR ) {
-	    *pGPIBstatus &= ~ERR;
-	}
+	ibtmo( GPIBdescriptor, currentTimeout);
 
     if( rtn == eRDWT_CONTINUE ) {
         *pGPIBstatus |= ERR_TIMEOUT;
@@ -735,6 +730,6 @@ threadGPIB(gpointer _pGlobal) {
 		}
 
 	}
-	LOG( G_LOG_LEVEL_WARNING, "Thread end...");
+	LOG( G_LOG_LEVEL_INFO, "🪡 threadGPIB ending");
 	return NULL;
 }

@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.33-1"
+   #define VERSION "1.33-2"
 #endif
 
 #define INVALID	(-1)
@@ -11,12 +11,17 @@
 #include <gpib/ib.h>
 #include <math.h>
 
+
 #define LOG( level, message, ...) \
     g_log_structured (G_LOG_DOMAIN, level, \
 		  "SYSLOG_IDENTIFIER", "HPGLplotter", \
 		  "CODE_FUNC", __FUNCTION__, \
 		  "CODE_LINE", G_STRINGIFY(__LINE__), \
 		  "MESSAGE", message, ## __VA_ARGS__)
+
+#define DBG( level, message, ... ) \
+    if( globalData.flags.bbDebug >= level ) \
+        LOG( G_LOG_LEVEL_DEBUG, message, ## __VA_ARGS__)
 
 /*!     \brief Debugging levels
  */
@@ -219,10 +224,6 @@ extern tGlobal globalData;
 
 #define ms(x)           ((x) * 1000)
 #define ms2us(x)        ((x) * 1000)
-
-#define DBG( level, message, ... ) \
-	if( globalData.flags.bbDebug >= level ) \
-		LOG( G_LOG_LEVEL_DEBUG, message, ## __VA_ARGS__)
 
 #if !GLIB_CHECK_VERSION(2, 67, 3)
 static inline gpointer
