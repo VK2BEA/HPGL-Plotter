@@ -54,7 +54,7 @@ logVersion(void) {
  * \param  pGlobal : Pointer to global data
  * \return once only
  */
-gboolean
+gint
 splashCreate (tGlobal *pGlobal)
 {
 	GtkWidget *wSplash = WLOOKUP( pGlobal, "Splash");
@@ -103,5 +103,5 @@ splashDestroy (tGlobal *pGlobal)
     if( GTK_IS_WIDGET( wSplash ) ) {
     	gtk_window_destroy( GTK_WINDOW( wSplash ) );
     }
-    return FALSE;
+    return G_SOURCE_REMOVE;
 }

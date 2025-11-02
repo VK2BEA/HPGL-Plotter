@@ -75,7 +75,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	gint currentTimeout;
 	gdouble waitTime = 0.0;
 	tGPIBReadWriteStatus rtn = eRDWT_CONTINUE;
-    int waitStatus;
+    gint waitStatus;
 
 	*pBytesWritten = 0;
 
@@ -138,7 +138,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
 	if( pBytesWritten )
 		*pBytesWritten = AsyncIbcnt();
 
-	DBG( eDEBUG_EXTENSIVE, "🖊: %d / %ld bytes", AsyncIbcnt(), length );
+    DBG( eDEBUG_EXTENSIVE, "🖊: %d / %ld bytes", AsyncIbcnt(), length );
 
 	if( rtn == eRDWT_ABORT )
         LOG( G_LOG_LEVEL_WARNING, "GPIB async write abort status/error: %04X/%d", *pGPIBstatus, AsyncIberr() );
@@ -196,7 +196,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	gint currentTimeout;
 	gdouble waitTime = 0.0;
 	tGPIBReadWriteStatus rtn = eRDWT_CONTINUE;
-	int waitStatus;
+	gint waitStatus;
 
 	*pNbytesRead = 0;
 
@@ -224,7 +224,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
 	do {
 		// Wait for read completion or timeout or being set as a talker
 	    // We may also receive a device clear
-	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | END | DCAS);
+	    waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | END);
 
 		if( (waitStatus & TIMO) == TIMO ){
 			// Timeout
@@ -436,7 +436,8 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
 	}
 
 	// Disable read termination on character
-	if( ibeos( pGlobal->GPIBcontrollerDevice, 0x0a ) & ERR ) {	// no | REOS  (Enable termination of reads when eos character is received.)
+	if( ibeos( pGlobal->GPIBcontrollerDevice,
+	        pGlobal->flags.bEOIonLF ? BIN | REOS | 0x0a : BIN | 0x0a ) & ERR ) {	// no | REOS  (Enable termination of reads when eos character is received.)
 		LOG( G_LOG_LEVEL_WARNING, "ibeos error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
 		goto err;
 	}
@@ -576,6 +577,22 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
 	    }
 	}
 	return TRUE;	// return TRUE
+}
+
+/*!     \brief  Post a refresh message if we have received data but no SP;
+ *
+ * Ensure we draw the plot when the data is over
+ *
+ *
+ * \param  tGlobal Pointer to global data
+ * \return false (do not restart)
+ */
+gint
+postRefreshOnTimeout (tGlobal *pGlobal)
+{
+    postMessageToMainLoop(TM_REFRESH_PLOT, NULL);
+    pGlobal->refreshTimer = 0;
+    return G_SOURCE_REMOVE;
 }
 
 /*!     \brief  Thread to communicate with GPIB
@@ -725,11 +742,20 @@ threadGPIB(gpointer _pGlobal) {
 			g_printerr( "%.*s", (gint)nBytesRead, sHPGL );
 		}
 
+		// As a precaution, we will refresh the plot after 100ms
+		// of the last data received
+        if ( pGlobal->refreshTimer ) {
+            g_source_remove( pGlobal->refreshTimer );
+        }
+
 		if( deserializeHPGL( sHPGL, pGlobal ) == TRUE ) {
 			postMessageToMainLoop(TM_REFRESH_PLOT, NULL);
+		} else {
+		    pGlobal->refreshTimer = g_timeout_add( 100, (GSourceFunc)postRefreshOnTimeout, pGlobal );
 		}
 
 	}
 	LOG( G_LOG_LEVEL_INFO, "🪡 threadGPIB ending");
 	return NULL;
 }
+

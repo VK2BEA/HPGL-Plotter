@@ -32,9 +32,10 @@
 tGlobal globalData = {0};
 
 static gint     optDebug = 0;
-static gboolean bOptQuiet = 0;
-static gint     bOptDoNotEnableSystemController = 0;
-static gint     bOptEnableSystemController = 0;
+static gboolean bOptQuiet = FALSE;
+static gboolean bOptDoNotEnableSystemController = FALSE;
+static gboolean bOptEnableSystemController = FALSE;
+static gboolean bEOIonLF = FALSE;
        gint     optInitializeGPIBasListener = INVALID;
 static gint     optDeviceID = INVALID;
 static gint     optControllerIndex = INVALID;
@@ -85,7 +86,7 @@ static const GOptionEntry optionEntries[] =
   { "GPIBnoSystemController",  'n', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
           &bOptDoNotEnableSystemController, "Do not enable GPIB interface as a system controller", NULL },
   { "GPIBuseSystemController",  'N', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
-                  &bOptEnableSystemController, "Enable GPIB interface as a system controller when needed", NULL },
+          &bOptEnableSystemController, "Enable GPIB interface as a system controller when needed", NULL },
   { "GPIBinitialListener",  'l', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK,
           argumentGPIBlistener, "Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')", NULL },
   { "GPIBdeviceID",      'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
@@ -93,7 +94,9 @@ static const GOptionEntry optionEntries[] =
   { "GPIBcontrollerIndex",  'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
           &optControllerIndex, "GPIB controller board index", NULL },
   { "GPIBcontrollerName",  'C', G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING,
-		          &sOptControllerName, "GPIB controller name (in /etc/gpib.conf)", NULL },
+		  &sOptControllerName, "GPIB controller name (in /etc/gpib.conf)", NULL },
+  { "EOIonLF",  'e', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
+		  &bEOIonLF, "End GPIB read on LF character", NULL },
   { G_OPTION_REMAINING, 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING_ARRAY, &argsRemainder, "", NULL },
   { NULL }
 };
@@ -528,6 +531,10 @@ on_startup (GApplication *app, gpointer udata)
     // The command line switches should override the recovered settings
     if( bOptDoNotEnableSystemController ) {
     	pGlobal->flags.bDoNotEnableSystemController = TRUE;
+    }
+
+    if( bEOIonLF ) {
+        pGlobal->flags.bEOIonLF = TRUE;
     }
 
     // The command line switches should override the recovered settings

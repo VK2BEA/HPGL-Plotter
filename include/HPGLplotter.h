@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-   #define VERSION "1.33-2"
+   #define VERSION "1.34-1"
 #endif
 
 #define INVALID	(-1)
@@ -135,6 +135,7 @@ typedef struct {
 	GSource 		*messageEventSource;
 	GAsyncQueue 	*messageQueueToMain;
 	GAsyncQueue 	*messageQueueToGPIB;
+    guint           refreshTimer;
 
 	void 			*plotHPGL;				// Optimized HPGL - potentially better for redrawing plot on the screen
 	GString  		*verbatimHPGLplot;		// The HPGL as received
