@@ -751,7 +751,7 @@ threadGPIB(gpointer _pGlobal) {
 		if( deserializeHPGL( sHPGL, pGlobal ) == TRUE ) {
 			postMessageToMainLoop(TM_REFRESH_PLOT, NULL);
 		} else {
-		    pGlobal->refreshTimer = g_timeout_add( 100, (GSourceFunc)postRefreshOnTimeout, pGlobal );
+		    pGlobal->refreshTimer = g_timeout_add( 250, (GSourceFunc)postRefreshOnTimeout, pGlobal );
 		}
 
 	}
