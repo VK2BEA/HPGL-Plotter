@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 
 #include <gtk/gtk.h>
@@ -36,28 +36,28 @@
 #define HEADER_HEIGHT 10
 static void
 CB_PrintDrawPage (GtkPrintOperation *operation,
-           GtkPrintContext   *context,
-           gint               pageNo,
-		   tGlobal *          pGlobal)
+        GtkPrintContext   *context,
+        gint               pageNo,
+        tGlobal *          pGlobal)
 {
-	cairo_t *cr;
-	gdouble height, width;
+    cairo_t *cr;
+    gdouble height, width;
 
-	cr     = gtk_print_context_get_cairo_context (context);
-	height = gtk_print_context_get_height( context );
-	width  = gtk_print_context_get_width (context);
+    cr     = gtk_print_context_get_cairo_context (context);
+    height = gtk_print_context_get_height( context );
+    width  = gtk_print_context_get_width (context);
 
-	// Letter and Tabloid size are not in the ratio of our data ( height = width / sqrt( 2 ) )
-	// we need to adjust
-	if( height / (width / SQU_ROOT_2) > 1.01 ) {// this should leave A4 and A3 untouched
-	  cairo_translate( cr, 0.0, (height - width / SQU_ROOT_2) / 2.0  );
-	  height = width / SQU_ROOT_2;
-	} else if( height / (width / SQU_ROOT_2) < 0.99 ) {
-	  cairo_translate( cr, (height - width / SQU_ROOT_2) / 2.0, 0.0  );
-	  width = height * SQU_ROOT_2;
-	}
+    // Letter and Tabloid size are not in the ratio of our data ( height = width / sqrt( 2 ) )
+    // we need to adjust
+    if( height / (width / SQU_ROOT_2) > 1.01 ) {// this should leave A4 and A3 untouched
+        cairo_translate( cr, 0.0, (height - width / SQU_ROOT_2) / 2.0  );
+        height = width / SQU_ROOT_2;
+    } else if( height / (width / SQU_ROOT_2) < 0.99 ) {
+        cairo_translate( cr, (height - width / SQU_ROOT_2) / 2.0, 0.0  );
+        width = height * SQU_ROOT_2;
+    }
 
-	plotCompiledHPGL (cr, width, height, pGlobal);
+    plotCompiledHPGL (cr, width, height, pGlobal);
 }
 
 /*!     \brief  Callback when printing commences
@@ -70,10 +70,10 @@ CB_PrintDrawPage (GtkPrintOperation *operation,
  */
 static void
 CB_PrintBegin (GtkPrintOperation *printOp,
-           GtkPrintContext   *context, tGlobal *pGlobal)
+        GtkPrintContext   *context, tGlobal *pGlobal)
 {
-	gint pageNos = 1;
-	gtk_print_operation_set_n_pages( printOp, pageNos );
+    gint pageNos = 1;
+    gtk_print_operation_set_n_pages( printOp, pageNos );
 }
 
 /*!     \brief  Callback when printing completes
@@ -92,57 +92,57 @@ CB_PrintDone (GtkPrintOperation *printOp,
 
 static void
 CB_PrintRequestPageSetup(GtkPrintOperation* printOp,
-                            GtkPrintContext* context, gint page_number, GtkPageSetup* setup,
-							tGlobal *pGlobal)
+        GtkPrintContext* context, gint page_number, GtkPageSetup* setup,
+        tGlobal *pGlobal)
 {
 #if 0
-	GtkPageOrientation orientation;
-	orientation = gtk_page_setup_get_orientation(setup);
+    GtkPageOrientation orientation;
+    orientation = gtk_page_setup_get_orientation(setup);
 
-	GtkPaperSize *paperSize = gtk_paper_size_new ( GTK_PAPER_NAME_LETTER );
-	gtk_page_setup_set_paper_size( setup, paperSize );
+    GtkPaperSize *paperSize = gtk_paper_size_new ( GTK_PAPER_NAME_LETTER );
+    gtk_page_setup_set_paper_size( setup, paperSize );
 #endif
 }
 
 void
 CB_btn_Print ( GtkButton* wBtnOptions, gpointer user_data ) {
 
-	GtkPrintOperation *printOp;
-	GtkPrintOperationResult res;
+    GtkPrintOperation *printOp;
+    GtkPrintOperationResult res;
 
-	tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnOptions), "data");
+    tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnOptions), "data");
 
-	printOp = gtk_print_operation_new ();
+    printOp = gtk_print_operation_new ();
 
-	if (pGlobal->printSettings != NULL)
-		  gtk_print_operation_set_print_settings (printOp, pGlobal->printSettings);
+    if (pGlobal->printSettings != NULL)
+        gtk_print_operation_set_print_settings (printOp, pGlobal->printSettings);
 
-	if (pGlobal->pageSetup != NULL)
-		  gtk_print_operation_set_default_page_setup (printOp, pGlobal->pageSetup);
+    if (pGlobal->pageSetup != NULL)
+        gtk_print_operation_set_default_page_setup (printOp, pGlobal->pageSetup);
 
 
-	g_signal_connect(printOp, "begin_print", G_CALLBACK (CB_PrintBegin), pGlobal);
-	g_signal_connect(printOp, "draw_page", G_CALLBACK (CB_PrintDrawPage), pGlobal);
-	g_signal_connect(printOp, "request-page-setup", G_CALLBACK(CB_PrintRequestPageSetup), pGlobal);
-	g_signal_connect(printOp, "done", G_CALLBACK(CB_PrintDone), pGlobal);
+    g_signal_connect(printOp, "begin_print", G_CALLBACK (CB_PrintBegin), pGlobal);
+    g_signal_connect(printOp, "draw_page", G_CALLBACK (CB_PrintDrawPage), pGlobal);
+    g_signal_connect(printOp, "request-page-setup", G_CALLBACK(CB_PrintRequestPageSetup), pGlobal);
+    g_signal_connect(printOp, "done", G_CALLBACK(CB_PrintDone), pGlobal);
 
-	gtk_print_operation_set_embed_page_setup ( printOp, TRUE );
-	gtk_print_operation_set_use_full_page ( printOp, FALSE );
+    gtk_print_operation_set_embed_page_setup ( printOp, TRUE );
+    gtk_print_operation_set_use_full_page ( printOp, FALSE );
 
-	gtk_print_operation_set_n_pages ( printOp, 1 );
+    gtk_print_operation_set_n_pages ( printOp, 1 );
 
-	res = gtk_print_operation_run (printOp, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-			  GTK_WINDOW(g_hash_table_lookup ( pGlobal->widgetHashTable, (gconstpointer)"HPGLplotter_main") ), NULL);
+    res = gtk_print_operation_run (printOp, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+            GTK_WINDOW(g_hash_table_lookup ( pGlobal->widgetHashTable, (gconstpointer)"HPGLplotter_main") ), NULL);
 
-	if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
-		if (pGlobal->printSettings != NULL)
-			g_object_unref (pGlobal->printSettings);
-		pGlobal->printSettings = g_object_ref (gtk_print_operation_get_print_settings (printOp));
+    if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
+        if (pGlobal->printSettings != NULL)
+            g_object_unref (pGlobal->printSettings);
+        pGlobal->printSettings = g_object_ref (gtk_print_operation_get_print_settings (printOp));
 
-		if (pGlobal->pageSetup != NULL)
-			g_object_unref (pGlobal->pageSetup);
-		pGlobal->pageSetup = g_object_ref (gtk_print_operation_get_default_page_setup (printOp));
-	}
+        if (pGlobal->pageSetup != NULL)
+            g_object_unref (pGlobal->pageSetup);
+        pGlobal->pageSetup = g_object_ref (gtk_print_operation_get_default_page_setup (printOp));
+    }
 
-	g_object_unref (printOp);
+    g_object_unref (printOp);
 }

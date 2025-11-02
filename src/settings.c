@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,16 +29,16 @@
 
 static gboolean g_settings_schema_exist (const char * id)
 {
-  gboolean bReturn = FALSE;
-  GSettingsSchema *gss;
+    gboolean bReturn = FALSE;
+    GSettingsSchema *gss;
 
-  if( (gss = g_settings_schema_source_lookup (
-		  	  	  g_settings_schema_source_get_default(), id, TRUE)) != NULL ) {
-	  bReturn = TRUE;
-    g_settings_schema_unref ( gss );
-  }
+    if( (gss = g_settings_schema_source_lookup (
+            g_settings_schema_source_get_default(), id, TRUE)) != NULL ) {
+        bReturn = TRUE;
+        g_settings_schema_unref ( gss );
+    }
 
-  return bReturn;
+    return bReturn;
 }
 
 /*
@@ -51,33 +51,33 @@ static gboolean g_settings_schema_exist (const char * id)
 gint
 saveSettings( tGlobal *pGlobal ) {
 
-	GVariant *gvPrintSettings = NULL, *gvPageSetup = NULL, *gvPenColors;
+    GVariant *gvPrintSettings = NULL, *gvPageSetup = NULL, *gvPenColors;
     GVariantBuilder *builder;
 
     GSettings *gs;
 
     if( !g_settings_schema_exist( GSETTINGS_SCHEMA ) )
-    	return FALSE;
+        return FALSE;
 
     gs = g_settings_new( GSETTINGS_SCHEMA );
     if( pGlobal->printSettings )
-    	gvPrintSettings = gtk_print_settings_to_gvariant( pGlobal->printSettings );
+        gvPrintSettings = gtk_print_settings_to_gvariant( pGlobal->printSettings );
     if( pGlobal->pageSetup )
-    	gvPageSetup  = gtk_page_setup_to_gvariant( pGlobal->pageSetup );
+        gvPageSetup  = gtk_page_setup_to_gvariant( pGlobal->pageSetup );
 
-//    g_print( "Print Settings is of type %s\n", g_variant_get_type_string( gvPrintSettings ));
+    //    g_print( "Print Settings is of type %s\n", g_variant_get_type_string( gvPrintSettings ));
     if( gvPrintSettings )
-    	g_settings_set_value( gs, "print-settings", gvPrintSettings ); // this consumes the GVariant
+        g_settings_set_value( gs, "print-settings", gvPrintSettings ); // this consumes the GVariant
 
-//    g_print( "Print Setup is of type %s\n", g_variant_get_type_string( gvPageSetup ));
+    //    g_print( "Print Setup is of type %s\n", g_variant_get_type_string( gvPageSetup ));
     if( gvPageSetup )
-    	g_settings_set_value( gs, "page-setup", gvPageSetup );	// this consumes the GVariant
+        g_settings_set_value( gs, "page-setup", gvPageSetup );	// this consumes the GVariant
 
     builder = g_variant_builder_new (G_VARIANT_TYPE ("a(dddd)"));
     for (int i = 0; i < NUM_HPGL_PENS; i++)
     {
         g_variant_builder_add (builder, "(dddd)", pGlobal->HPGLpens[i].red,
-        		pGlobal->HPGLpens[i].green, pGlobal->HPGLpens[i].blue, pGlobal->HPGLpens[i].alpha);
+                pGlobal->HPGLpens[i].green, pGlobal->HPGLpens[i].blue, pGlobal->HPGLpens[i].alpha);
     }
     gvPenColors = g_variant_new ("a(dddd)", builder);
     g_variant_builder_unref (builder);
@@ -95,11 +95,11 @@ saveSettings( tGlobal *pGlobal ) {
     g_settings_set_boolean( gs, "gpib-initial-listener", pGlobal->flags.bGPIB_InitialListener );
     g_settings_set_int( gs, "pdf-paper-size", pGlobal->PDFpaperSize );
 
-//    g_variant_unref (gvPenColors);
+    //    g_variant_unref (gvPenColors);
 
     g_object_unref( gs );
 
-	return TRUE;
+    return TRUE;
 }
 
 gint
@@ -111,7 +111,7 @@ recoverSettings( tGlobal *pGlobal ) {
     gint	pen = 0;
 
     if( !g_settings_schema_exist( GSETTINGS_SCHEMA ) )
-    	return FALSE;
+        return FALSE;
 
     gs = g_settings_new( GSETTINGS_SCHEMA );
 
@@ -149,5 +149,5 @@ recoverSettings( tGlobal *pGlobal ) {
 
     g_object_unref( gs );
 
-	return TRUE;
+    return TRUE;
 }

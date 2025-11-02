@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <gtk/gtk.h>
 #include <cairo/cairo.h>
@@ -26,118 +26,118 @@
 void cairo_renderHewlettPackardLogo(cairo_t *cr,
         gboolean bFlipVertical, gboolean bFull, gdouble alpha,
         gdouble HPlogoHeight) {
-	cairo_pattern_t *pattern;
-	gdouble x, y;
-	gdouble scale = HP_LOGO_SCALE_FACTOR * HPlogoHeight;
+    cairo_pattern_t *pattern;
+    gdouble x, y;
+    gdouble scale = HP_LOGO_SCALE_FACTOR * HPlogoHeight;
 
-	cairo_save( cr ); {
-	    // draw log relative to the current point .. if defined
-	    // otherwise we assume 0.0, 0.0 .. usually translated prior to calling routine
-	    if ( cairo_has_current_point( cr ) ) {
+    cairo_save( cr ); {
+        // draw log relative to the current point .. if defined
+        // otherwise we assume 0.0, 0.0 .. usually translated prior to calling routine
+        if ( cairo_has_current_point( cr ) ) {
             cairo_get_current_point( cr, &x, &y );
             cairo_translate( cr , x, y );
-	    }
+        }
 
         cairo_translate( cr , 0.0, (bFlipVertical ? 1.0 : -1.0) * HPlogoHeight);
-		cairo_scale( cr, scale, (bFlipVertical ? -1.0 : 1.0) * scale );
+        cairo_scale( cr, scale, (bFlipVertical ? -1.0 : 1.0) * scale );
 
-		// [(hp)] logo ... ')]' part
-		cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-		pattern = cairo_pattern_create_rgba(0.0, 0.270588, 0.552941, alpha);
-		cairo_set_source(cr, pattern);
-		cairo_pattern_destroy(pattern);
-		cairo_new_path(cr);
-		cairo_move_to(cr, 757.648438, 499.691406);
-		cairo_curve_to(cr, 726.820313, 499.691406, 506.722656, 499.691406, 426.679688, 499.691406);
-		cairo_line_to(cr, 439.117188, 465.621094);
-		cairo_curve_to(cr, 581.886719, 456.964844, 644.625, 337.996094, 644.625, 246.058594);
-		cairo_curve_to(cr, 644.625, 148.714844, 566.75, 36.773438, 425.0625, 34.074219);
-		cairo_line_to(cr, 436.964844, 0.0078125);
-		cairo_curve_to(cr, 515.375, 0.0078125, 739.265625, 0.0078125, 764.140625, 0.0078125);
-		cairo_curve_to(cr, 790.097656, 0.0078125, 814.433594, 24.34375, 814.433594, 47.054688);
-		cairo_curve_to(cr, 814.433594, 80.046875, 814.433594, 370.449219, 814.433594, 430.480469);
-		cairo_curve_to(cr, 814.433594, 475.355469, 796.585938, 499.691406, 757.648438, 499.691406);
-		cairo_close_path(cr);
-		cairo_move_to(cr, 757.648438, 499.691406);
-		cairo_set_tolerance(cr, 0.1);
-		cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
-		cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
-		cairo_fill_preserve(cr);
-		// [(hp)] logo ... '[(' part
-		cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-		pattern = cairo_pattern_create_rgba(0.0, 0.270588, 0.552941, alpha);
-		cairo_set_source(cr, pattern);
-		cairo_pattern_destroy(pattern);
-		cairo_new_path(cr);
-		cairo_move_to(cr, 315.824219, 499.691406);
-		cairo_curve_to(cr, 236.328125, 499.691406, 87.605469, 499.691406, 56.785156, 499.691406);
-		cairo_curve_to(cr, 17.847656, 499.691406, 0, 475.355469, 0, 430.472656);
-		cairo_curve_to(cr, 0, 370.441406, 0, 80.039063, 0, 47.046875);
-		cairo_curve_to(cr, 0, 24.335938, 24.335938, 0, 50.292969, 0);
-		cairo_curve_to(cr, 76.25, 0, 246.601563, 0, 325.015625, 0);
-		cairo_line_to(cr, 313.660156, 33.527344);
-		cairo_curve_to(cr, 231.457031, 65.976563, 168.1875, 148.722656, 168.1875, 246.058594);
-		cairo_curve_to(cr, 168.1875, 337.996094, 222.265625, 427.226563, 328.804688, 462.375);
-		cairo_close_path(cr);
-		cairo_move_to(cr, 315.824219, 499.691406);
-		cairo_set_tolerance(cr, 0.1);
-		cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
-		cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
-		cairo_fill_preserve(cr);
-		// [(hp)] logo ... 'h' part
-		cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-		pattern = cairo_pattern_create_rgba( 0.0, 0.270588, 0.552941, alpha);
-		cairo_set_source(cr, pattern);
-		cairo_pattern_destroy(pattern);
-		cairo_new_path(cr);
-		cairo_move_to(cr, 413.707031, 207.664063);
-		cairo_curve_to(cr, 410.460938, 217.398438, 365.035156, 345.023438, 365.035156, 345.023438);
-		cairo_line_to(cr, 312.03125, 345.023438);
-		cairo_line_to(cr, 370.441406, 180.625);
-		cairo_line_to(cr, 341.242188, 180.625);
-		cairo_line_to(cr, 282.839844, 345.023438);
-		cairo_line_to(cr, 231.464844, 345.023438);
-		cairo_line_to(cr, 354.222656, 0);
-		cairo_line_to(cr, 405.597656, 0);
-		cairo_line_to(cr, 351.523438, 151.960938);
-		cairo_curve_to(cr, 351.523438, 151.960938, 375.316406, 151.960938, 389.914063, 151.960938);
-		cairo_curve_to(cr, 408.296875, 151.960938, 421.28125, 165.480469, 421.28125, 181.164063);
-		cairo_curve_to(cr, 421.28125, 188.734375, 415.871094, 201.71875, 413.707031, 207.664063);
-		cairo_close_path(cr);
-		cairo_move_to(cr, 413.707031, 207.664063);
-		cairo_set_tolerance(cr, 0.1);
-		cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
-		cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
-		cairo_fill_preserve(cr);
-		// [(hp)] logo ... 'p' part
-		cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
-		pattern = cairo_pattern_create_rgba( 0.0, 0.270588, 0.552941, alpha);
-		cairo_set_source(cr, pattern);
-		cairo_pattern_destroy(pattern);
-		cairo_new_path(cr);
-		cairo_move_to(cr, 585.140625, 207.125);
-		cairo_curve_to(cr, 581.894531, 216.863281, 551.613281, 302.304688, 546.203125, 316.902344);
-		cairo_curve_to(cr, 540.792969, 331.503906, 533.230469, 352.597656, 508.347656, 352.597656);
-		cairo_line_to(cr, 450.488281, 352.597656);
-		cairo_line_to(cr, 397.496094, 499.691406);
-		cairo_line_to(cr, 344.5, 499.691406);
-		cairo_line_to(cr, 468.34375, 151.960938);
-		cairo_line_to(cr, 561.355469, 151.960938);
-		cairo_curve_to(cr, 579.203125, 151.960938, 592.722656, 165.480469, 592.722656, 181.164063);
-		cairo_curve_to(cr, 592.707031, 187.652344, 588.925781, 196.84375, 585.140625, 207.125);
-		cairo_close_path(cr);
-		cairo_move_to(cr, 511.59375, 180.625);
-		cairo_line_to(cr, 460.761719, 323.941406);
-		cairo_line_to(cr, 489.964844, 323.941406);
-		cairo_line_to(cr, 540.792969, 180.625);
-		cairo_close_path(cr);
-		cairo_move_to(cr, 511.59375, 180.625);
-		cairo_set_tolerance(cr, 0.1);
-		cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
-		cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
-		cairo_fill_preserve(cr);
+        // [(hp)] logo ... ')]' part
+        cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+        pattern = cairo_pattern_create_rgba(0.0, 0.270588, 0.552941, alpha);
+        cairo_set_source(cr, pattern);
+        cairo_pattern_destroy(pattern);
+        cairo_new_path(cr);
+        cairo_move_to(cr, 757.648438, 499.691406);
+        cairo_curve_to(cr, 726.820313, 499.691406, 506.722656, 499.691406, 426.679688, 499.691406);
+        cairo_line_to(cr, 439.117188, 465.621094);
+        cairo_curve_to(cr, 581.886719, 456.964844, 644.625, 337.996094, 644.625, 246.058594);
+        cairo_curve_to(cr, 644.625, 148.714844, 566.75, 36.773438, 425.0625, 34.074219);
+        cairo_line_to(cr, 436.964844, 0.0078125);
+        cairo_curve_to(cr, 515.375, 0.0078125, 739.265625, 0.0078125, 764.140625, 0.0078125);
+        cairo_curve_to(cr, 790.097656, 0.0078125, 814.433594, 24.34375, 814.433594, 47.054688);
+        cairo_curve_to(cr, 814.433594, 80.046875, 814.433594, 370.449219, 814.433594, 430.480469);
+        cairo_curve_to(cr, 814.433594, 475.355469, 796.585938, 499.691406, 757.648438, 499.691406);
+        cairo_close_path(cr);
+        cairo_move_to(cr, 757.648438, 499.691406);
+        cairo_set_tolerance(cr, 0.1);
+        cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
+        cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+        cairo_fill_preserve(cr);
+        // [(hp)] logo ... '[(' part
+        cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+        pattern = cairo_pattern_create_rgba(0.0, 0.270588, 0.552941, alpha);
+        cairo_set_source(cr, pattern);
+        cairo_pattern_destroy(pattern);
+        cairo_new_path(cr);
+        cairo_move_to(cr, 315.824219, 499.691406);
+        cairo_curve_to(cr, 236.328125, 499.691406, 87.605469, 499.691406, 56.785156, 499.691406);
+        cairo_curve_to(cr, 17.847656, 499.691406, 0, 475.355469, 0, 430.472656);
+        cairo_curve_to(cr, 0, 370.441406, 0, 80.039063, 0, 47.046875);
+        cairo_curve_to(cr, 0, 24.335938, 24.335938, 0, 50.292969, 0);
+        cairo_curve_to(cr, 76.25, 0, 246.601563, 0, 325.015625, 0);
+        cairo_line_to(cr, 313.660156, 33.527344);
+        cairo_curve_to(cr, 231.457031, 65.976563, 168.1875, 148.722656, 168.1875, 246.058594);
+        cairo_curve_to(cr, 168.1875, 337.996094, 222.265625, 427.226563, 328.804688, 462.375);
+        cairo_close_path(cr);
+        cairo_move_to(cr, 315.824219, 499.691406);
+        cairo_set_tolerance(cr, 0.1);
+        cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
+        cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+        cairo_fill_preserve(cr);
+        // [(hp)] logo ... 'h' part
+        cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+        pattern = cairo_pattern_create_rgba( 0.0, 0.270588, 0.552941, alpha);
+        cairo_set_source(cr, pattern);
+        cairo_pattern_destroy(pattern);
+        cairo_new_path(cr);
+        cairo_move_to(cr, 413.707031, 207.664063);
+        cairo_curve_to(cr, 410.460938, 217.398438, 365.035156, 345.023438, 365.035156, 345.023438);
+        cairo_line_to(cr, 312.03125, 345.023438);
+        cairo_line_to(cr, 370.441406, 180.625);
+        cairo_line_to(cr, 341.242188, 180.625);
+        cairo_line_to(cr, 282.839844, 345.023438);
+        cairo_line_to(cr, 231.464844, 345.023438);
+        cairo_line_to(cr, 354.222656, 0);
+        cairo_line_to(cr, 405.597656, 0);
+        cairo_line_to(cr, 351.523438, 151.960938);
+        cairo_curve_to(cr, 351.523438, 151.960938, 375.316406, 151.960938, 389.914063, 151.960938);
+        cairo_curve_to(cr, 408.296875, 151.960938, 421.28125, 165.480469, 421.28125, 181.164063);
+        cairo_curve_to(cr, 421.28125, 188.734375, 415.871094, 201.71875, 413.707031, 207.664063);
+        cairo_close_path(cr);
+        cairo_move_to(cr, 413.707031, 207.664063);
+        cairo_set_tolerance(cr, 0.1);
+        cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
+        cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+        cairo_fill_preserve(cr);
+        // [(hp)] logo ... 'p' part
+        cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+        pattern = cairo_pattern_create_rgba( 0.0, 0.270588, 0.552941, alpha);
+        cairo_set_source(cr, pattern);
+        cairo_pattern_destroy(pattern);
+        cairo_new_path(cr);
+        cairo_move_to(cr, 585.140625, 207.125);
+        cairo_curve_to(cr, 581.894531, 216.863281, 551.613281, 302.304688, 546.203125, 316.902344);
+        cairo_curve_to(cr, 540.792969, 331.503906, 533.230469, 352.597656, 508.347656, 352.597656);
+        cairo_line_to(cr, 450.488281, 352.597656);
+        cairo_line_to(cr, 397.496094, 499.691406);
+        cairo_line_to(cr, 344.5, 499.691406);
+        cairo_line_to(cr, 468.34375, 151.960938);
+        cairo_line_to(cr, 561.355469, 151.960938);
+        cairo_curve_to(cr, 579.203125, 151.960938, 592.722656, 165.480469, 592.722656, 181.164063);
+        cairo_curve_to(cr, 592.707031, 187.652344, 588.925781, 196.84375, 585.140625, 207.125);
+        cairo_close_path(cr);
+        cairo_move_to(cr, 511.59375, 180.625);
+        cairo_line_to(cr, 460.761719, 323.941406);
+        cairo_line_to(cr, 489.964844, 323.941406);
+        cairo_line_to(cr, 540.792969, 180.625);
+        cairo_close_path(cr);
+        cairo_move_to(cr, 511.59375, 180.625);
+        cairo_set_tolerance(cr, 0.1);
+        cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
+        cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
+        cairo_fill_preserve(cr);
         cairo_new_path( cr );
-		if( bFull ) {
+        if( bFull ) {
             // PACKARD
             cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
             pattern = cairo_pattern_create_rgba( 0.0, 0.0, 0.0, alpha);
@@ -437,9 +437,9 @@ void cairo_renderHewlettPackardLogo(cairo_t *cr,
             cairo_set_antialias(cr, CAIRO_ANTIALIAS_DEFAULT);
             cairo_set_fill_rule(cr, CAIRO_FILL_RULE_WINDING);
             cairo_fill_preserve(cr);
-		}
-		cairo_new_path( cr );
-	} cairo_restore( cr );
+        }
+        cairo_new_path( cr );
+    } cairo_restore( cr );
 }
 
 /*!     \brief  find the width of the string in the current font
@@ -455,9 +455,9 @@ void cairo_renderHewlettPackardLogo(cairo_t *cr,
 gdouble
 stringWidthCairoText(cairo_t *cr, gchar *sLabel)
 {
-        cairo_text_extents_t extents;
-        cairo_text_extents (cr, sLabel, &extents);
-        return( extents.x_advance );
+    cairo_text_extents_t extents;
+    cairo_text_extents (cr, sLabel, &extents);
+    return( extents.x_advance );
 }
 
 /*!     \brief  Render a text string right justified from the specified point
@@ -475,8 +475,8 @@ stringWidthCairoText(cairo_t *cr, gchar *sLabel)
 void
 leftJustifiedCairoText(cairo_t *cr, gchar *sLabel, gdouble x, gdouble y)
 {
-        cairo_move_to(cr, x, y );
-        cairo_show_text (cr, sLabel);
+    cairo_move_to(cr, x, y );
+    cairo_show_text (cr, sLabel);
 }
 
 /*!     \brief  Render a text string right justified from the specified point
@@ -494,8 +494,8 @@ leftJustifiedCairoText(cairo_t *cr, gchar *sLabel, gdouble x, gdouble y)
 void
 rightJustifiedCairoText(cairo_t *cr, gchar *sLabel, gdouble x, gdouble y)
 {
-        cairo_move_to(cr, x - stringWidthCairoText(cr, sLabel), y );
-        cairo_show_text (cr, sLabel);
+    cairo_move_to(cr, x - stringWidthCairoText(cr, sLabel), y );
+    cairo_show_text (cr, sLabel);
 }
 
 /*!     \brief  Render a text string center justified around the specified point
@@ -513,8 +513,8 @@ rightJustifiedCairoText(cairo_t *cr, gchar *sLabel, gdouble x, gdouble y)
 void
 centreJustifiedCairoText(cairo_t *cr, gchar *sLabel, gdouble x, gdouble y)
 {
-        cairo_move_to(cr, x - stringWidthCairoText(cr, sLabel)/2.0, y);
-        cairo_show_text (cr, sLabel);
+    cairo_move_to(cr, x - stringWidthCairoText(cr, sLabel)/2.0, y);
+    cairo_show_text (cr, sLabel);
 }
 
 
@@ -523,27 +523,27 @@ void
 drawHPlogo (cairo_t *cr, gdouble centreX, gdouble lowerLeftY, gdouble scale)
 {
 #define HP_LOGO_HEIGHT  (DECAL_WIDTH * 0.08185185)
-	cairo_save( cr ); {
-		// make the current point 0.0, 0.0
-		cairo_translate( cr , centreX, lowerLeftY);
-		// scale so that 1.0 is 100pt horizontally
-		cairo_scale( cr, 2.83 * scale, 2.83 * scale );
-		cairo_translate( cr , -DECAL_WIDTH/2.0, 0.0);
+    cairo_save( cr ); {
+        // make the current point 0.0, 0.0
+        cairo_translate( cr , centreX, lowerLeftY);
+        // scale so that 1.0 is 100pt horizontally
+        cairo_scale( cr, 2.83 * scale, 2.83 * scale );
+        cairo_translate( cr , -DECAL_WIDTH/2.0, 0.0);
 
         cairo_renderHewlettPackardLogo(cr, FALSE, TRUE, 1.0, HP_LOGO_HEIGHT);
 
-		cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0 );
+        cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0 );
         cairo_set_font_size( cr, 10.0 );
-//        rightJustifiedCairoText( cr, "300 kHz - 3 GHz", DECAL_WIDTH, -14.0);
+        //        rightJustifiedCairoText( cr, "300 kHz - 3 GHz", DECAL_WIDTH, -14.0);
         leftJustifiedCairoText( cr, "Linux GPIB / HPGL Plotter", DECAL_WIDTH/2.0, 0.0 );
 
         // draw tram lines
-		cairo_set_line_width( cr, 0.20 );
+        cairo_set_line_width( cr, 0.20 );
         cairo_move_to( cr, 0.0, -30.0 );
         cairo_rel_line_to( cr, DECAL_WIDTH, 0.0 );
         cairo_move_to( cr, 0.0, 8.0 );
         cairo_rel_line_to( cr, DECAL_WIDTH, 0.0 );
         cairo_stroke( cr );
 
-	} cairo_restore( cr );
+    } cairo_restore( cr );
 }

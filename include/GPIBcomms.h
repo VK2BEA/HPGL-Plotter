@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef GPIBCOMMS_H_
 #define GPIBCOMMS_H_
@@ -25,10 +25,10 @@ gint GPIBwrite( gint GPIBdescriptor, const void *sData, gint *GPIBstatus );
 gint GPIBwriteOneOfN( gint GPIBdescriptor, const void *sData, gint number, gint *GPIBstatus );
 tGPIBReadWriteStatus GPIBasyncWriteOneOfN( gint GPIBdescriptor, const void *sData, gint number, gint *GPIBstatus, gdouble timeoutSecs );
 tGPIBReadWriteStatus GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
-		glong *pNbytesRead, gint *pGPIBstatus, gdouble timeout );
+        glong *pNbytesRead, gint *pGPIBstatus, gdouble timeout );
 tGPIBReadWriteStatus GPIBasyncWrite( gint GPIBdescriptor, const void *sData, gint *GPIBstatus, gdouble timeoutSecs );
 tGPIBReadWriteStatus GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
-		glong *pNbytesWritten, gint *GPIBstatus, gdouble timeoutSecs );
+        glong *pNbytesWritten, gint *GPIBstatus, gdouble timeoutSecs );
 
 #define ERR_TIMEOUT (0x10000)
 #define GPIBfailed(x) (((x) & (ERR | ERR_TIMEOUT)) != 0)

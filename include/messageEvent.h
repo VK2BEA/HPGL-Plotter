@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef MESSAGEEVENT_H_
 #define MESSAGEEVENT_H_
@@ -26,21 +26,21 @@ gboolean messageEventDispatch (GSource *, GSourceFunc, gpointer);
 
 enum _threadmessage
 {
-	TM_INFO,							// show information
-	TM_INFO_HIGHLIGHT,					// show information with a highlight (green)
+    TM_INFO,							// show information
+    TM_INFO_HIGHLIGHT,					// show information with a highlight (green)
     TM_ERROR,							// show error message (in red)
 
-	TM_COMPLETE_GPIB,					// update widgets based on GPIB connection
-	TM_REFRESH_PLOT,
-	TM_SAVE_SETUP,						// save calibration and setup to database
+    TM_COMPLETE_GPIB,					// update widgets based on GPIB connection
+    TM_REFRESH_PLOT,
+    TM_SAVE_SETUP,						// save calibration and setup to database
 
-	TG_SETUP_GPIB,						// configure GPIB
-	TG_REINITIALIZE_GPIB,				// If GPIB options are changed
-	TG_LISTEN, 							// listen for connections
+    TG_SETUP_GPIB,						// configure GPIB
+    TG_REINITIALIZE_GPIB,				// If GPIB options are changed
+    TG_LISTEN, 							// listen for connections
 
-	TG_UTILITY,
-	TG_ABORT,
-	TG_END								// end thread
+    TG_UTILITY,
+    TG_ABORT,
+    TG_END								// end thread
 };
 
 typedef struct

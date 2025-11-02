@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 
 #include <cairo/cairo.h>
@@ -33,7 +33,7 @@ logVersion(void) {
 
     errno = 0;
     if ( uname(&UTSbuffer) != 0) {
-    	LOG( G_LOG_LEVEL_CRITICAL, "%s", strerror (errno) );
+        LOG( G_LOG_LEVEL_CRITICAL, "%s", strerror (errno) );
         return;
     }
     LOG( G_LOG_LEVEL_INFO, "%s %s %s %s %s",
@@ -57,21 +57,21 @@ logVersion(void) {
 gint
 splashCreate (tGlobal *pGlobal)
 {
-	GtkWidget *wSplash = WLOOKUP( pGlobal, "Splash");
-	// GtkWidget *wApplicationWidget = WLOOKUP( pGlobal, "HPGLplotter_main");
-	GtkWidget *wVersionLabel = g_hash_table_lookup ( ((tGlobal *)pGlobal)->widgetHashTable, (gconstpointer)"lbl_version");
-	gchar *sVersion;
-	static gboolean bFirst = TRUE;
+    GtkWidget *wSplash = WLOOKUP( pGlobal, "Splash");
+    // GtkWidget *wApplicationWidget = WLOOKUP( pGlobal, "HPGLplotter_main");
+    GtkWidget *wVersionLabel = g_hash_table_lookup ( ((tGlobal *)pGlobal)->widgetHashTable, (gconstpointer)"lbl_version");
+    gchar *sVersion;
+    static gboolean bFirst = TRUE;
 
-	if( wSplash ) {
-	    if( bFirst ) {
-	        // This is a kludge because of Wayland not showing the application window immediately
-	        // therefore if we show the splash screen it is half off the screen.
-	        // Come back here after a delay, so that we can be assured that the splash screen is
-	        // shown in relation to the application window.
-	        bFirst = FALSE;
-	        g_timeout_add( 50, (GSourceFunc)splashCreate, pGlobal );
-	    } else {
+    if( wSplash ) {
+        if( bFirst ) {
+            // This is a kludge because of Wayland not showing the application window immediately
+            // therefore if we show the splash screen it is half off the screen.
+            // Come back here after a delay, so that we can be assured that the splash screen is
+            // shown in relation to the application window.
+            bFirst = FALSE;
+            g_timeout_add( 50, (GSourceFunc)splashCreate, pGlobal );
+        } else {
             sVersion = g_strdup_printf( "Version %s\t(🔨 %s)", VERSION, __DATE__ ); // Changelog date is used in RPM
             gtk_label_set_label( GTK_LABEL( wVersionLabel ), sVersion );
             g_free( sVersion );
@@ -82,7 +82,7 @@ splashCreate (tGlobal *pGlobal)
             gtk_window_present( GTK_WINDOW( wSplash ) ); // make sure we are on top
             // after 5 seconds ... destroy
             g_timeout_add( 5000, (GSourceFunc)splashDestroy, pGlobal );
-	    }
+        }
     }
     return G_SOURCE_REMOVE;
 }
@@ -99,9 +99,9 @@ splashCreate (tGlobal *pGlobal)
 gint
 splashDestroy (tGlobal *pGlobal)
 {
-	GtkWidget *wSplash = WLOOKUP ( pGlobal, "Splash");
+    GtkWidget *wSplash = WLOOKUP ( pGlobal, "Splash");
     if( GTK_IS_WIDGET( wSplash ) ) {
-    	gtk_window_destroy( GTK_WINDOW( wSplash ) );
+        gtk_window_destroy( GTK_WINDOW( wSplash ) );
     }
     return G_SOURCE_REMOVE;
 }
