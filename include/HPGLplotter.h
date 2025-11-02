@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-#define VERSION "1.34-1"
+#define VERSION "1.34-2"
 #endif
 
 #define INVALID	(-1)
