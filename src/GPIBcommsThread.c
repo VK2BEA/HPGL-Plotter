@@ -276,16 +276,6 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
      */
     if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO  ) {
         *pGPIBstatus &=  ~ERR;
-
-        // A device clear will set the ERR, DCAS and CMPL bits
-        // the iberr will be EABO
-        // Catch 'device clear'. The driver gives a system error when 'device clear' is received.
-        // We will treat this as benign and simply return 0 bytes
-        // AsyncIbsta() doesn't give DCAS, so use that obtained by the last wait.
-        if( (waitStatus & DCAS) == DCAS ) {
-            DBG( eDEBUG_EXTENSIVE, "👓 received device clear" );
-            rtn = eRDWT_CLEAR;
-        }
     }
 
     DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", *pNbytesRead, maxBytes );
