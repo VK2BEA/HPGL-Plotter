@@ -65,6 +65,7 @@ splashCreate (tGlobal *pGlobal)
 
     if( wSplash ) {
         if( bFirst ) {
+            gtk_window_set_auto_startup_notification( FALSE );
             // This is a kludge because of Wayland not showing the application window immediately
             // therefore if we show the splash screen it is half off the screen.
             // Come back here after a delay, so that we can be assured that the splash screen is
@@ -103,5 +104,6 @@ splashDestroy (tGlobal *pGlobal)
     if( GTK_IS_WIDGET( wSplash ) ) {
         gtk_window_destroy( GTK_WINDOW( wSplash ) );
     }
+    gtk_window_set_auto_startup_notification( TRUE );
     return G_SOURCE_REMOVE;
 }

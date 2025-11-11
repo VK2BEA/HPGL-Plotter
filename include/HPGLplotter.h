@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-#define VERSION "1.34-2"
+#define VERSION "1.34-3"
 #endif
 
 #define INVALID	(-1)
@@ -10,7 +10,6 @@
 #include <cairo/cairo.h>
 #include <gpib/ib.h>
 #include <math.h>
-
 
 #define LOG( level, message, ...) \
         g_log_structured (G_LOG_DOMAIN, level, \

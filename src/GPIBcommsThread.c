@@ -76,6 +76,7 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
     gdouble waitTime = 0.0;
     tGPIBReadWriteStatus rtn = eRDWT_CONTINUE;
     gint waitStatus;
+    gboolean bDCAS = TRUE;
 
     *pBytesWritten = 0;
 
@@ -100,8 +101,12 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
     // set the timout for the ibwait to 30ms
     ibtmo( GPIBdescriptor, T30ms );
     do {
-        // Wait for read completion or timeout
-        waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | END);
+        waitStatus = ibwait(GPIBdescriptor,  bDCAS ? (TIMO | CMPL) : (TIMO | CMPL | DCAS) );
+        // The wait may return with the DCAS flag before the driver has set the CMPL flag.
+        // Take note of the flag and wait for the CMPL flag (which will follow).
+        if( (waitStatus & DCAS) == DCAS )
+            bDCAS = TRUE;
+
         if( (waitStatus & TIMO) == TIMO ){
             // Timeout
             rtn = eRDWT_CONTINUE;
@@ -112,12 +117,20 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
                 g_free(sMessage);
             }
         } else {
-            // did we have a read error
-            if((waitStatus & ERR) == ERR )
-                rtn= eRDWT_ERROR;
-            // or did we complete the read
-            else // must have CMPL or END set
-                rtn = eRDWT_OK;
+            // An artifact of the GPIB driver is that the ibwait() may complete
+            // but none of the conditions in the mask are set. We need to check
+            // that at least one of the conditions are met (here CMPL)
+            // Did we complete the read or get an error?
+            if((waitStatus & ERR) == ERR ) { // or did we have a read error
+                if( (waitStatus & CMPL) == CMPL && AsyncIberr() == EABO )
+                    rtn = eRDWT_OK;
+                else
+                    rtn = eRDWT_ERROR;
+            } else {
+                // We must be here because either CMPL or END is set
+                if ((waitStatus & CMPL) == CMPL )
+                    rtn = eRDWT_OK;
+            }
         }
         // If we get a message on the queue, it is assumed to be an abort
         if( GPIB_checkQueue( NULL ) )
@@ -132,8 +145,9 @@ GPIBasyncWriteBinary( gint GPIBdescriptor, const void *sData, glong length,
         //  If the ERR bit is not set in ibsta, then there was no asynchronous i/o operation in progress.
         ibstop( GPIBdescriptor );
     }
-
-    *pGPIBstatus = AsyncIbsta();
+    // Only the status bits END | ERR | TIMO | CMPL are valid. (all others are 0)
+    // Also flag that device clear was seen
+    *pGPIBstatus = AsyncIbsta() | (bDCAS ? DCAS : 0);
 
     if( pBytesWritten )
         *pBytesWritten = AsyncIbcnt();
@@ -197,6 +211,7 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
     gdouble waitTime = 0.0;
     tGPIBReadWriteStatus rtn = eRDWT_CONTINUE;
     gint waitStatus;
+    __attribute__((unused)) gboolean bDCAS = FALSE;
 
     *pNbytesRead = 0;
 
@@ -224,7 +239,11 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
     do {
         // Wait for read completion or timeout or being set as a talker
         // We may also receive a device clear
-        waitStatus = ibwait(GPIBdescriptor, TIMO | CMPL | END);
+        waitStatus = ibwait(GPIBdescriptor,  bDCAS ? (TIMO | CMPL) : (TIMO | CMPL | DCAS) );
+        // The wait may return with the DCAS flag before the driver has set the CMPL flag.
+        // Take note of the flag and wait for the CMPL flag (which will follow).
+        if( (waitStatus & DCAS) == DCAS )
+            bDCAS = TRUE;
 
         if( (waitStatus & TIMO) == TIMO ){
             // Timeout
@@ -236,7 +255,10 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
                 g_free( sMessage );
             }
         } else {
-            // did we complete the read
+            // An artifact of the GPIB driver is that the ibwait() may complete
+            // but none of the conditions in the mask are set. We need to check
+            // that at least one of the conditions are met (here CMPL)
+            // Did we complete the read or get an error?
             if((waitStatus & ERR) == ERR ) { // or did we have a read error
                 if( (waitStatus & CMPL) == CMPL && AsyncIberr() == EABO )
                     rtn = eRDWT_OK;
@@ -244,7 +266,8 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
                     rtn = eRDWT_ERROR;
             } else {
                 // We must be here because either CMPL or END is set
-                rtn = eRDWT_OK;
+                if ((waitStatus & CMPL) == CMPL )
+                    rtn = eRDWT_OK;
             }
         }
 
@@ -264,7 +287,8 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
     }
 
     // Only the status bits END | ERR | TIMO | CMPL are valid. (all others are 0)
-    *pGPIBstatus = AsyncIbsta();
+    // Also flag that device clear was seen
+    *pGPIBstatus = AsyncIbsta() | (bDCAS ? DCAS : 0);
 
     if( pNbytesRead ) {
         *pNbytesRead = AsyncIbcnt();
@@ -274,9 +298,12 @@ GPIBasyncRead( gint GPIBdescriptor, void *readBuffer, glong maxBytes,
      * condition (EOI or eos character).
      * Don't treat an abort as an error. It can come from an ibclr()
      */
-    if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO  ) {
+
+    if ( (*pGPIBstatus & ERR) == ERR && AsyncIberr() == EABO  )
         *pGPIBstatus &=  ~ERR;
-    }
+
+    if( bDCAS )
+        DBG( eDEBUG_EXTENSIVE, "👓 Device Clear received\n" );
 
     DBG( eDEBUG_EXTENSIVE, "👓 %d bytes (%ld max)", *pNbytesRead, maxBytes );
 
@@ -602,6 +629,7 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
 
         messageEventData *message;
         gboolean bRunning = TRUE;
+        gboolean bDCAS = FALSE;
 
 #define MAX_HPGL_PLOT_CHUNK    2000
         gchar sHPGL[ MAX_HPGL_PLOT_CHUNK + 1 ] = "";
@@ -695,12 +723,21 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
 
             // Wait for GPIB line to toggle (or timeout)
             // LACS - Board is currently addressed as a listener (IEEE listener state machine is in LACS or LADS).
-            GPIBstatus = ibwait( pGlobal->GPIBcontrollerDevice, TIMO | LACS );
-
-            if ( (GPIBstatus & ATN) || (GPIBstatus & TIMO) ) {
+            GPIBstatus = ibwait( pGlobal->GPIBcontrollerDevice, TIMO | LACS | (bDCAS ? 0 : DCAS) );
+            // Check to see if we received a device clear
+            if( GPIBstatus & DCAS ) {
+                bDCAS = TRUE;
+                DBG( eDEBUG_EXTENSIVE, "⟳ Device Clear received\n" );
+            }
+            // If we have not yet been addressed as a listener (LACS)
+            // or if we are still receiving commands (ATN), loop and wait
+            if ( !(GPIBstatus & LACS) || (GPIBstatus & ATN) ) {
                 usleep(1000);
                 continue;
             }
+            // For now, we don't do anything further if there is a device clear
+            bDCAS = FALSE;
+
             // We must be a listener if we are here
             if( bInitialAddressedAsListener ) {
                 postInfo("GPIB addressed as a listener");
