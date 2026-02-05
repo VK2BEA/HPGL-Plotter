@@ -673,6 +673,10 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
                     closeGPIBcontroller( pGlobal );
                     bRunning = FALSE;
                     break;
+                case TG_OFFLINE:
+                    closeGPIBcontroller( pGlobal );
+                    postError("Offline");
+                    break;
                 case TG_REINITIALIZE_GPIB:
                     if( openGPIBcontroller( pGlobal, TRUE ) == ERROR ) {
                         postError("GPIB controller no connection");
@@ -692,6 +696,11 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
                 continue;
             }
 
+            if( !pGlobal->flags.bOnline ) {
+                continue;
+            }
+
+            // Only get here if we are on-line
             // Open the GPIB controller as a device if not already opened
             if( !pGlobal->flags.bGPIBcommsActive ) {
                 bInitialAddressedAsListener = TRUE;

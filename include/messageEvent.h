@@ -40,6 +40,7 @@ enum _threadmessage
 
     TG_UTILITY,
     TG_ABORT,
+    TG_OFFLINE,
     TG_END								// end thread
 };
 

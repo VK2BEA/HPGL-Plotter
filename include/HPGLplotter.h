@@ -1,6 +1,6 @@
 
 #ifndef VERSION
-#define VERSION "1.35-1"
+#define VERSION "1.36-1"
 #endif
 
 #define INVALID	(-1)
@@ -66,6 +66,7 @@ typedef struct {
 extern GPIBdevice devices[];
 extern GHashTable *widgetHashTable;
 extern gint       optInitializeGPIBasListener;
+extern gboolean   bOptOffline;
 
 #define ERROR   (-1)
 #define OK      ( 0)
@@ -110,6 +111,7 @@ typedef struct {
         guint32 bDoNotEnableSystemController    : 1;
         guint32 bMuteGPIBreply                  : 1;
         guint32 bEOIonLF                        : 1;
+        guint32 bOnline                         : 1;
     } flags;
     gint		PDFpaperSize;
 #define P1	0
@@ -253,6 +255,7 @@ typedef enum { PAYLOAD_ONLY=0,   CHPGL_MOVE=1,      CHPGL_RMOVE=2,
 
     void CB_btn_Options    ( GtkButton* wBtnOptions, gpointer user_data );
     void CB_btn_Erase      ( GtkButton* wBtnOptions, gpointer user_data );
+    void CB_btn_Online     ( GtkToggleButton* wBtnOptions, gpointer user_data );
     void CB_chk_AutoErase  ( GtkCheckButton* wBtnOptions, gpointer user_data );
     void CB_btn_Print      ( GtkButton* wBtnOptions, gpointer user_data );
     void CB_btn_PDF        ( GtkButton* wBtnOptions, gpointer user_data );

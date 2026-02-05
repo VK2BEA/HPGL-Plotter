@@ -95,6 +95,7 @@ saveSettings( tGlobal *pGlobal ) {
     g_settings_set_boolean( gs, "gpib-initial-listener", pGlobal->flags.bGPIB_InitialListener );
     g_settings_set_int( gs, "pdf-paper-size", pGlobal->PDFpaperSize );
 
+    g_settings_set_boolean( gs, "online", pGlobal->flags.bOnline );
     //    g_variant_unref (gvPenColors);
 
     g_object_unref( gs );
@@ -146,6 +147,9 @@ recoverSettings( tGlobal *pGlobal ) {
     pGlobal->flags.bDoNotEnableSystemController = g_settings_get_boolean( gs, "gpib-do-not-enable-system" );
     pGlobal->flags.bAutoClear = g_settings_get_boolean( gs, "auto-clear" );
     pGlobal->PDFpaperSize = g_settings_get_int( gs, "pdf-paper-size" );
+
+    if( bOptOffline == INVALID )
+        pGlobal->flags.bOnline = g_settings_get_boolean( gs, "online" );
 
     g_object_unref( gs );
 

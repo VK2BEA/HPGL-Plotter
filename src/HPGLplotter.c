@@ -37,6 +37,7 @@ static gboolean bOptDoNotEnableSystemController = FALSE;
 static gboolean bOptEnableSystemController = FALSE;
 static gboolean bEOIonLF = FALSE;
 gint     optInitializeGPIBasListener = INVALID;
+gint     bOptOffline = INVALID;
 static gint     optDeviceID = INVALID;
 static gint     optControllerIndex = INVALID;
 static gchar    *sOptControllerName = NULL;
@@ -97,6 +98,8 @@ static const GOptionEntry optionEntries[] =
             &sOptControllerName, "GPIB controller name (in /etc/gpib.conf)", NULL },
         { "EOIonLF",                  'e', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
             &bEOIonLF, "End GPIB read on LF character", NULL },
+        { "offline",                  'o', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
+            &bOptOffline,        "Do not open the GPIB controller on start up", NULL },
         { G_OPTION_REMAINING, 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_STRING_ARRAY, &argsRemainder, "", NULL },
         { NULL }
 };
@@ -121,10 +124,12 @@ CB_KeyPressed (GObject             *dataObject,
 
     switch ( keyval ) {
     case GDK_KEY_Escape:
-        pGlobal->flags.bInitialActiveController = TRUE;
-        messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
-        messageData->command = TG_REINITIALIZE_GPIB;
-        g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+        if( pGlobal->flags.bOnline ) {
+            pGlobal->flags.bInitialActiveController = TRUE;
+            messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
+            messageData->command = TG_REINITIALIZE_GPIB;
+            g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+        }
         break;
     case GDK_KEY_F2:
         switch (state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_ALT_MASK | GDK_SUPER_MASK) ) {
@@ -255,7 +260,7 @@ on_DBUSresume(GDBusConnection *connection,
 
     g_variant_get (parameters, "(b)", &bState);
 
-    if( !bState ) {
+    if( !bState && pGlobal->flags.bOnline ) {
         messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
         messageData->command = TG_REINITIALIZE_GPIB;
         g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
@@ -434,6 +439,12 @@ on_activate (GApplication *app, gpointer udata)
 
     initializeOptionsDialog( pGlobal );
     gtk_check_button_set_active( WLOOKUP( pGlobal, "chk_AutoErase" ), pGlobal->flags.bAutoClear );
+    gtk_toggle_button_set_active( WLOOKUP( pGlobal, "tbtn_Online" ), pGlobal->flags.bOnline );
+
+    gchar *sMarkup = g_markup_printf_escaped(
+            "<span color=\"darkred\">Offline</span>");
+    gtk_label_set_markup(GTK_LABEL( WLOOKUP( pGlobal, "label_Status") ), sMarkup);
+    g_free(sMarkup);
 
     gtk_window_set_default_icon_name("HPGLplotter");
 
@@ -510,6 +521,9 @@ on_startup (GApplication *app, gpointer udata)
     pGlobal->flags.bbDebug = optDebug;
     pGlobal->flags.bGPIB_UseControllerIndex = TRUE;
     pGlobal->flags.bAutoClear = TRUE;
+
+    if( bOptOffline != INVALID )
+        pGlobal->flags.bOnline = FALSE;
 
     /*! We use a loop source to send data back from the
      *  GPIB threads to indicate status

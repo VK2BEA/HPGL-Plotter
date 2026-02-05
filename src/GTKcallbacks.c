@@ -62,6 +62,23 @@ CB_btn_Erase ( GtkButton* wBtnErase, gpointer user_data ) {
     gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }
 
+void
+CB_tbtn_Online ( GtkToggleButton* wTBtnOnline, gpointer user_data ) {
+    tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT( wTBtnOnline ), "data");
+    pGlobal->flags.bOnline = gtk_toggle_button_get_active( wTBtnOnline );
+
+    if( !pGlobal->flags.bOnline ) {
+        messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
+        messageData->command = TG_OFFLINE;
+        g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+    } else {
+        messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
+        messageData->command = TG_REINITIALIZE_GPIB;
+        g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
+    }
+
+}
+
 static gchar *sSuggestedHPGLfilename = NULL;
 
 // Call back when file is selected

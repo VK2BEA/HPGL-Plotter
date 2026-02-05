@@ -106,7 +106,8 @@ CB_btn_OK ( GtkButton* wBtnOK, gpointer user_data ) {
 
     pGlobal->HPGLperiodEnd = gtk_spin_button_get_value( WLOOKUP( pGlobal, "spin_EndOfPlotPeriod" )  );
 
-    if( bGPIBchanged || bPreviousGPIB_InitialListener != pGlobal->flags.bGPIB_InitialListener ) {
+    if( (bGPIBchanged || bPreviousGPIB_InitialListener != pGlobal->flags.bGPIB_InitialListener)
+            && pGlobal->flags.bOnline ) {
         messageEventData *messageData = g_malloc0( sizeof(messageEventData) );
         messageData->command = TG_REINITIALIZE_GPIB;
         g_async_queue_push( pGlobal->messageQueueToGPIB, messageData );
