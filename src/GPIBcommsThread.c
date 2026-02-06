@@ -684,7 +684,7 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
                         if( pGlobal->flags.bDoNotEnableSystemController )
                             postInfo("GPIB controller configured");
                         else
-                            postInfo("GPIB interfaced cleared and controller configured");
+                            postInfo("GPIB interface cleared and controller configured");
                     }
                     break;
                 default:
@@ -714,7 +714,7 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
                         continue; // can't do anything without GPIB
                         break;
                     case 1:
-                        postInfo("GPIB no listeners on bus");
+                        postInfo("GPIB ⚠️ no listeners on bus");
                         usleep( ms(100) );
                         continue; // can't do anything without GPIB
                     default:
