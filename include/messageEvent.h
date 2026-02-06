@@ -29,6 +29,7 @@ enum _threadmessage
     TM_INFO,							// show information
     TM_INFO_HIGHLIGHT,					// show information with a highlight (green)
     TM_ERROR,							// show error message (in red)
+    TM_OFFLINE,                         // show 'off-line'
 
     TM_COMPLETE_GPIB,					// update widgets based on GPIB connection
     TM_REFRESH_PLOT,
