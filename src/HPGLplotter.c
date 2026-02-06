@@ -441,10 +441,7 @@ on_activate (GApplication *app, gpointer udata)
     gtk_check_button_set_active( WLOOKUP( pGlobal, "chk_AutoErase" ), pGlobal->flags.bAutoClear );
     gtk_toggle_button_set_active( WLOOKUP( pGlobal, "tbtn_Online" ), pGlobal->flags.bOnline );
 
-    gchar *sMarkup = g_markup_printf_escaped(
-            "<span color=\"darkred\">Offline</span>");
-    gtk_label_set_markup(GTK_LABEL( WLOOKUP( pGlobal, "label_Status") ), sMarkup);
-    g_free(sMarkup);
+    postMessageToMainLoop(TM_OFFLINE, NULL);
 
     gtk_window_set_default_icon_name("HPGLplotter");
 

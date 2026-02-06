@@ -675,7 +675,7 @@ sendGPIBreply( gchar *sHPGLreply, tGlobal *pGlobal ) {
                     break;
                 case TG_OFFLINE:
                     closeGPIBcontroller( pGlobal );
-                    postError("Offline");
+                    postMessageToMainLoop(TM_OFFLINE, NULL);
                     break;
                 case TG_REINITIALIZE_GPIB:
                     if( openGPIBcontroller( pGlobal, TRUE ) == ERROR ) {

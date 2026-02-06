@@ -78,6 +78,14 @@ messageEventDispatch(GSource *source, GSourceFunc callback, gpointer udata) {
 
             break;
 
+        case TM_OFFLINE:
+            if( clearTimerID != 0 )
+                g_source_remove( clearTimerID );
+            sMarkup = g_markup_printf_escaped( "<span color=\"darkred\">Offline</span>");
+            gtk_label_set_markup(wLabel, sMarkup);
+            g_free(sMarkup);
+            break;
+
         case TM_SAVE_SETUP:
             /*
 
