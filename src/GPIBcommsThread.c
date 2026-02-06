@@ -459,6 +459,10 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
         goto err;
     }
 
+    // Check that there is a controller there (USB device may have been removed)
+    if( iblines( pGlobal->GPIBcontrollerDevice, &lineStatus )  & ERR ) {
+        goto err;
+    }
 
     // If we have another system controller on the bus, the commands here will cause a problem
     // Do not change to controller mode unless the setting is checked.
@@ -477,12 +481,6 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
             if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
                 LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
             }
-        }
-
-        // Check that there is a controller there (USB device may have been removed)
-        if( iblines( pGlobal->GPIBcontrollerDevice, &lineStatus )  & ERR ) {
-            LOG( G_LOG_LEVEL_WARNING, "iblines error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
-            goto err;
         }
 
         pGlobal->flags.bInitialGPIB_ATN = ( ( lineStatus  & ( ValidATN | BusATN ) ) == ( ValidATN | BusATN ) ? 1 : 0 );
