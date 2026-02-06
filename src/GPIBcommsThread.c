@@ -478,6 +478,13 @@ openGPIBcontroller( tGlobal *pGlobal, gboolean bResetInterface ) {
             // perform interface clear (board)
             // this is to get the instrument (e.g. HP8595E) to release the GPIB
             // without this we get "not controller in charge" errors
+
+            // Take system control (argument is TRUE)
+            if( ibrsc( pGlobal->GPIBcontrollerDevice, TRUE ) & ERR ) {
+                LOG( G_LOG_LEVEL_WARNING, "ibrsc error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
+                goto err;
+            }
+
             if( ibsic( pGlobal->GPIBcontrollerDevice ) & ERR )  {
                 LOG( G_LOG_LEVEL_WARNING, "ibsic (0) (TRUE) error: %s / status: 0x%04x", gpib_error_string(ThreadIberr()), ThreadIbsta());
             }
