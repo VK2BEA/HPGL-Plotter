@@ -359,7 +359,7 @@ closeGPIBcontroller( tGlobal *pGlobal ) {
     // If we have another system controller on the bus, the commands here will cause a problem
     // Do not change to controller mode unless the setting is checked.
 
-    if( pGlobal->GPIBcontrollerDevice == INVALID ) {
+    if( pGlobal->GPIBcontrollerDevice == INVALID || !pGlobal->flags.bGPIBcommsActive ) {
         return 0;
     }
 
