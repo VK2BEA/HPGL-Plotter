@@ -41,18 +41,47 @@ To uninstall:
         
         $ sudo make uninstall
 
+Command Line Options (all are optional):
+----------------------------------------------------------------------
+```
+  -h,       --help                        Show help options
+  -b [0-7], --debug                       Print diagnostic messages in journal (0-7)
+  -s,       --stderrLogging               Send log data to the default device (usually stdout/stderr) rather than the journal
+  -n,       --GPIBnoSystemController      Do not enable GPIB interface as a system controller
+  -N,       --GPIBuseSystemController     Enable GPIB interface as a system controller when needed
+  -l [0,1], --GPIBinitialListener         Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')
+  -d,       --GPIBdeviceID                GPIB device ID for HPGL plotter
+  -c,       --GPIBcontrollerIndex         GPIB controller board index
+  -C,       --GPIBcontrollerName          GPIB controller name (in /etc/gpib.conf)
+  -e,       --EOIonLF                     End GPIB read on LF character
+  -o,       --offline                     Do not open the GPIB controller on start up
+```
+
 Troubleshooting:
 ----------------------------------------------------------------------
 If problems are encountered, first confirm that correct GPIB communication is occuring. 
+
+Use the `ibtest` and `ibterm` tools distributed with the `linux-gpib` distribution.
 
 **Note** that the GPIB interface on the Linux computer must be able to act as a simple listener / talker. Some devices (notably the **Agilent 82357A/B**) can only act as system controllers and will not work with this application. (the National Instruments GPIB-USB-HS does work as it does not have this restriction)
 
 The program requires the `gtk4` library, on the Linux system, to be version 4.10 or later. The build system will automatically check for this requirement during configuration. To manually check your GTK4 version, use: 
 `$ pkg-config --modversion gtk4`
 
-The program has been tested with the HP8753C Network Analyzer, HP8595E Spectrum Analyzer, HP8568B Spectrum Analyzer and the HP54100 oscilloscope. <em>(If you use it with other instruments, please report your experience)</em>
+On a real plotter the user would change the paper for each new plot. The `Auto Clear` function of the **HPGLplotter** anticipates a new plot by the lack of HPGL data for a period of time. On receipt of an HPGL block following the defined period of inactivity, the display is cleared. 
 
-Use the `ibtest` and `ibterm` tools distributed with the `linux-gpib` distribution.
+The duration of non-activity that indicates the end of plot is adjustable as a setting. If you notice that the instrument takes a long time to complete a plot or the plot is incomplete (or even blank), try unsetting `Auto Clear`. If the plot is then shown correctly you will need to increase the `end of plot period` setting (if you wish to use `Auto Clear`).
+
+The program is known to work with:
+- HP8753C Network Analyzer
+- HP8713B Network Analyzer
+- HP8595E Spectrum Analyzer
+- HP8568B Spectrum Analyzer
+- HP54100 oscilloscope
+- HP 4145A Semiconductor Parameter Analyzer
+- Rohde & Schwarz UPL Audio Analyzer
+
+<em>(If you use it with other instruments, please report your experience)</em>
 
 The HPGL Plotter logs some information to the journal, the verbosity of which can be set with the `--debug` command line switch.
 
