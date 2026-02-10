@@ -47,8 +47,7 @@ Command Line Options (all are optional):
   -h,       --help                        Show help options
   -b [0-7], --debug                       Print diagnostic messages in journal (0-7)
   -s,       --stderrLogging               Send log data to the default device (usually stdout/stderr) rather than the journal
-  -n,       --GPIBnoSystemController      Do not enable GPIB interface as a system controller
-  -N,       --GPIBuseSystemController     Enable GPIB interface as a system controller when needed
+  -n,       --GPIBnoSystemController      Do not enable GPIB interface as a system controller ('1', 'true' or no argument) or not ('0' or 'false')
   -l [0,1], --GPIBinitialListener         Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')
   -d,       --GPIBdeviceID                GPIB device ID for HPGL plotter
   -c,       --GPIBcontrollerIndex         GPIB controller board index
