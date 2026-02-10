@@ -33,10 +33,9 @@ tGlobal globalData = {0};
 
 static gint     optDebug = 0;
 static gboolean bOptStandardLogging = FALSE;
-static gboolean bOptDoNotEnableSystemController = FALSE;
-static gboolean bOptEnableSystemController = FALSE;
 static gboolean bEOIonLF = FALSE;
 gint     optInitializeGPIBasListener = INVALID;
+gint     optDoNotEnableSystemController = INVALID;
 gint     bOptOffline = INVALID;
 static gint     optDeviceID = INVALID;
 static gint     optControllerIndex = INVALID;
@@ -53,24 +52,23 @@ enum option_errors
 };
 
 
-gboolean
-argumentGPIBlistener (
+static gboolean
+argumentTrueFalse (
         const gchar* option_name,
         const gchar* value,
-        gpointer data,
+        gint *pOptionGint,
         GError** error
 ) {
-
     if( error )
         *error = (GError *)NULL;
 
-    if( value == NULL || !g_strcmp0( value, "1" ) || !g_strcmp0( value, "true" )) {
-        optInitializeGPIBasListener = 1;
-    } else if( !g_strcmp0( value, "0" ) || !g_strcmp0( value, "false" ) ) {
-        optInitializeGPIBasListener = 0;
+    if( value == NULL || !g_strcmp0( value, "1" ) || !g_ascii_strcasecmp( value, "true" )) {
+        *((gint *)pOptionGint) = 1;
+    } else if( !g_strcmp0( value, "0" ) || !g_ascii_strcasecmp( value, "false" ) ) {
+        *((gint *)pOptionGint) = 0;
     } else {
         g_set_error (error, OPTION_ERROR, OPTION_LISTENER,
-                "%s option argument: '%s'; Must be '1', 'true', '0' or 'false' or no value",
+                "%s option argument '%s' is invalid. 🛈 It must be '1', 'true', '0', 'false' or no value (same as true)",
                 option_name, value);
         return FALSE;
     }
@@ -78,18 +76,37 @@ argumentGPIBlistener (
     return TRUE;
 }
 
+static gboolean
+argumentGPIBnoSystemController (
+        const gchar* option_name,
+        const gchar* value,
+        gpointer data,
+        GError** error
+) {
+    return( argumentTrueFalse ( option_name, value, &optDoNotEnableSystemController, error ) );
+}
+
+static gboolean
+argumentGPIBinitialListener (
+        const gchar* option_name,
+        const gchar* value,
+        gpointer data,
+        GError** error
+) {
+    return( argumentTrueFalse ( option_name, value, &optInitializeGPIBasListener, error ) );
+}
+
+
 static const GOptionEntry optionEntries[] =
 {
         { "debug",                    'b', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
             &optDebug, "Print diagnostic messages in journal (0-7)", NULL },
         { "stderrLogging",            's', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
             &bOptStandardLogging, "Send log data to the default device (usually stdout/stderr) rather than the journal", NULL },
-        { "GPIBnoSystemController",   'n', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
-            &bOptDoNotEnableSystemController, "Do not enable GPIB interface as a system controller", NULL },
-        { "GPIBuseSystemController",  'N', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE,
-            &bOptEnableSystemController, "Enable GPIB interface as a system controller when needed", NULL },
+        { "GPIBnoSystemController",   'n', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK,
+            argumentGPIBnoSystemController, "Do not enable GPIB interface as a system controller ('1', 'true' or no argument) or not ('0' or 'false')", NULL },
         { "GPIBinitialListener",      'l', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK,
-            argumentGPIBlistener, "Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')", NULL },
+            argumentGPIBinitialListener, "Force GPIB interface as a listener ('1', 'true' or no argument) or not ('0' or 'false')", NULL },
         { "GPIBdeviceID",             'd', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
             &optDeviceID, "GPIB device ID for HPGL plotter", NULL },
         { "GPIBcontrollerIndex",      'c', G_OPTION_FLAG_NONE, G_OPTION_ARG_INT,
@@ -502,15 +519,6 @@ on_startup (GApplication *app, gpointer udata)
     setenv("IB_NO_ERROR", "1", 0);	// no noise
     logVersion();
 
-    if( bOptDoNotEnableSystemController && bOptEnableSystemController ) {
-        LOG( G_LOG_LEVEL_WARNING, "command line options -n and -N are mutually exclusive" );
-        g_printerr( "command line options -n and -N are mutually exclusive\n" );
-        g_signal_handlers_disconnect_by_func (app, G_CALLBACK (on_activate), (gpointer)&globalData);
-        g_signal_handlers_disconnect_by_func (app, G_CALLBACK (on_shutdown), (gpointer)&globalData);
-        g_application_quit (G_APPLICATION ( app ));
-        return;
-    }
-
     pGlobal->GPIBdevicePID       = DEFAULT_GPIB_DEVICE_ID;
     pGlobal->GPIBcontrollerIndex = DEFAULT_GPIB_CONTROLLER_INDEX;
     pGlobal->sGPIBcontrollerName = g_strdup( DEFAULT_GPIB_CONTROLLER_NAME );
@@ -539,19 +547,17 @@ on_startup (GApplication *app, gpointer udata)
     initializeHPGL( pGlobal, TRUE );
     recoverSettings( pGlobal );
 
-    // The command line switches should override the recovered settings
-    if( bOptDoNotEnableSystemController ) {
-        pGlobal->flags.bDoNotEnableSystemController = TRUE;
-    }
-
     if( bEOIonLF ) {
         pGlobal->flags.bEOIonLF = TRUE;
     }
 
-    // The command line switches should override the recovered settings
-    if( bOptEnableSystemController ) {
-        pGlobal->flags.bDoNotEnableSystemController = FALSE;
+    if( optDoNotEnableSystemController != INVALID ) {
+        if( optDoNotEnableSystemController == 0 || optDoNotEnableSystemController == 1 )
+            pGlobal->flags.bDoNotEnableSystemController = optDoNotEnableSystemController;
+        else
+            optDoNotEnableSystemController = INVALID;
     }
+
 
     if( optInitializeGPIBasListener != INVALID ) {
         if( optInitializeGPIBasListener == 0 || optInitializeGPIBasListener == 1 )

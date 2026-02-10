@@ -144,7 +144,8 @@ recoverSettings( tGlobal *pGlobal ) {
     pGlobal->flags.bGPIB_UseControllerIndex = g_settings_get_boolean( gs, "gpib-use-controller-index" );
     if( optInitializeGPIBasListener == INVALID )
         pGlobal->flags.bGPIB_InitialListener = g_settings_get_boolean( gs, "gpib-initial-listener" );
-    pGlobal->flags.bDoNotEnableSystemController = g_settings_get_boolean( gs, "gpib-do-not-enable-system" );
+    if( optDoNotEnableSystemController )
+        pGlobal->flags.bDoNotEnableSystemController = g_settings_get_boolean( gs, "gpib-do-not-enable-system" );
     pGlobal->flags.bAutoClear = g_settings_get_boolean( gs, "auto-clear" );
     pGlobal->PDFpaperSize = g_settings_get_int( gs, "pdf-paper-size" );
 
