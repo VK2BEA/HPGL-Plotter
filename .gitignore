@@ -72,3 +72,6 @@ m4/
 build/
 build-aux/
 
+Makefile
+src/HPGLplotter-GTK4.c
+
