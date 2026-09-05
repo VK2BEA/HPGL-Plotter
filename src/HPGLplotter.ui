@@ -540,6 +540,26 @@ When off-line, free the GPIB controller for other uses.</property>
             </child>
             <child>
               <object class="GtkFrame">
+                <property name="label">Background color</property>
+                <property name="margin-bottom">4</property>
+                <property name="margin-end">4</property>
+                <property name="margin-start">4</property>
+                <property name="margin-top">4</property>
+                <child>
+                  <object class="GtkColorButton" id="WID_bg_Color">
+                    <property name="halign">fill</property>
+                    <property name="hexpand">True</property>
+                    <property name="margin-bottom">4</property>
+                    <property name="margin-end">14</property>
+                    <property name="margin-start">4</property>
+                    <property name="margin-top">4</property>
+                    <signal name="color-set" handler="CB_color_bg"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame">
                 <property name="label">PDF/SVG Page Size</property>
                 <child>
                   <object class="GtkGrid">
