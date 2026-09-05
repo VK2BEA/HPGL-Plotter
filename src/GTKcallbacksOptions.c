@@ -59,6 +59,13 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
 #pragma GCC diagnostic pop
     }
 
+    GtkWidget *wColorButton =  WLOOKUP( pGlobal, "bg_Color" );
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    gtk_color_chooser_set_use_alpha( GTK_COLOR_CHOOSER( wColorButton ), TRUE );
+    gtk_color_chooser_set_rgba( GTK_COLOR_CHOOSER(wColorButton), &pGlobal->bgColor );
+#pragma GCC diagnostic pop
+
     gchar *sOId = g_strdup_printf( "%d_chk_PaperSize", pGlobal->PDFpaperSize+1 );
     gtk_check_button_set_active( WLOOKUP( pGlobal, sOId ), TRUE );
     g_free( sOId );
@@ -129,6 +136,18 @@ CB_color_Pen( GtkColorButton* wColorBtn, gpointer not_used ){
     if( sequence >= 0 && sequence < NUM_HPGL_PENS-1 )
         pGlobal->HPGLpens[ sequence + 1 ] = penColor;
 
+
+    gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
+}
+
+void
+CB_color_bg( GtkColorButton* wColorBtn, gpointer not_used ){
+    tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wColorBtn), "data");
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    gtk_color_chooser_get_rgba ( GTK_COLOR_CHOOSER( wColorBtn ), &pGlobal->bgColor );
+#pragma GCC diagnostic pop
 
     gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }

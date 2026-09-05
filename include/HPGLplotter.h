@@ -121,6 +121,7 @@ typedef struct {
     gdouble			aspectRatio;
 
     GdkRGBA HPGLpens[ NUM_HPGL_PENS ];
+    GdkRGBA bgColor;
 
     gint	 		GPIBcontrollerIndex;
     gint			GPIBdevicePID;
@@ -153,6 +154,7 @@ typedef struct {
 } tGlobal;
 
 extern GdkRGBA HPGLpensFactory[ NUM_HPGL_PENS ];
+extern GdkRGBA HPGLbgFactory;
 
 #define HPGL_FONT "Noto Sans Mono Light"   // OR "Noto Sans Mono ExtraLight"
 #define COLOR_HPGL_DEFAULT              eColorBlack     // HPGL from 8753 always sets the color .. so not useful
@@ -264,6 +266,7 @@ typedef enum { PAYLOAD_ONLY=0,   CHPGL_MOVE=1,      CHPGL_RMOVE=2,
     void CB_btn_SVG        ( GtkButton* wBtnOptions, gpointer user_data );
     void CB_btn_OK         ( GtkButton* wBtnOK, gpointer user_data );
     void CB_color_Pen      ( GtkColorButton* wColorBtn, gpointer user_data );
+    void CB_color_bg       ( GtkColorButton* wColorBtn, gpointer user_data );
     void CB_btn_ColorReset ( GtkButton* wBtnColorReset, gpointer user_data );
     void CB_chk_UseControllerName ( GtkCheckButton* wBtnUseControllerName, gpointer user_data );
     void initializeOptionsDialog( tGlobal *pGlobal );
