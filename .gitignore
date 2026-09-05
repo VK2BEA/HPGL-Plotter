@@ -35,6 +35,7 @@
 *.i*86
 *.x86_64
 *.hex
+src/HPGLplotter
 
 # Debug files
 *.dSYM/
@@ -71,4 +72,6 @@ configure
 m4/
 build/
 build-aux/
+Makefile
+src/HPGLplotter-GTK4.c
 
