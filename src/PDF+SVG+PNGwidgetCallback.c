@@ -143,6 +143,10 @@ plotAndSaveFile( GObject *source_object, GAsyncResult *res, gpointer gpGlobal, e
         }
 
         cairo_save( cr ); {
+            if(pGlobal->bgColor.red != 1 || pGlobal->bgColor.green != 1 || pGlobal->bgColor.blue != 1 || pGlobal->bgColor.alpha != 1) {
+                gdk_cairo_set_source_rgba (cr, &pGlobal->bgColor );
+                cairo_paint( cr );
+            }
             plotCompiledHPGL( cr, width, height, pGlobal);
         } cairo_restore( cr );
 

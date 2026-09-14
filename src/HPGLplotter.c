@@ -544,6 +544,8 @@ on_startup (GApplication *app, gpointer udata)
         pGlobal->HPGLpens[ i ] = HPGLpensFactory[ i ];
     }
 
+    pGlobal->bgColor = HPGLbgFactory;
+
     initializeHPGL( pGlobal, TRUE );
     recoverSettings( pGlobal );
 

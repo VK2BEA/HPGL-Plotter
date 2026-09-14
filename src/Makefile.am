@@ -36,3 +36,5 @@ HPGLplotter_SOURCES += $(top_srcdir)/include/GPIBcomms.h \
 				  $(top_srcdir)/include/HPGLplotter.h \
 				  $(top_srcdir)/include/messageEvent.h
 
+HPGLplotter-GTK4.c: HPGLplotter-GTK4.xml
+	glib-compile-resources --target=$@ --generate-source $<

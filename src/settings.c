@@ -51,7 +51,7 @@ static gboolean g_settings_schema_exist (const char * id)
 gint
 saveSettings( tGlobal *pGlobal ) {
 
-    GVariant *gvPrintSettings = NULL, *gvPageSetup = NULL, *gvPenColors;
+    GVariant *gvPrintSettings = NULL, *gvPageSetup = NULL, *gvPenColors, *gvBgColor;
     GVariantBuilder *builder;
 
     GSettings *gs;
@@ -84,6 +84,16 @@ saveSettings( tGlobal *pGlobal ) {
 
     g_settings_set_value( gs, "pen-colors", gvPenColors ); // this consumes the GVariant
 
+    gvBgColor = g_variant_new(
+        "(dddd)",
+        pGlobal->bgColor.red,
+        pGlobal->bgColor.green,
+        pGlobal->bgColor.blue,
+        pGlobal->bgColor.alpha
+    );
+
+    g_settings_set_value(gs, "bg-color", gvBgColor);
+
     g_settings_set_string( gs, "last-directory", pGlobal->sLastDirectory );
     g_settings_set_int( gs, "gpib-controller-index", pGlobal->GPIBcontrollerIndex );
     g_settings_set_int( gs, "gpib-device-pid", pGlobal->GPIBdevicePID );
@@ -106,7 +116,7 @@ saveSettings( tGlobal *pGlobal ) {
 gint
 recoverSettings( tGlobal *pGlobal ) {
     GSettings *gs;
-    GVariant *gvPenColors, *gvPrintSettings, *gvPageSetup;;
+    GVariant *gvPenColors, *gvPrintSettings, *gvPageSetup, *gvBgColor;
     GVariantIter iter;
     gdouble RGBAcolor[4] = {0};
     gint	pen = 0;
@@ -135,6 +145,14 @@ recoverSettings( tGlobal *pGlobal ) {
         pen++;
     }
     g_variant_unref (gvPenColors);
+
+    gvBgColor = g_settings_get_value ( gs, "bg-color" );
+    g_variant_get (gvBgColor, "(dddd)", &RGBAcolor[0], &RGBAcolor[1], &RGBAcolor[2], &RGBAcolor[3]);
+    pGlobal->bgColor.red   = RGBAcolor[0];
+    pGlobal->bgColor.green = RGBAcolor[1];
+    pGlobal->bgColor.blue  = RGBAcolor[2];
+    pGlobal->bgColor.alpha = RGBAcolor[3];
+    g_variant_unref (gvBgColor);
 
     pGlobal->GPIBcontrollerIndex  = g_settings_get_int( gs, "gpib-controller-index" );
     pGlobal->GPIBdevicePID = g_settings_get_int( gs, "gpib-device-pid" );

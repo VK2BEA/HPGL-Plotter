@@ -46,6 +46,8 @@ GdkRGBA HPGLpensFactory[ NUM_HPGL_PENS ] = {
         { 0.75, 0.75, 0.75, 1.0 }, // 8 - Grey
 };
 
+GdkRGBA HPGLbgFactory = { 1.00, 1.00, 1.00, 1.0 };
+
 static void
 showUserChar ( cairo_t *cr, tCoordFloat *pLabel, gint nPoints ) {
     gdouble startX, startY, deltaX, deltaY;
@@ -550,7 +552,7 @@ CB_DrawingArea_Draw (GtkDrawingArea *widget, cairo_t *cr,
     tGlobal *pGlobal = (tGlobal *)gpGlobal;
     // clear the screen
     if( pGlobal->flags.bAutoClear || pGlobal->plotHPGL == NULL) {
-        cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0 );
+        gdk_cairo_set_source_rgba (cr, &pGlobal->bgColor );
         cairo_paint( cr );
     }
 
