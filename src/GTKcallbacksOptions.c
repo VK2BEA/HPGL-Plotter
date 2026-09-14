@@ -37,6 +37,8 @@
 
 void
 initializeOptionsDialog( tGlobal *pGlobal ) {
+    GtkWidget *wColorButton;
+
     gtk_spin_button_set_value( WLOOKUP( pGlobal, "spin_ControllerIndex"), pGlobal->GPIBcontrollerIndex );
     gtk_spin_button_set_value( WLOOKUP( pGlobal, "spin_DevicePID"), pGlobal->GPIBdevicePID );
     gtk_spin_button_set_value( WLOOKUP( pGlobal, "spin_EndOfPlotPeriod" ), pGlobal->HPGLperiodEnd );
@@ -51,7 +53,7 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
     for( gint pen = 1; pen < NUM_HPGL_PENS; pen++ ) {	// Pen 0 is always white
         gchar sWID[] = "1_Color";
         sWID[0] = '0' + pen;
-        GtkWidget *wColorButton =  WLOOKUP( pGlobal, sWID );
+        wColorButton =  WLOOKUP( pGlobal, sWID );
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         gtk_color_chooser_set_use_alpha( GTK_COLOR_CHOOSER( wColorButton ), TRUE );
@@ -59,7 +61,7 @@ initializeOptionsDialog( tGlobal *pGlobal ) {
 #pragma GCC diagnostic pop
     }
 
-    GtkWidget *wColorButton =  WLOOKUP( pGlobal, "bg_Color" );
+    wColorButton =  WLOOKUP( pGlobal, "bg_Color" );
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     gtk_color_chooser_set_use_alpha( GTK_COLOR_CHOOSER( wColorButton ), TRUE );
@@ -178,5 +180,33 @@ CB_chk_PaperSize ( GtkCheckButton* wBtnPaperSize, gpointer user_data ) {
     if( gtk_check_button_get_active( wBtnPaperSize ) ) {
         pGlobal->PDFpaperSize = sequence;
     }
+}
+
+void
+CB_btn_BGcolorWhite( GtkButton* wBtnBGcolorWhite, gpointer user_data ) {
+    GdkRGBA White = { 1.0, 1.0, 1.0, 1.0 };
+    tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnBGcolorWhite), "data");
+    GtkWidget *wBgColorButton =  WLOOKUP( pGlobal, "bg_Color" );
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    gtk_color_chooser_set_rgba ( GTK_COLOR_CHOOSER( wBgColorButton ), &White );
+#pragma GCC diagnostic pop
+
+    pGlobal->bgColor = White;
+    gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
+}
+
+void
+CB_btn_BGcolorClear( GtkButton* wBtnBGcolorClear, gpointer user_data ) {
+    GdkRGBA Transparent = { 1.0, 1.0, 1.0, 0.0 };
+    tGlobal *pGlobal = (tGlobal *)g_object_get_data(G_OBJECT(wBtnBGcolorClear), "data");
+    GtkWidget *wBgColorButton =  WLOOKUP( pGlobal, "bg_Color" );
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    gtk_color_chooser_set_rgba ( GTK_COLOR_CHOOSER( wBgColorButton ), &Transparent );
+#pragma GCC diagnostic pop
+
+    pGlobal->bgColor = Transparent;
+    gtk_widget_queue_draw ( WLOOKUP ( pGlobal, "drawing_Plot") );
 }
 

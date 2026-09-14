@@ -23,6 +23,13 @@
         HPGL pen colors (RGBA)
       </description>
     </key>
+    <key name="bg-color" type="(dddd)">
+      <default>(1.0, 1.0, 1.0, 1.0)</default>
+      <summary>Background color</summary>
+      <description>
+        Background color (RGBA)
+      </description>
+    </key>
     <key name="last-directory" type="s">
       <default>''</default>
       <summary>Last directory used to save PDF, PNG or SVG</summary>
@@ -102,4 +109,3 @@
     </key>
   </schema>
 </schemalist>
-
